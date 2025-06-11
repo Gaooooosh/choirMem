@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+    <form method="POST" action="">
+        <div class="mb-3">
+            <label for="title" class="form-label">曲目标题</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ track.title if track else '' }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">曲目介绍 (支持 Markdown)</label>
+            <textarea class="form-control" id="description" name="description" rows="10">{{ track.description if track else '' }}</textarea>
+            <small class="form-text text-muted">支持标题、列表、粗体、斜体、表格等 Markdown 格式。</small>
+        </div>
+        <button type="submit" class="btn btn-primary">保存</button>
+        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">取消</a>
+    </form>
+{% endblock %}

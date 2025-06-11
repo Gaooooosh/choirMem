@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>曲目列表</h1>
+    <div class="list-group">
+        {% for track in tracks %}
+            <a href="{{ url_for('main.track_detail', track_id=track.id) }}" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ track.title }}</h5>
+                    <small>{{ track.timestamp.strftime('%Y-%m-%d') }}</small>
+                </div>
+                <p class="mb-1">由 {{ track.creator.username }} 创建</p>
+            </a>
+        {% else %}
+            <p>还没有任何曲目，快去<a href="{{ url_for('main.new_track') }}">创建一个</a>吧！</p>
+        {% endfor %}
+    </div>
+{% endblock %}

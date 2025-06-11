@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>System Settings</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">User Registration</h5>
+        <p class="card-text">
+            Control whether new users can register for an account.
+        </p>
+        <p>Current Status:
+            {% if registration_enabled %}
+            <span class="badge bg-success">Enabled</span>
+            {% else %}
+            <span class="badge bg-danger">Disabled</span>
+            {% endif %}
+        </p>
+        <form action="{{ url_for('admin.toggle_registration') }}" method="POST">
+            <button type="submit" class="btn btn-primary">
+                {% if registration_enabled %}
+                Disable Registration
+                {% else %}
+                Enable Registration
+                {% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
