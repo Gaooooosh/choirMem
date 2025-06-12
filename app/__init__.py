@@ -2,7 +2,7 @@ import os
 import logging
 import shutil
 from datetime import datetime
-from flask import Flask
+from flask import Flask, render_template
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -49,7 +49,15 @@ def create_app(config_class=Config):
     from app.track_routes import track_bp
     app.register_blueprint(track_bp)
     # ------------------------------------------------
+    
+    @app.errorhandler(403)
+    def forbidden_error(error):
+        return render_template('errors/403.html'), 403
 
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return render_template('errors/404.html'), 404
+    
     # --- (create-admin command is unchanged) ---
     from app.models import User
     @app.cli.command("create-admin")

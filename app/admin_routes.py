@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, abort, Blueprint, current_app
 from app import db
-from app.models import User, SystemSetting, PermissionGroup
+from app.models import User, SystemSetting, PermissionGroup, Announcement
 from flask_login import current_user, login_required
 import random
 import string
@@ -166,3 +166,59 @@ def delete_group(group_id):
     db.session.commit()
     flash(f'Group "{group.name}" deleted.', 'success')
     return redirect(url_for('admin.group_management'))
+
+@admin_bp.route('/announcements')
+def announcement_management():
+    announcements = Announcement.query.order_by(Announcement.timestamp.desc()).all()
+    return render_template('admin_announcements.html', title='Announcements', announcements=announcements)
+
+@admin_bp.route('/announcements/new', methods=['GET', 'POST'])
+def create_announcement():
+    if request.method == 'POST':
+        announcement = Announcement(
+            content=request.form['content'],
+            level=request.form['level']
+        )
+        db.session.add(announcement)
+        db.session.commit()
+        flash('Announcement created successfully.', 'success')
+        return redirect(url_for('admin.announcement_management'))
+    return render_template('admin_announcement_form.html', title='Create New Announcement', announcement=None)
+
+@admin_bp.route('/announcements/<int:ann_id>/edit', methods=['GET', 'POST'])
+def edit_announcement(ann_id):
+    announcement = Announcement.query.get_or_404(ann_id)
+    if request.method == 'POST':
+        announcement.content = request.form['content']
+        announcement.level = request.form['level']
+        db.session.commit()
+        flash('Announcement updated successfully.', 'success')
+        return redirect(url_for('admin.announcement_management'))
+    return render_template('admin_announcement_form.html', title='Edit Announcement', announcement=announcement)
+
+@admin_bp.route('/announcements/<int:ann_id>/activate', methods=['POST'])
+def activate_announcement(ann_id):
+    # Deactivate all other announcements first
+    Announcement.query.update({Announcement.is_active: False})
+    # Activate the target one
+    announcement = Announcement.query.get_or_404(ann_id)
+    announcement.is_active = True
+    db.session.commit()
+    flash('Announcement has been activated.', 'success')
+    return redirect(url_for('admin.announcement_management'))
+
+@admin_bp.route('/announcements/<int:ann_id>/deactivate', methods=['POST'])
+def deactivate_announcement(ann_id):
+    announcement = Announcement.query.get_or_404(ann_id)
+    announcement.is_active = False
+    db.session.commit()
+    flash('Announcement has been deactivated.', 'info')
+    return redirect(url_for('admin.announcement_management'))
+
+@admin_bp.route('/announcements/<int:ann_id>/delete', methods=['POST'])
+def delete_announcement(ann_id):
+    announcement = Announcement.query.get_or_404(ann_id)
+    db.session.delete(announcement)
+    db.session.commit()
+    flash('Announcement has been deleted.', 'success')
+    return redirect(url_for('admin.announcement_management'))

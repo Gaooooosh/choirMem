@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="mb-4">{{ title }}</h1>
+        <div class="card track-card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Announcement Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="5" placeholder="支持Markdown格式..." required>{{ announcement.content if announcement else '' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="level" class="form-label">Banner Style</label>
+                        <select class="form-select" id="level" name="level">
+                            <option value="success" {% if announcement and announcement.level == 'success' %}selected{% endif %}>Green (Success)</option>
+                            <option value="secondary" {% if announcement and announcement.level == 'secondary' %}selected{% endif %}>Gray (Neutral)</option>
+                            <option value="primary" {% if announcement and announcement.level == 'primary' %}selected{% endif %}>Blue (Info)</option>
+                            <option value="warning" {% if announcement and announcement.level == 'warning' %}selected{% endif %}>Yellow (Warning)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Announcement</button>
+                    <a href="{{ url_for('admin.announcement_management') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,6 +1,7 @@
+import random
 from flask import render_template, flash, redirect, url_for, request, Blueprint, current_app
 from app import db
-from app.models import User, Track, SystemSetting, Photo, Rating
+from app.models import User, Track, SystemSetting, Photo, Rating, Announcement
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from sqlalchemy.sql.expression import func
@@ -18,7 +19,7 @@ def index():
         query = query.filter(Track.title.ilike(f'%{search}%'))
     
     tracks_pagination = query.order_by(Track.title).paginate(page=page, per_page=9)
-    
+    active_announcement = Announcement.query.filter_by(is_active=True).first()
     photo_limit_str = SystemSetting.get('homepage_photo_max', '3')
     try:
         photo_limit = int(photo_limit_str)
@@ -30,19 +31,29 @@ def index():
         random_photos = Photo.query.order_by(func.random()).limit(photo_limit).all()
     
     display_items = list(tracks_pagination.items)
-    if not search and page == 1 and random_photos:
-        for i, photo in enumerate(random_photos):
-            position = (i + 1) * 3
-            if position < len(display_items):
-                display_items.insert(position, photo)
-            else:
-                display_items.append(photo)
+    # Only add photos on the first page when not searching
+    if not search and page == 1:
+        photo_limit_str = SystemSetting.get('homepage_photo_max', '3')
+        try:
+            photo_limit = int(photo_limit_str)
+        except (ValueError, TypeError):
+            photo_limit = 3
+
+        random_photos = []
+        if photo_limit > 0:
+            random_photos = Photo.query.order_by(func.random()).limit(photo_limit).all()
+        
+        # Combine tracks and photos into one list
+        display_items.extend(random_photos)
+        # Shuffle the combined list for a natural mix
+        random.shuffle(display_items)
 
     return render_template('index.html', 
                            title='曲目库', 
                            tracks_pagination=tracks_pagination, 
                            display_items=display_items,
-                           search=search)
+                           search=search,
+                           active_announcement=active_announcement)
 
 @main_bp.route('/login', methods=['GET', 'POST'])
 def login():

@@ -80,7 +80,7 @@ def edit_track(track_id):
     # Check permissions for title edits
     if 'title' in request.form:
         if not current_user.is_admin and current_user != track_creator:
-            return jsonify({'status': 'error', 'message': 'Permission denied.'}), 403
+            return jsonify({'status': 'error', 'message': '您不是曲目的创建者，无法修改'}), 403
         track.title = request.form['title']
 
     # Any logged-in user can edit the description
@@ -96,7 +96,7 @@ def edit_version(version_id):
     version = Version.query.get_or_404(version_id)
     if 'title' in request.form:
         if version.creator != current_user and not current_user.is_admin:
-            return jsonify({'status': 'error', 'message': 'Permission denied to edit title.'}), 403
+            return jsonify({'status': 'error', 'message': '您不是版本的创建者，无法修改'}), 403
         version.title = request.form['title']
     if 'notes' in request.form:
         version.notes = request.form['notes']
@@ -232,7 +232,7 @@ def upload_photo(version_id):
         flash('未选择文件。', 'warning')
         return redirect(url_for('track.version_detail', version_id=version.id))
     filename = secure_filename(file.filename)
-    unique_filename = f"photo_{version.id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{filename}"
+    unique_filename = f"photo_{version.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
     file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename))
     caption = request.form.get('caption', '')
     photo = Photo(filename=unique_filename, caption=caption, uploader=current_user, version=version)
@@ -291,7 +291,7 @@ def delete_version(version_id):
     track_id = version.track_id
     db.session.delete(version)
     db.session.commit()
-    flash(f'Version "{version.title}" has been deleted.', 'success')
+    flash(f'版本 "{version.title}" 已删除.', 'success')
     return redirect(url_for('track.track_detail', track_id=track_id))
 
 @track_bp.route('/track/<int:track_id>/delete', methods=['POST'])
@@ -309,5 +309,5 @@ def delete_track(track_id):
     track_title = track.title
     db.session.delete(track)
     db.session.commit()
-    flash(f'Track "{track_title}" has been permanently deleted.', 'success')
+    flash(f'曲目 "{track_title}" 已经被完全删除', 'success')
     return redirect(url_for('main.index'))

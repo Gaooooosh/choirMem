@@ -150,3 +150,14 @@ class Rating(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     version_id = db.Column(db.Integer, db.ForeignKey('version.id'), nullable=False)
     __table_args__ = (db.UniqueConstraint('user_id', 'version_id', name='_user_version_uc'),)
+
+class Announcement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    # Level corresponds to Bootstrap alert colors, e.g., 'success' (green), 'secondary' (gray)
+    level = db.Column(db.String(20), nullable=False, default='secondary')
+    is_active = db.Column(db.Boolean, default=False, index=True)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Announcement {self.id}>'
