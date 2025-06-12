@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent p-0 mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.user_management') }}">Admin</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.group_management') }}">Permission Groups</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+            </ol>
+        </nav>
+        <h1 class="mb-4">{{ title }}</h1>
+
+        <div class="card track-card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-4">
+                        <label for="name" class="form-label">Group Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ group.name if group else '' }}" required>
+                    </div>
+
+                    <h5 class="mb-3">Permissions</h5>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="can_view_scores" name="can_view_scores" {% if not group or group.can_view_scores %}checked{% endif %}>
+                        <label class="form-check-label" for="can_view_scores">可以预览、下载曲谱 (Can view/download scores)</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="can_post_comments" name="can_post_comments" {% if not group or group.can_post_comments %}checked{% endif %}>
+                        <label class="form-check-label" for="can_post_comments">可以发表评论 (Can post comments)</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="can_upload_scores" name="can_upload_scores" {% if group and group.can_upload_scores %}checked{% endif %}>
+                        <label class="form-check-label" for="can_upload_scores">可以上传曲谱 (Can upload scores)</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="can_upload_photos" name="can_upload_photos" {% if group and group.can_upload_photos %}checked{% endif %}>
+                        <label class="form-check-label" for="can_upload_photos">可以上传照片 (Can upload photos)</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="can_create_tracks" name="can_create_tracks" {% if group and group.can_create_tracks %}checked{% endif %}>
+                        <label class="form-check-label" for="can_create_tracks">可以创建新曲目、版本 (Can create new tracks/versions)</label>
+                    </div>
+                    
+                    <hr class="my-4">
+
+                    <button type="submit" class="btn btn-primary">Save Group</button>
+                    <a href="{{ url_for('admin.group_management') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

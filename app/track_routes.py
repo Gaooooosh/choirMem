@@ -7,6 +7,7 @@ from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from sqlalchemy import func
+from app.decorators import permission_required
 
 track_bp = Blueprint('track', __name__)
 
@@ -20,6 +21,7 @@ def allowed_file(filename):
 
 @track_bp.route('/track/new', methods=['GET', 'POST'])
 @login_required
+@permission_required('can_create_tracks')
 def create_track():
     if request.method == 'POST':
         track = Track(title=request.form['title'], description=request.form.get('notes'))
@@ -65,10 +67,6 @@ def version_detail(version_id):
     return render_template('version_detail.html', 
                            title=f'{version.track.title} - {version.title}', version=version, 
                            scores=scores, comments=comments, suggested_tags=suggested_tags)
-
-# # # # # # # # # # # # # # # # # # # #
-# Editing Routes
-# # # # # # # # # # # # # # # # # # # #
 
 @track_bp.route('/track/<int:track_id>/edit', methods=['POST'])
 @login_required
@@ -140,6 +138,7 @@ def rate_version(version_id):
 
 @track_bp.route('/comment/add', methods=['POST'])
 @login_required
+@permission_required('can_post_comments')
 def add_comment():
     body = request.form.get('body')
     track_id = request.form.get('track_id')
@@ -195,11 +194,13 @@ def remove_tag(version_id, tag_id):
 
 @track_bp.route('/uploads/<path:filename>')
 @login_required
+@permission_required('can_view_scores')
 def uploaded_file(filename):
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
 @track_bp.route('/version/<int:version_id>/upload', methods=['POST'])
 @login_required
+@permission_required('can_upload_scores')
 def upload_score(version_id):
     version = Version.query.get_or_404(version_id)
     if 'file' not in request.files or not request.form.get('description'):
@@ -220,6 +221,7 @@ def upload_score(version_id):
 
 @track_bp.route('/version/<int:version_id>/photos/upload', methods=['POST'])
 @login_required
+@permission_required('can_upload_photos')
 def upload_photo(version_id):
     version = Version.query.get_or_404(version_id)
     if 'photo' not in request.files or not allowed_file(request.files['photo'].filename):

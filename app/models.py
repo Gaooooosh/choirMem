@@ -18,12 +18,18 @@ version_tags = db.Table('version_tags',
 class PermissionGroup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
+    
     # Permissions
-    can_view_scores = db.Column(db.Boolean, default=True)
-    can_upload_photos = db.Column(db.Boolean, default=False)
-    can_post_comments = db.Column(db.Boolean, default=True)
-    can_create_tracks = db.Column(db.Boolean, default=False) # Includes versions
-    can_upload_scores = db.Column(db.Boolean, default=False)
+    can_view_scores = db.Column(db.Boolean, default=True)      # 预览、下载曲谱
+    can_upload_scores = db.Column(db.Boolean, default=False)   # 上传曲谱
+    can_upload_photos = db.Column(db.Boolean, default=False)   # 上传照片
+    can_post_comments = db.Column(db.Boolean, default=True)    # 发表评论
+    can_create_tracks = db.Column(db.Boolean, default=False)   # 创建新曲目/版本
+
+    users = db.relationship('User', backref='group', lazy='dynamic')
+
+    def __repr__(self):
+        return f'<PermissionGroup {self.name}>'
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,7 +43,6 @@ class User(UserMixin, db.Model):
     liked_versions = db.relationship('Version', secondary=likes, back_populates='likes')
     ratings = db.relationship('Rating', backref='user', lazy='dynamic', cascade="all, delete-orphan")
     group_id = db.Column(db.Integer, db.ForeignKey('permission_group.id'))
-    group = db.relationship('PermissionGroup')
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
@@ -45,6 +50,7 @@ class User(UserMixin, db.Model):
         return bcrypt.check_password_hash(self.password_hash, password)
     
     def can(self, permission_name):
+        """Check if a user has a specific permission."""
         if self.is_admin:
             return True
         if not self.group:

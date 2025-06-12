@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, abort, Blueprint, current_app
 from app import db
-from app.models import User, SystemSetting
+from app.models import User, SystemSetting, PermissionGroup
 from flask_login import current_user, login_required
 import random
 import string
@@ -23,7 +23,20 @@ def index():
 @admin_bp.route('/users')
 def user_management():
     users = User.query.all()
-    return render_template('admin_users.html', title='User Management', users=users)
+    groups = PermissionGroup.query.all()
+    return render_template('admin_users.html', title='User Management', users=users, groups=groups)
+
+@admin_bp.route('/users/<int:user_id>/assign_group', methods=['POST'])
+def assign_group(user_id):
+    user = User.query.get_or_404(user_id)
+    group_id = request.form.get('group_id')
+    if group_id == '0': # '0' means "No Group"
+        user.group_id = None
+    else:
+        user.group_id = group_id
+    db.session.commit()
+    flash(f'User {user.username}\'s group has been updated.', 'success')
+    return redirect(url_for('admin.user_management'))
 
 @admin_bp.route('/users/add', methods=['POST'])
 def add_user():
@@ -108,3 +121,48 @@ def update_homepage_photos():
     SystemSetting.set('homepage_photo_max', max_photos)
     flash(f'Homepage max photos set to {max_photos}.', 'success')
     return redirect(url_for('admin.system_settings'))
+
+@admin_bp.route('/groups')
+def group_management():
+    groups = PermissionGroup.query.order_by(PermissionGroup.name).all()
+    return render_template('admin_groups.html', title='Permission Groups', groups=groups)
+
+@admin_bp.route('/groups/new', methods=['GET', 'POST'])
+def create_group():
+    if request.method == 'POST':
+        group = PermissionGroup(
+            name=request.form['name'],
+            can_view_scores=request.form.get('can_view_scores') == 'on',
+            can_upload_scores=request.form.get('can_upload_scores') == 'on',
+            can_upload_photos=request.form.get('can_upload_photos') == 'on',
+            can_post_comments=request.form.get('can_post_comments') == 'on',
+            can_create_tracks=request.form.get('can_create_tracks') == 'on'
+        )
+        db.session.add(group)
+        db.session.commit()
+        flash(f'Group "{group.name}" created.', 'success')
+        return redirect(url_for('admin.group_management'))
+    return render_template('admin_group_form.html', title='Create New Group', group=None)
+
+@admin_bp.route('/groups/<int:group_id>/edit', methods=['GET', 'POST'])
+def edit_group(group_id):
+    group = PermissionGroup.query.get_or_404(group_id)
+    if request.method == 'POST':
+        group.name = request.form['name']
+        group.can_view_scores = request.form.get('can_view_scores') == 'on'
+        group.can_upload_scores = request.form.get('can_upload_scores') == 'on'
+        group.can_upload_photos = request.form.get('can_upload_photos') == 'on'
+        group.can_post_comments = request.form.get('can_post_comments') == 'on'
+        group.can_create_tracks = request.form.get('can_create_tracks') == 'on'
+        db.session.commit()
+        flash(f'Group "{group.name}" updated.', 'success')
+        return redirect(url_for('admin.group_management'))
+    return render_template('admin_group_form.html', title='Edit Group', group=group)
+
+@admin_bp.route('/groups/<int:group_id>/delete', methods=['POST'])
+def delete_group(group_id):
+    group = PermissionGroup.query.get_or_404(group_id)
+    db.session.delete(group)
+    db.session.commit()
+    flash(f'Group "{group.name}" deleted.', 'success')
+    return redirect(url_for('admin.group_management'))
