@@ -9,10 +9,16 @@ services:
     volumes:
       - choir_data:/app/instance
       - choir_uploads:/app/uploads
+      - choir_migrations:/app/migrations
     environment:
-      - FLASK_APP=run.py
+      # These are used by init_db.py on the first run
+      - ADMIN_USER=yonggaoxiao
+      - ADMIN_PASSWORD=Wodemima052488
+      # You can set FLASK_DEBUG=1 for development if needed
       - FLASK_DEBUG=0
+      - SECRET_KEY=e9f06fb2fd134abd89de0d3948a7f04b95842fb34325be85b35bf3f342c51a76
 
 volumes:
   choir_data:
   choir_uploads:
+  choir_migrations:

@@ -1,114 +1,164 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center">
-    <h1>{{ track.title }}</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        {% if current_user == track.creator or current_user.is_admin %}
-        <a href="{{ url_for('main.edit_track', track_id=track.id) }}" class="btn btn-secondary btn-sm">编辑介绍</a>
-        <form action="{{ url_for('main.delete_track', track_id=track.id) }}" method="post" style="display: inline;" onsubmit="return confirm('确定要删除整个曲目及其所有乐谱吗？');">
-            <button type="submit" class="btn btn-danger btn-sm">删除曲目</button>
-        </form>
-        {% endif %}
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent p-0 mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">曲库</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ track.title }}</li>
+            </ol>
+        </nav>
+        <h1 class="display-5">{{ track.title }}</h1>
     </div>
+    <a href="{{ url_for('track.create_version', track_id=track.id) }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> 添加新版本</a>
+    {% if current_user.is_admin %}
+    <form action="{{ url_for('track.delete_track', track_id=track.id) }}" method="POST" class="d-inline" onsubmit="return confirm('警告：这将永久删除整个曲目，包括其所有版本、乐谱、照片和评论。此操作无法撤销。确定要继续吗？');">
+        <button type="submit" class="btn btn-danger">
+            <i class="bi bi-exclamation-triangle-fill"></i> 删除曲目
+        </button>
+    </form>
+    {% endif %}
 </div>
-<p class="text-muted">由 {{ track.creator.username }} 创建于 {{ track.timestamp.strftime('%Y-%m-%d') }}</p>
 
-<div class="card my-4">
-    <div class="card-header">
-        曲目介绍
-    </div>
+<!-- In-place editing for track description -->
+<div class="card mb-4 track-card" id="track-description-card">
     <div class="card-body">
-        {{ track.description | markdown | safe }}
-    </div>
-</div>
-
-<hr>
-
-<h3>乐谱文件</h3>
-
-<div class="card my-4">
-    <div class="card-body">
-        <h5 class="card-title">上传新乐谱</h5>
-        <form method="post" action="{{ url_for('main.upload_score', track_id=track.id) }}" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label for="description" class="form-label">文件描述 (例如: 四部混声总谱, 女高音声部谱)</label>
-                <input type="text" class="form-control" id="description" name="description" required>
-            </div>
-            <div class="mb-3">
-                <label for="file" class="form-label">选择 PDF 文件</label>
-                <input class="form-control" type="file" id="file" name="file" accept=".pdf" required>
-            </div>
-            <button type="submit" class="btn btn-primary">上传</button>
-        </form>
-    </div>
-</div>
-
-<h4>已有乐谱</h4>
-<ul class="list-group">
-    {% for score in track.scores %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-            <strong>{{ score.description }}</strong>
-            <br>
-            <small class="text-muted">由 {{ score.uploader.username }} 上传于 {{ score.timestamp.strftime('%Y-%m-%d') }}</small>
+        <div class="d-flex justify-content-between">
+            <h5 class="card-title">曲目介绍</h5>
+            <button class="btn btn-link btn-sm text-muted" onclick="toggleEdit('description', 'track', {{ track.id }})"><i class="bi bi-pencil-square"></i> 编辑</button>
         </div>
-        <div>
-            <button class="btn btn-info btn-sm" onclick="previewPdf('{{ url_for('main.uploaded_file', filename=score.filename) }}')">预览</button>
-            <a href="{{ url_for('main.uploaded_file', filename=score.filename) }}" class="btn btn-success btn-sm" download>下载</a>
-            {% if current_user == score.uploader or current_user.is_admin %}
-            <form action="{{ url_for('main.delete_score', score_id=score.id) }}" method="post" style="display: inline;" onsubmit="return confirm('确定要删除这个乐谱文件吗？');">
-                <button type="submit" class="btn btn-danger btn-sm">删除</button>
-            </form>
+        <div id="description-display" class="text-muted mt-2">
+            {# --- THIS IS THE CORRECTED LOGIC --- #}
+            {% if track.description %}
+                {{ track.description | markdown | safe }}
+            {% else %}
+                <p>还没有介绍，点击编辑来添加吧！</p>
             {% endif %}
         </div>
-    </li>
-    {% else %}
-    <li class="list-group-item">该曲目下还没有乐谱。</li>
-    {% endfor %}
-</ul>
-
-<div class="modal fade" id="pdfPreviewModal" tabindex="-1" aria-labelledby="pdfPreviewModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="pdfPreviewModalLabel">乐谱预览</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <form id="description-edit-form" class="d-none mt-2" onsubmit="saveContent('description', 'track', {{ track.id }}); return false;">
+            <textarea name="description" class="form-control" rows="8">{{ track.description or '' }}</textarea>
+            <div class="mt-2">
+                <button type="submit" class="btn btn-primary btn-sm">保存</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit('description', 'track', {{ track.id }})">取消</button>
             </div>
-            <div class="modal-body" style="height: 80vh;">
-                <canvas id="pdf-canvas" style="width: 100%; height: 100%;"></canvas>
+        </form>
+    </div>
+</div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <div id="title-display">
+            <h1 class="display-5 d-inline">{{ track.title }}</h1>
+            {% if current_user.is_admin %}
+            <button class="btn btn-link btn-lg text-muted" onclick="toggleEdit('title', 'track', {{ track.id }})"><i class="bi bi-pencil-square"></i></button>
+            {% endif %}
+        </div>
+        <form id="title-edit-form" class="d-none" onsubmit="saveContent('title', 'track', {{ track.id }}); return false;">
+            <div class="input-group">
+                <input type="text" name="title" class="form-control form-control-lg" value="{{ track.title }}">
+                <button type="submit" class="btn btn-primary">保存</button>
+                <button type="button" class="btn btn-secondary" onclick="toggleEdit('title', 'track', {{ track.id }})">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<h4 class="mt-5 mb-3">可用版本</h4>
+<div class="list-group">
+    {% for version in versions %}
+    <div class="list-group-item flex-column align-items-start p-3 mb-2 track-card">
+        <div class="d-flex w-100 justify-content-between">
+            <div>
+                <h5 class="mb-1">{{ version.title }}</h5>
+                <small class="text-muted">由 {{ version.creator.username }} 创建</small>
+            </div>
+            <div class="align-self-center">
+                {% if current_user == version.creator or current_user.is_admin %}
+                <form action="{{ url_for('track.delete_version', version_id=version.id) }}" method="POST" class="d-inline" onsubmit="return confirm('确定要永久删除此版本及其所有乐谱和照片吗？此操作无法撤销。');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm me-2">
+                        <i class="bi bi-trash"></i> 删除版本
+                    </button>
+                </form>
+                {% endif %}
+                <a href="{{ url_for('track.version_detail', version_id=version.id) }}" class="btn btn-primary">
+                    查看乐谱 & 上传 <i class="bi bi-arrow-right-short"></i>
+                </a>
+            </div>
+        </div>
+        <p class="mb-1 mt-2 text-muted small">{{ (version.notes or '') | truncate(150) }}</p>
+        <div class="mt-2">
+            {% for tag in version.tags %}
+            <span class="badge rounded-pill" style="background-color: #e9ecef; color: #495057;">{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+        <div class="mt-2 d-flex justify-content-end small text-muted">
+            <span class="me-3">
+                <i class="bi bi-star-fill text-warning"></i> 
+                {{ "%.1f"|format(version.avg_difficulty) if version.ratings.count() > 0 else '未评分' }} ({{ version.ratings.count() }} 票)
+            </span>
+            <span>
+                <i class="bi bi-heart-fill text-danger"></i> 
+                {{ version.likes | length }} 次喜欢
+            </span>
+        </div>
+    </div>
+    {% else %}
+    {% endfor %}
+</div>
+
+<!-- Comments Section -->
+<div class="mt-5">
+    <h4 class="mb-3">讨论 & 练习记录</h4>
+    {% include '_comments.html' with context %}
+</div>
+
+<!-- Photos Section -->
+{% if random_photos %}
+<h4 class="mt-5 mb-3">演出照片</h4>
+<div class="row row-cols-2 row-cols-lg-4 g-2">
+    {% for photo in random_photos %}
+    <div class="col">
+        <div class="card track-card photo-card">
+            <img src="{{ url_for('track.uploaded_file', filename=photo.filename) }}" class="img-fluid rounded" alt="{{ photo.caption or '' }}" style="aspect-ratio: 1 / 1; object-fit: cover;">
+            <a href="{{ url_for('track.uploaded_file', filename=photo.filename) }}" class="stretched-link" data-bs-toggle="tooltip" title="查看大图"></a>
+            <div class="photo-overlay">
+                <h5 class="photo-overlay-title">{{ photo.version.track.title }}</h5>
+                <p class="photo-overlay-caption">{{ photo.caption or '' }}</p>
             </div>
         </div>
     </div>
+    {% endfor %}
 </div>
+{% endif %}
+
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/pdf.min.js') }}"></script>
 <script>
-    var pdfjsLib = window['pdfjs-dist/build/pdf'];
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "{{ url_for('static', filename='js/pdf.worker.min.js') }}";
-    var myModal = new bootstrap.Modal(document.getElementById('pdfPreviewModal'), {});
+function toggleEdit(section, type, id) {
+    document.getElementById(section + '-display').classList.toggle('d-none');
+    document.getElementById(section + '-edit-form').classList.toggle('d-none');
+}
 
-    function previewPdf(pdfUrl) {
-        myModal.show();
-        var canvas = document.getElementById('pdf-canvas');
-        var context = canvas.getContext('2d');
-        
-        pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
-            // 只显示第一页作为预览
-            return pdf.getPage(1);
-        }).then(function(page) {
-            var viewport = page.getViewport({ scale: 1.5 });
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+function saveContent(section, type, id) {
+    const form = document.getElementById(section + '-edit-form');
+    const formData = new FormData(form);
+    
+    // Construct the correct URL based on the type (track or version)
+    const url = `/${type}/${id}/edit`;
 
-            var renderContext = {
-                canvasContext: context,
-                viewport: viewport
-            };
-            page.render(renderContext);
-        });
-    }
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success') {
+            location.reload(); 
+        } else {
+            alert('Error saving content.');
+        }
+    });
+}
 </script>
 {% endblock %}

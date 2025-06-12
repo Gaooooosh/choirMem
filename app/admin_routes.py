@@ -89,11 +89,22 @@ def delete_user(user_id):
 @admin_bp.route('/system')
 def system_settings():
     registration_enabled = SystemSetting.is_registration_enabled()
-    return render_template('admin_system.html', title='System Settings', registration_enabled=registration_enabled)
+    homepage_photo_max = SystemSetting.get('homepage_photo_max', '3')
+    return render_template('admin_system.html', 
+                           title='System Settings', 
+                           registration_enabled=registration_enabled,
+                           homepage_photo_max=homepage_photo_max)
 
 @admin_bp.route('/system/toggle_registration', methods=['POST'])
 def toggle_registration():
     current_status = SystemSetting.is_registration_enabled()
     SystemSetting.set('registration_enabled', not current_status)
     flash(f'User registration has been {"disabled" if current_status else "enabled"}.', 'success')
+    return redirect(url_for('admin.system_settings'))
+
+@admin_bp.route('/system/update_homepage_photos', methods=['POST'])
+def update_homepage_photos():
+    max_photos = request.form.get('max_photos', '3')
+    SystemSetting.set('homepage_photo_max', max_photos)
+    flash(f'Homepage max photos set to {max_photos}.', 'success')
     return redirect(url_for('admin.system_settings'))

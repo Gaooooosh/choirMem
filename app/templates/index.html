@@ -1,18 +1,83 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>曲目列表</h1>
-    <div class="list-group">
-        {% for track in tracks %}
-            <a href="{{ url_for('main.track_detail', track_id=track.id) }}" class="list-group-item list-group-item-action">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ track.title }}</h5>
-                    <small>{{ track.timestamp.strftime('%Y-%m-%d') }}</small>
-                </div>
-                <p class="mb-1">由 {{ track.creator.username }} 创建</p>
-            </a>
-        {% else %}
-            <p>还没有任何曲目，快去<a href="{{ url_for('main.new_track') }}">创建一个</a>吧！</p>
-        {% endfor %}
+<div class="text-center mb-5">
+    <h1 class="display-4">北邮爱乐合唱团</h1>
+    <p class="lead text-muted">在这里记录我们的爱乐</p>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('main.index') }}" class="mb-0">
+            <div class="input-group input-group-lg">
+                <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" class="form-control border-0" placeholder="搜索曲目标题..." value="{{ search or '' }}">
+            </div>
+        </form>
     </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for item in display_items %}
+        {% if item.__class__.__name__ == 'Track' %}
+            <div class="col">
+                <div class="card track-card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ item.title }}</h5>
+                        <p class="card-text small text-muted flex-grow-1">{{ (item.description or '') | truncate(100) }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-light text-dark">{{ item.versions.count() }}个版本</span>
+                            <a href="{{ url_for('track.track_detail', track_id=item.id) }}" class="stretched-link"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% elif item.__class__.__name__ == 'Photo' %}
+            <div class="col">
+                <div class="card track-card h-100 photo-card">
+                    <img src="{{ url_for('track.uploaded_file', filename=item.filename) }}" class="card-img-top h-100" alt="{{ item.caption or '' }}" style="object-fit: cover;">
+                    <a href="{{ url_for('track.version_detail', version_id=item.version_id) }}" class="stretched-link"></a>
+                    <div class="photo-overlay">
+                        <h5 class="photo-overlay-title">{{ item.version.track.title }}</h5>
+                        <p class="photo-overlay-caption">{{ item.caption or '' }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-secondary text-center">没有找到任何曲目。 <a href="{{ url_for('track.create_track') }}" class="alert-link">马上创建一个！</a></div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if tracks_pagination.pages > 1 %}
+<nav aria-label="Page navigation" class="mt-5">
+    <ul class="pagination justify-content-center">
+        {% if tracks_pagination.has_prev %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('main.index', page=tracks_pagination.prev_num, search=search) }}">«</a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">«</span></li>
+        {% endif %}
+        
+        {% for page_num in tracks_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+                {% if tracks_pagination.page == page_num %}
+                <li class="page-item active" aria-current="page"><span class="page-link">{{ page_num }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('main.index', page=page_num, search=search) }}">{{ page_num }}</a></li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if tracks_pagination.has_next %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('main.index', page=tracks_pagination.next_num, search=search) }}">»</a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">»</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
 {% endblock %}
