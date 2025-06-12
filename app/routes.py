@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, Blueprint, current_app
 from app import db
-from app.models import User, Track, SystemSetting, Photo
+from app.models import User, Track, SystemSetting, Photo, Rating
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from sqlalchemy.sql.expression import func
@@ -84,3 +84,8 @@ def register():
         flash('恭喜你，注册成功！请登录。', 'success')
         return redirect(url_for('main.login'))
     return render_template('register.html', title='注册')
+
+@main_bp.route('/help')
+@login_required
+def help_page():
+    return render_template('help.html', title="帮助/说明")

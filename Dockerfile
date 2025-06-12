@@ -20,4 +20,4 @@ RUN chmod +x /app/entrypoint.sh
 # No need to expose port here, docker-compose handles it
 
 # Set the entrypoint
-ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["gunicorn", "-b", "0.0.0.0:1000", "--access-logfile", "-", "--error-logfile", "-", "run:app"]

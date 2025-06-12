@@ -3,13 +3,25 @@
 {% block content %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb bg-transparent p-0 mb-2">
-        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">曲目库</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">爱乐爱家</a></li>
         <li class="breadcrumb-item"><a href="{{ url_for('track.track_detail', track_id=version.track.id) }}">{{ version.track.title }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ version.title }}</li>
     </ol>
 </nav>
 
-<h1 class="display-5 mb-4">{{ version.title }}</h1>
+<div id="title-display">
+    <h1 class="display-5 d-inline">{{ version.title }}</h1>
+    {% if current_user == version.creator or current_user.is_admin %}
+    <button class="btn btn-link btn-lg text-muted" onclick="toggleEdit('title')"><i class="bi bi-pencil-square"></i></button>
+    {% endif %}
+</div>
+<form id="title-edit-form" class="d-none mb-4" onsubmit="saveContent(this, '{{ url_for('track.edit_version', version_id=version.id) }}'); return false;">
+    <div class="input-group">
+        <input type="text" name="title" class="form-control form-control-lg" value="{{ version.title }}">
+        <button type="submit" class="btn btn-primary">保存</button>
+        <button type="button" class="btn btn-secondary" onclick="toggleEdit('title')">取消</button>
+    </div>
+</form>
 
 <div class="card mb-4 track-card">
     <div class="card-body">
@@ -63,8 +75,8 @@
 
 <div class="me-4">
         <i class="bi bi-star-fill text-warning"></i>
-        <span class="ms-1 fw-bold">{{ "%.1f"|format(version.avg_difficulty) if version.ratings.count() > 0 else '未评分' }}</span>
-        <span class="ms-1 small">({{ version.ratings.count() }} 票)</span>
+        <span class="ms-1 fw-bold">难度：{{ "%.1f"|format(version.avg_difficulty) if version.ratings.count() > 0 else '未评分' }}</span>
+        <span class="ms-1 small">({{ version.ratings.count() }} 次评分)</span>
     </div>
     
     <form action="{{ url_for('track.rate_version', version_id=version.id) }}" method="POST">
@@ -84,7 +96,7 @@
     <div class="card-body">
         <div class="d-flex justify-content-between">
             <h5 class="card-title">版本说明</h5>
-            <button class="btn btn-link btn-sm text-muted" onclick="toggleEdit('notes', 'version', {{ version.id }})"><i class="bi bi-pencil-square"></i> 编辑</button>
+            <button class="btn btn-link btn-sm text-muted" onclick="toggleEdit('notes')"><i class="bi bi-pencil-square"></i> 编辑</button>
         </div>
         <div id="notes-display" class="text-muted mt-2">
             {# --- THIS IS THE CORRECTED LOGIC --- #}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-5">帮助与说明</h1>
+    <p class="lead text-muted">欢迎来到北邮爱乐合唱团乐谱库！这里是一些关于如何使用本站的说明。</p>
+</div>
+
+<div class="accordion" id="helpAccordion">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <strong>基本概念：曲目、版本、乐谱的关系是什么？</strong>
+            </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#helpAccordion">
+            <div class="accordion-body">
+                我们的乐谱库按三级结构组织，以保持清晰：
+                <ul>
+                    <li><strong>曲目 (Track):</strong> 这是指一首歌曲或音乐作品的最高层级，例如“Siyahamba”。它包含了这首作品的通用介绍和历史。</li>
+                    <li><strong>版本 (Version):</strong> 一首“曲目”可以有多种不同的编排或演绎方式。每一种都是一个“版本”，例如“SATB无伴奏合唱版”或“钢琴伴奏独唱版”。每个版本都可以有自己独立的练习备注、难度评级和演出照片。</li>
+                    <li><strong>乐谱 (Score):</strong> 这是指具体的PDF文件。一个“版本”可以包含多个乐谱文件，例如“女高音声部谱.pdf”、“钢琴谱.pdf”和“完整总谱.pdf”。</li>
+                </ul>
+                这个结构可以确保我们能清晰地管理同一首歌曲的不同编排。
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingTwo">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                <strong>我该如何上传一份新的乐谱？</strong>
+            </button>
+        </h2>
+        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#helpAccordion">
+            <div class="accordion-body">
+                上传乐谱是一个简单的三步流程：
+                <ol>
+                    <li>在主页上找到对应的**曲目**，如果不存在，请先“创建新曲目”。</li>
+                    <li>点击曲目卡片进入“曲目详情页”，然后点击您想上传乐谱的那个**版本**（例如“SATB版”）。如果版本不存在，请先“添加新版本”。</li>
+                    <li>在“版本详情页”，您会看到“上传新乐谱”的表单。在这里选择您的PDF文件并添加描述，然后点击上传即可。</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingThree">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                <strong>关于编辑、评分和评论</strong>
+            </button>
+        </h2>
+        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#helpAccordion">
+            <div class="accordion-body">
+                本站鼓励协作和交流：
+                <ul>
+                    <li><strong>内容编辑:</strong> 曲目和版本的介绍/说明是大家共同维护的。任何登录用户都可以点击<i class="bi bi-pencil-square"></i>图标进行“在线编辑”。</li>
+                    <li><strong>难度评分:</strong> 你可以为每个版本评定难度（1-5星），帮助其他团员了解作品的挑战程度。你的评分可以随时修改。</li>
+                    <li><strong>喜欢:</strong> 点击 ❤️ 图标来为你最喜欢的版本投票！</li>
+                    <li><strong>讨论与练习记录:</strong> 每个曲目和版本下方都有评论区。欢迎在这里分享你的练习心得、演唱建议或者对作品的看法。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -162,7 +162,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light fixed-top border-bottom">
         <div class="container-fluid main-content-area">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}"><i class="bi bi-music-note-list"></i> 乐谱库</a>
+            <a class="navbar-brand" href="{{ url_for('main.index') }}"><i class="bi bi-music-note-list"></i> 爱乐爱家</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -173,6 +173,8 @@
                     <li class="nav-item"><a class="nav-link btn btn-primary text-white ms-2 px-3" href="{{ url_for('main.register') }}">注册</a></li>
                     {% else %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('track.create_track') }}">创建曲目</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.help_page') }}">帮助/说明</a></li>
+                    <li><hr class="dropdown-divider"></li>
                     {% if current_user.is_admin %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarAdminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
