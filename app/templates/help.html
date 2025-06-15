@@ -1,6 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+    blockquote {
+            border-left: 4px solid #ccc;
+            padding-left: 1em;
+            margin-left: 0;
+            color: #555;
+    }
+    .signature {
+            text-align: right;
+            margin-top: 40px;
+        }
+</style>
 <div class="text-center mb-5">
     <h1 class="display-5">帮助与说明</h1>
     <p class="lead text-muted">欢迎来到北邮爱乐合唱团乐谱库！这里是一些关于如何使用本站的说明。</p>
@@ -61,21 +73,29 @@
         </div>
     </div>
     <div class="accordion-item">
-        <h2 class="accordion-header" id="headingThree">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+        <h2 class="accordion-header" id="headingFour">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
                 <strong>站长留言</strong>
             </button>
         </h2>
-        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#helpAccordion">
+        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#helpAccordion">
             <div class="accordion-body">
-                北邮爱乐合唱团有近四十年历史，在历史的长河中我们因爱乐相遇，以歌曲为单元留下了美好的回忆，为了建立一个属于爱乐人的回忆档案馆，我设计了这个网站，希望他可以在所有在团团员、离校的团友的努力下成长为我们共同的记忆展览馆。
+                <p>北邮爱乐合唱团有近四十年历史，在历史的长河中我们因爱乐相遇，以歌曲为单元留下了美好的回忆。为了建立一个属于爱乐人的回忆档案馆，我设计了这个网站，希望它可以在所有在团团员、离校的团友的共同努力下成长为我们共同的记忆展览馆。</p>
+
                 <ul>
-                    <li>网站的设计以曲目和不同的版本为最小的回忆承载单元，可以由各位团友共同编辑歌曲和版本的介绍，上传标准的或是带有自己笔记的曲谱</li>
-                    <li>我对网站的希望是可以帮助团友以共同排练过的歌曲为桥梁，跨跃时间长河，探讨、交流音乐，设计了对歌曲、版本的评论区，希望团友可以将自己对歌曲的理解、当时演唱时的新的作为评论编辑发表在网站上。</li>
-                    <li>由于版权的问题，曲谱的获取无法向已经离团的团友开发，如果您依然关系关爱爱乐合唱团，并且依然在合唱的道路上前行，可以联系我为您开通曲谱的获取权限，但是也希望您可以将其仅用作自己学习、练习或是非商业盈利等不侵犯版权的用途。</li>
-                    <li><strong>时间像是一条不断分叉的道路，我们的意识同时站在时间的每一个路口，以独特的形式的留下痕迹。我相信对于北邮爱乐合唱团的团友而言，一定存在着一条属于合唱属于音乐的时间道路，我希望这个网站可以以曲目的形式将这段道路重现在你的眼前。</strong></li>
-                    <li><strong>肖永杲</strong>留言</li>   
+                    <li>网站的设计以曲目和不同的版本为最小的回忆承载单元，可以由各位团友共同编辑歌曲和版本的介绍，上传标准的或是带有自己笔记的曲谱。</li>
+                    <li>我对网站的希望是可以帮助团友以共同排练过的歌曲为桥梁，跨越时间长河，探讨、交流音乐。因此设计了对歌曲、版本的评论区，希望团友可以将自己对歌曲的理解、当时演唱时的心得作为评论发表在网站上。</li>
+                    <li>由于版权的问题，曲谱的获取无法向已经离团的团友开放。如果您依然关心关爱爱乐合唱团，并且依然在合唱的道路上前行，可以联系我为您开通曲谱的获取权限。但也希望您可以将其仅用作自己学习、练习或非商业盈利等不侵犯版权的用途。</li>
                 </ul>
+            
+                <blockquote>
+                    时间像是一条不断分叉的道路，我们的意识同时站在时间的每一个路口，以独特的形式留下痕迹。我相信对于北邮爱乐合唱团的团友而言，一定存在着一条属于合唱、属于音乐的时间道路。我希望这个网站可以以曲目的形式将这段道路重现在你的眼前。爱乐爱家。
+                </blockquote>
+            
+                <div class="signature">
+                    <p>肖永杲</p>
+                    <p>联系方式：yonggaoxiao(微信号)</p>
+                </div>
             </div>
         </div>
     </div>

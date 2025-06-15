@@ -175,6 +175,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('track.create_track') }}">创建曲目</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.help_page') }}">帮助/说明</a></li>
                     <li><hr class="dropdown-divider"></li>
+
                     {% if current_user.is_admin %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarAdminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -185,6 +186,7 @@
                             <li><a class="dropdown-item" href="{{ url_for('admin.system_settings') }}">系统设置</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.group_management') }}">权限组管理</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.announcement_management') }}">公告管理</a></li> <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.invite_management') }}">邀请码管理</a></li>
                         </ul>
                     </li>
                     {% endif %}
@@ -193,6 +195,8 @@
                             <i class="bi bi-person-circle"></i> {{ current_user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('main.change_password') }}">修改密码</a></li>
+
                             <li><a class="dropdown-item text-danger" href="{{ url_for('main.logout') }}">登出</a></li>
                         </ul>
                     </li>
@@ -218,6 +222,65 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    {% block scripts %}{% endblock %}
+
+
+{% block scripts %}
+<script>
+// --- NEW, ROBUST JAVASCRIPT FOR ALL PAGES ---
+
+// Toggles between the display view and the edit form for a given section
+function toggleEdit(sectionId) {
+    const displayEl = document.getElementById(sectionId + '-display');
+    const formEl = document.getElementById(sectionId + '-edit-form');
+    if (displayEl && formEl) {
+        displayEl.classList.toggle('d-none');
+        formEl.classList.toggle('d-none');
+    }
+}
+
+// Submits the content of a form to a specific URL using Fetch
+function saveContent(formElement, url) {
+    const formData = new FormData(formElement);
+    
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.message || 'A server error occurred.') });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if(data.status === 'success') {
+            location.reload(); // Reload the page to show changes
+        } else {
+            alert(data.message || 'Could not save content.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving: ' + error.message);
+    });
+}
+
+// Handles the PDF preview modal
+document.addEventListener('DOMContentLoaded', function () {
+    var pdfPreviewModal = document.getElementById('pdfPreviewModal');
+    if(pdfPreviewModal) {
+        pdfPreviewModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var pdfUrl = button.getAttribute('data-pdf-url');
+            var iframe = document.getElementById('pdf-iframe');
+            iframe.src = pdfUrl;
+        });
+        pdfPreviewModal.addEventListener('hidden.bs.modal', function (event) {
+            document.getElementById('pdf-iframe').src = 'about:blank';
+        });
+    }
+});
+</script>
+{% endblock %}
 </body>
 </html>

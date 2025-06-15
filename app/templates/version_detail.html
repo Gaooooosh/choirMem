@@ -99,18 +99,13 @@
             <button class="btn btn-link btn-sm text-muted" onclick="toggleEdit('notes')"><i class="bi bi-pencil-square"></i> 编辑</button>
         </div>
         <div id="notes-display" class="text-muted mt-2">
-            {# --- THIS IS THE CORRECTED LOGIC --- #}
-            {% if version.notes %}
-                {{ version.notes | markdown | safe }}
-            {% else %}
-                <p>还没有版本说明，点击编辑来添加吧！</p>
-            {% endif %}
+            {% if version.notes %}{{ version.notes | markdown | safe }}{% else %}<p>还没有版本说明，点击编辑来添加吧！</p>{% endif %}
         </div>
-        <form id="notes-edit-form" class="d-none mt-2" onsubmit="saveContent('notes', 'version', {{ version.id }}); return false;">
+        <form id="notes-edit-form" class="d-none mt-2" onsubmit="saveContent(this, '{{ url_for('track.edit_version', version_id=version.id) }}'); return false;">
             <textarea name="notes" class="form-control" rows="8">{{ version.notes or '' }}</textarea>
             <div class="mt-2">
                 <button type="submit" class="btn btn-primary btn-sm">保存</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit('notes', 'version', {{ version.id }})">取消</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit('notes')">取消</button>
             </div>
         </form>
     </div>
@@ -191,16 +186,20 @@
              <div class="col">
                 <div class="card track-card photo-card">
                     <img src="{{ url_for('track.uploaded_file', filename=photo.filename) }}" class="img-fluid rounded" alt="{{ photo.caption or '' }}" style="aspect-ratio: 1 / 1; object-fit: cover;">
-                     <a href="{{ url_for('track.uploaded_file', filename=photo.filename) }}" class="stretched-link" data-bs-toggle="tooltip" title="查看大图"></a>
                     <div class="photo-overlay">
-                        <p class="photo-overlay-caption">{{ photo.caption or 'No caption' }}</p>
-                        {% if current_user == photo.uploader or current_user.is_admin %}
-                        <form action="{{ url_for('track.delete_photo', photo_id=photo.id) }}" method="POST" onsubmit="return confirm('确定要删除这张照片吗？');" class="position-absolute top-0 end-0 p-1">
-                            <button type="submit" class="btn btn-danger btn-sm" style="--bs-btn-padding-y: .1rem; --bs-btn-padding-x: .4rem; --bs-btn-font-size: .75rem;">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
-                        {% endif %}
+                        <p class="photo-overlay-caption mb-0">{{ photo.caption or 'No caption' }}</p>
+                        <div class="position-absolute top-0 end-0 p-1">
+                            <a href="{{ url_for('track.uploaded_file', filename=photo.filename) }}" class="btn btn-sm btn-secondary" title="View Fullscreen">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                            </a>
+                            {% if current_user == photo.uploader or current_user.is_admin %}
+                            <form action="{{ url_for('track.delete_photo', photo_id=photo.id) }}" method="POST" class="d-inline" onsubmit="return confirm('确定要删除这张照片吗？');">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Delete Photo">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
              </div>
@@ -235,32 +234,34 @@ function toggleEdit(section, type, id) {
     document.getElementById(section + '-edit-form').classList.toggle('d-none');
 }
 
-function saveContent(section, type, id) {
-    const form = document.getElementById(section + '-edit-form');
-    // The textarea name must match what the backend expects. 'description' for tracks, 'notes' for versions.
-    const textareaName = (type === 'track') ? 'description' : 'notes';
-    const formData = new FormData();
-    formData.append(textareaName, form.querySelector(`textarea[name="${textareaName}"]`).value);
-
-    const url = `/${type}/${id}/edit`;
-
+// This function takes the form element and the correct URL, then submits the data
+function saveContent(formElement, url) {
+    const formData = new FormData(formElement);
+    
     fetch(url, {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            // Handle errors like 403 Forbidden
+            return response.json().then(err => { throw new Error(err.message || 'A server error occurred.') });
+        }
+        return response.json();
+    })
     .then(data => {
         if(data.status === 'success') {
-            location.reload(); 
+            location.reload(); // Simple reload to show changes
         } else {
-            alert('Error saving content.');
+            alert(data.message || 'Could not save content.');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while saving.');
+        alert('An error occurred while saving: ' + error.message);
     });
 }
+
 
 // PDF Modal script
 document.addEventListener('DOMContentLoaded', function () {

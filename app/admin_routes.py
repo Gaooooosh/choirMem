@@ -1,6 +1,7 @@
+import uuid
 from flask import render_template, flash, redirect, url_for, request, abort, Blueprint, current_app
 from app import db
-from app.models import User, SystemSetting, PermissionGroup, Announcement
+from app.models import User, SystemSetting, PermissionGroup, Announcement, InvitationCode
 from flask_login import current_user, login_required
 import random
 import string
@@ -25,6 +26,29 @@ def user_management():
     users = User.query.all()
     groups = PermissionGroup.query.all()
     return render_template('admin_users.html', title='User Management', users=users, groups=groups)
+
+@admin_bp.route('/users/<int:user_id>/reset_password', methods=['POST'])
+def reset_password(user_id):
+    user = User.query.get_or_404(user_id)
+    # Generate a secure random password
+    new_password = uuid.uuid4().hex[:12]
+    user.set_password(new_password)
+    db.session.commit()
+    flash(f'Password for "{user.username}" has been reset to: {new_password}. Please deliver this password securely.', 'success')
+    return redirect(url_for('admin.user_management'))
+
+@admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.is_admin:
+        flash("Admin accounts cannot be deleted from this interface.", "danger")
+        return redirect(url_for('admin.user_management'))
+    
+    # This simply deletes the user. Content will be orphaned.
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"User '{user.username}' has been deleted.", "success")
+    return redirect(url_for('admin.user_management'))
 
 @admin_bp.route('/users/<int:user_id>/assign_group', methods=['POST'])
 def assign_group(user_id):
@@ -71,33 +95,6 @@ def toggle_admin(user_id):
     db.session.commit()
     flash(f'User "{user.username}" admin status updated.', 'success')
     return redirect(url_for('admin.user_management'))
-
-@admin_bp.route('/users/<int:user_id>/reset_password', methods=['POST'])
-def reset_password(user_id):
-    user = User.query.get_or_404(user_id)
-    new_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
-    user.set_password(new_password)
-    db.session.commit()
-    flash(f'Password for "{user.username}" has been reset to: {new_password}. Please save this password.', 'success')
-    return redirect(url_for('admin.user_management'))
-
-@admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
-def delete_user(user_id):
-    user_to_delete = User.query.get_or_404(user_id)
-    if user_to_delete.is_admin and User.query.filter_by(is_admin=True).count() == 1:
-        flash("You cannot delete the last admin account.", "danger")
-        return redirect(url_for('admin.user_management'))
-    if user_to_delete.id == current_user.id:
-        flash("You cannot delete your own account.", "danger")
-        return redirect(url_for('admin.user_management'))
-    
-    # Here you might want to re-assign or delete content created by the user
-    # For now, we'll just delete the user
-    db.session.delete(user_to_delete)
-    db.session.commit()
-    flash(f"User '{user_to_delete.username}' has been deleted.", "success")
-    return redirect(url_for('admin.user_management'))
-
 
 @admin_bp.route('/system')
 def system_settings():
@@ -222,3 +219,33 @@ def delete_announcement(ann_id):
     db.session.commit()
     flash('Announcement has been deleted.', 'success')
     return redirect(url_for('admin.announcement_management'))
+
+@admin_bp.route('/invites')
+def invite_management():
+    invites = InvitationCode.query.order_by(InvitationCode.created_at.desc()).all()
+    groups = PermissionGroup.query.order_by(PermissionGroup.name).all()
+    return render_template('admin_invites.html', title='Invitation Codes', invites=invites, groups=groups)
+
+@admin_bp.route('/invites/generate', methods=['POST'])
+def generate_invite():
+    group_id = request.form.get('group_id')
+    if not group_id:
+        flash('You must select a permission group.', 'danger')
+        return redirect(url_for('admin.invite_management'))
+    
+    new_code = InvitationCode(
+        code=uuid.uuid4().hex,
+        group_id=group_id
+    )
+    db.session.add(new_code)
+    db.session.commit()
+    flash(f'New code "{new_code.code}" generated for group "{new_code.group.name}".', 'success')
+    return redirect(url_for('admin.invite_management'))
+
+@admin_bp.route('/invites/<int:invite_id>/deactivate', methods=['POST'])
+def deactivate_invite(invite_id):
+    invite = InvitationCode.query.get_or_404(invite_id)
+    invite.is_active = False
+    db.session.commit()
+    flash(f'Code "{invite.code}" has been deactivated.', 'info')
+    return redirect(url_for('admin.invite_management'))

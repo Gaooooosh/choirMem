@@ -41,10 +41,12 @@
             <div class="col">
                 <div class="card track-card h-100 photo-card">
                     <img src="{{ url_for('track.uploaded_file', filename=item.filename) }}" class="card-img-top h-100" alt="{{ item.caption or '' }}" style="object-fit: cover;">
-                    <a href="{{ url_for('track.version_detail', version_id=item.version_id) }}" class="stretched-link"></a>
                     <div class="photo-overlay">
-                        <h5 class="photo-overlay-title">{{ item.version.track.title }}</h5>
-                        <p class="photo-overlay-caption">{{ item.caption or '' }}</p>
+                        <div>
+                            <h5 class="photo-overlay-title">{{ item.version.track.title }}</h5>
+                            <p class="photo-overlay-caption">{{ item.caption or '' }}</p>
+                        </div>
+                        <a href="{{ url_for('track.version_detail', version_id=item.version_id) }}" class="btn btn-sm btn-light mt-auto">前往版本 <i class="bi bi-arrow-right-short"></i></a>
                     </div>
                 </div>
             </div>

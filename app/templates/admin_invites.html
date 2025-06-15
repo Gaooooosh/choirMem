@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent p-0 mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.user_management') }}">Admin</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Invitation Codes</li>
+            </ol>
+        </nav>
+        <h1>Invitation Codes</h1>
+    </div>
+</div>
+
+<div class="card track-card mb-4">
+    <div class="card-header">
+        Generate New Code
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('admin.generate_invite') }}" method="POST">
+            <div class="input-group">
+                <select name="group_id" class="form-select" required>
+                    <option value="" disabled selected>Choose a permission group...</option>
+                    {% for group in groups %}
+                    <option value="{{ group.id }}">{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Generate</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card track-card">
+    <div class="card-header">
+        Active Codes
+    </div>
+    <div class="card-body">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Permission Group</th>
+                    <th>Created On</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set active_codes = invites | selectattr('is_active') | list %}
+                {% for invite in active_codes %}
+                <tr>
+                    <td><input type="text" class="form-control form-control-sm" value="{{ invite.code }}" readonly></td>
+                    <td><span class="badge bg-secondary">{{ invite.group.name }}</span></td>
+                    <td>{{ invite.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <form action="{{ url_for('admin.deactivate_invite', invite_id=invite.id) }}" method="POST">
+                            <button type="submit" class="btn btn-sm btn-warning">Deactivate</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">No active codes.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card track-card mt-4">
+    <div class="card-header">
+        Used / Inactive Codes
+    </div>
+    <div class="card-body">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Permission Group</th>
+                    <th>Created On</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set inactive_codes = invites | rejectattr('is_active') | list %}
+                {% for invite in inactive_codes %}
+                <tr>
+                    <td class="text-muted"><del>{{ invite.code }}</del></td>
+                    <td><span class="badge bg-light text-dark">{{ invite.group.name }}</span></td>
+                    <td class="text-muted">{{ invite.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">No used or inactive codes.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

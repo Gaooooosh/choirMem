@@ -34,25 +34,20 @@
 </div>
 
 <!-- In-place editing for track description -->
-<div class="card mb-4 track-card" id="track-description-card">
+<div class="card mb-4 track-card" id="description-card">
     <div class="card-body">
         <div class="d-flex justify-content-between">
             <h5 class="card-title">曲目介绍</h5>
             <button class="btn btn-link btn-sm text-muted" onclick="toggleEdit('description')"><i class="bi bi-pencil-square"></i> 编辑</button>
         </div>
         <div id="description-display" class="text-muted mt-2">
-            {# --- THIS IS THE CORRECTED LOGIC --- #}
-            {% if track.description %}
-                {{ track.description | markdown | safe }}
-            {% else %}
-                <p>还没有介绍，点击编辑来添加吧！</p>
-            {% endif %}
+            {% if track.description %}{{ track.description | markdown | safe }}{% else %}<p>还没有介绍，点击编辑来添加吧！</p>{% endif %}
         </div>
-        <form id="description-edit-form" class="d-none mt-2" onsubmit="saveContent('description', 'track', {{ track.id }}); return false;">
+        <form id="description-edit-form" class="d-none mt-2" onsubmit="saveContent(this, '{{ url_for('track.edit_track', track_id=track.id) }}'); return false;">
             <textarea name="description" class="form-control" rows="8">{{ track.description or '' }}</textarea>
             <div class="mt-2">
                 <button type="submit" class="btn btn-primary btn-sm">保存</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit('description', 'track', {{ track.id }})">取消</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit('description')">取消</button>
             </div>
         </form>
     </div>
@@ -116,7 +111,6 @@
     <div class="col">
         <div class="card track-card photo-card">
             <img src="{{ url_for('track.uploaded_file', filename=photo.filename) }}" class="img-fluid rounded" alt="{{ photo.caption or '' }}" style="aspect-ratio: 1 / 1; object-fit: cover;">
-            <a href="{{ url_for('track.uploaded_file', filename=photo.filename) }}" class="stretched-link" data-bs-toggle="tooltip" title="查看大图"></a>
             <div class="photo-overlay">
                 <h5 class="photo-overlay-title">{{ photo.version.track.title }}</h5>
                 <p class="photo-overlay-caption">{{ photo.caption or '' }}</p>

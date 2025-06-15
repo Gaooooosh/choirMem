@@ -36,25 +36,24 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean, default=False)
+    group_id = db.Column(db.Integer, db.ForeignKey('permission_group.id'))
     
     versions = db.relationship('Version', backref='creator', lazy='dynamic')
     scores = db.relationship('Score', backref='uploader', lazy='dynamic')
-    comments = db.relationship('Comment', back_populates='author', lazy='dynamic')
+    comments = db.relationship('Comment', back_populates='author', lazy='dynamic', cascade="all, delete-orphan")
     liked_versions = db.relationship('Version', secondary=likes, back_populates='likes')
     ratings = db.relationship('Rating', backref='user', lazy='dynamic', cascade="all, delete-orphan")
-    group_id = db.Column(db.Integer, db.ForeignKey('permission_group.id'))
+    photos = db.relationship('Photo', back_populates='uploader', lazy='dynamic', cascade="all, delete-orphan")
+
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
-    
+        
     def can(self, permission_name):
-        """Check if a user has a specific permission."""
-        if self.is_admin:
-            return True
-        if not self.group:
-            return False
+        if self.is_admin: return True
+        if not self.group: return False
         return getattr(self.group, permission_name, False)
 
 @login.user_loader
@@ -64,6 +63,7 @@ def load_user(id):
 class Track(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(140), nullable=False, index=True)
+    title_sort = db.Column(db.String(140), index=True)
     description = db.Column(db.Text) 
     versions = db.relationship('Version', backref='track', lazy='dynamic', cascade="all, delete-orphan")
     comments = db.relationship('Comment', back_populates='track', lazy='dynamic', cascade="all, delete-orphan")
@@ -142,7 +142,7 @@ class Photo(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     version_id = db.Column(db.Integer, db.ForeignKey('version.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    uploader = db.relationship('User')
+    uploader = db.relationship('User', back_populates='photos')
 
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -161,3 +161,17 @@ class Announcement(db.Model):
 
     def __repr__(self):
         return f'<Announcement {self.id}>'
+
+
+class InvitationCode(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(32), unique=True, nullable=False, index=True)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # The permission group this code will grant access to
+    group_id = db.Column(db.Integer, db.ForeignKey('permission_group.id'), nullable=False)
+    group = db.relationship('PermissionGroup')
+
+    def __repr__(self):
+        return f'<InvitationCode {self.code}>'

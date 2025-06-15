@@ -1,16 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>注册</h1>
+    <h1>加入北邮爱乐合唱团资料馆</h1>
     <form action="" method="post">
         <div class="mb-3">
-            <label for="username" class="form-label">用户名</label>
+            <label for="username" class="form-label">名称（可以使用中文，建议实名）</label>
             <input type="text" class="form-control" id="username" name="username" required>
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">密码</label>
             <input type="password" class="form-control" id="password" name="password" required>
         </div>
-        <button type="submit" class="btn btn-primary">注册</button>
+        <div class="mb-3">
+            <label for="invite_code" class="form-label">邀请码</label>
+            <input type="text" class="form-control" id="invite_code" name="invite_code" required>
+        </div>
+        <button type="submit" class="btn btn-primary">加入！</button>
     </form>
 {% endblock %}

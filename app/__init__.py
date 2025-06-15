@@ -2,6 +2,7 @@ import os
 import logging
 import shutil
 from datetime import datetime
+import uuid
 from flask import Flask, render_template
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
@@ -10,8 +11,14 @@ from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 import markdown
 import click
+from pypinyin import pinyin, Style
 
-# --- (No changes to this section) ---
+def generate_sort_key(text):
+    """A helper function duplicated here for the CLI command."""
+    pinyin_list = pinyin(text, style=Style.NORMAL)
+    return "".join(item[0] for item in pinyin_list).lower()
+
+
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
@@ -64,8 +71,16 @@ def create_app(config_class=Config):
     @click.argument("username")
     @click.option("--password", prompt=True, hide_input=True, confirmation_prompt=True)
     def create_admin(username, password):
-        # ... (function body is unchanged)
-        pass
+        """Creates a new administrator user."""
+        if User.query.filter_by(username=username).first():
+            print(f"Error: User '{username}' already exists.")
+            return
+        
+        admin_user = User(username=username, is_admin=True)
+        admin_user.set_password(password)
+        db.session.add(admin_user)
+        db.session.commit()
+        print(f"Admin user '{username}' created successfully.")
 
 
     # --- NEW: EXPORT DATABASE COMMAND ---
@@ -123,4 +138,39 @@ def create_app(config_class=Config):
         except Exception as e:
             print(f"Error during import: {e}")
 
+    @app.cli.command("reset-password")
+    @click.argument("username")
+    def reset_password_command(username):
+        """Resets a user's password to a new random string."""
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            print(f"Error: User '{username}' not found.")
+            return
+        
+        new_password = uuid.uuid4().hex[:12]
+        user.set_password(new_password)
+        db.session.commit()
+        
+        print("="*50)
+        print(f"✅ Password for user '{username}' has been reset.")
+        print(f"   New Password: {new_password}")
+        print("   Please copy this password and use it to log in.")
+        print("="*50)
+
+    @app.cli.command("backfill-sort-titles")
+    def backfill_sort_titles_command():
+        """One-time command to populate the title_sort column for existing tracks."""
+        from app.models import Track
+        tracks = Track.query.filter(Track.title_sort == None).all()
+        if not tracks:
+            print("All tracks already have a sort title. Nothing to do.")
+            return
+
+        print(f"Found {len(tracks)} tracks to update...")
+        for track in tracks:
+            track.title_sort = generate_sort_key(track.title)
+        
+        db.session.commit()
+        print("✅ Successfully back-filled sort titles for all tracks.")
+        
     return app

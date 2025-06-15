@@ -15,16 +15,28 @@ ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def generate_sort_key(text):
+    """Generates a sortable key from text (converts Chinese to Pinyin)."""
+    # lazy_pinyin returns a list of lists, e.g., [['da'], ['hai']]
+    pinyin_list = pinyin(text, style=Style.NORMAL)
+    # Join it all together, e.g., 'dahai'
+    return "".join(item[0] for item in pinyin_list).lower()
+
+
 # # # # # # # # # # # # # # # # # # # #
 # Main Viewing & Creation Routes
 # # # # # # # # # # # # # # # # # # # #
 
 @track_bp.route('/track/new', methods=['GET', 'POST'])
 @login_required
-@permission_required('can_create_tracks')
 def create_track():
     if request.method == 'POST':
-        track = Track(title=request.form['title'], description=request.form.get('notes'))
+        title = request.form['title']
+        track = Track(
+            title=title,
+            description=request.form.get('notes'),
+            title_sort=generate_sort_key(title) # Set the sort key
+        )
         db.session.add(track)
         db.session.commit()
         flash('曲目创建成功！现在请为它添加第一个版本。', 'success')
@@ -81,7 +93,9 @@ def edit_track(track_id):
     if 'title' in request.form:
         if not current_user.is_admin and current_user != track_creator:
             return jsonify({'status': 'error', 'message': '您不是曲目的创建者，无法修改'}), 403
-        track.title = request.form['title']
+        new_title = request.form['title']
+        track.title = new_title
+        track.title_sort = generate_sort_key(new_title) # Update the sort key
 
     # Any logged-in user can edit the description
     if 'description' in request.form:
