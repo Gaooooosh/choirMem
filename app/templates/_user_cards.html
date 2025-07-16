@@ -1,0 +1,17 @@
+{% for user in users %}
+{# The only change is removing the 'h-100' class from the line below #}
+<div class="card track-card text-center mb-4">
+    <a href="{{ url_for('profile.user_profile', username=user.username) }}" class="text-decoration-none text-dark d-block p-3">
+        <img src="{{ user.avatar }}" class="rounded-circle mb-3" alt="{{ user.username }}'s Avatar" style="width: 100px; height: 100px; object-fit: cover;">
+        <h5 class="card-title mb-1">{{ user.username }}</h5>
+        {% if user.is_admin %}
+            <span class="badge bg-success">Admin</span>
+        {% elif user.group %}
+            <span class="badge bg-secondary">{{ user.group.name }}</span>
+        {% endif %}
+        <p class="card-text text-muted small mt-2 mb-0">
+            {{ user.bio | truncate(70) if user.bio else '...' }}
+        </p>
+    </a>
+</div>
+{% endfor %}

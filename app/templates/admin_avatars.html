@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent p-0 mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.user_management') }}">后台管理</a></li>
+                <li class="breadcrumb-item active" aria-current="page">管理默认头像</li>
+            </ol>
+        </nav>
+        <h1>{{ title }}</h1>
+    </div>
+</div>
+
+<div class="card track-card mb-4">
+    <div class="card-header">上传新的默认头像</div>
+    <div class="card-body">
+        <form action="{{ url_for('admin.manage_default_avatars') }}" method="POST" enctype="multipart/form-data">
+            <div class="input-group">
+                <input type="file" class="form-control" name="avatar_upload" accept="image/png, image/jpeg, image/gif" required>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-upload"></i> 上传</button>
+            </div>
+            <div class="form-text">上传的图片将作为所有未设置头像用户的随机头像池。文件名最好以 `default_` 开头。</div>
+        </form>
+    </div>
+</div>
+
+<div class="card track-card">
+    <div class="card-header">当前默认头像池</div>
+    <div class="card-body">
+        {% if default_avatars %}
+        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
+            {% for avatar_file in default_avatars %}
+            <div class="col text-center">
+                <img src="{{ url_for('track.view_photo', filename=avatar_file) }}" class="rounded-circle mb-2" width="80" height="80" style="object-fit: cover;">
+                <p class="small text-muted" style="word-break: break-all;">{{ avatar_file }}</p>
+                {% if avatar_file != 'fallback.png' %} {# Protect the fallback avatar from deletion #}
+                <form action="{{ url_for('admin.delete_default_avatar', filename=avatar_file) }}" method="POST" onsubmit="return confirm('确定要删除这个默认头像吗？');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">删除</button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center text-muted">还没有上传任何默认头像。请务必上传一个名为 'fallback.png' 的文件作为后备。</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

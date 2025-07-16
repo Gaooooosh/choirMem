@@ -2,16 +2,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb bg-transparent p-0 mb-2">
-                <li class="breadcrumb-item"><a href="{{ url_for('admin.user_management') }}">Admin</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Invitation Codes</li>
-            </ol>
-        </nav>
-        <h1>Invitation Codes</h1>
     </div>
-</div>
 
 <div class="card track-card mb-4">
     <div class="card-header">
@@ -19,14 +10,21 @@
     </div>
     <div class="card-body">
         <form action="{{ url_for('admin.generate_invite') }}" method="POST">
-            <div class="input-group">
-                <select name="group_id" class="form-select" required>
-                    <option value="" disabled selected>Choose a permission group...</option>
-                    {% for group in groups %}
-                    <option value="{{ group.id }}">{{ group.name }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Generate</button>
+            <div class="row g-2">
+                <div class="col-sm-8">
+                    <select name="group_id" class="form-select" required>
+                        <option value="" disabled selected>Choose a permission group...</option>
+                        {% for group in groups %}
+                        <option value="{{ group.id }}">{{ group.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control" name="total_uses" value="10" min="1" placeholder="Uses">
+                </div>
+                <div class="col-sm-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-circle"></i> Generate</button>
+                </div>
             </div>
         </form>
     </div>
@@ -42,26 +40,28 @@
                 <tr>
                     <th>Code</th>
                     <th>Permission Group</th>
+                    <th>Uses Left / Total</th>
                     <th>Created On</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                {% set active_codes = invites | selectattr('is_active') | list %}
+                {% set active_codes = invites | selectattr('uses_left', 'gt', 0) | list %}
                 {% for invite in active_codes %}
                 <tr>
                     <td><input type="text" class="form-control form-control-sm" value="{{ invite.code }}" readonly></td>
                     <td><span class="badge bg-secondary">{{ invite.group.name }}</span></td>
-                    <td>{{ invite.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td><span class="fw-bold">{{ invite.uses_left }}</span> / {{ invite.total_uses }}</td>
+                    <td>{{ invite.created_at.strftime('%Y-%m-%d') }}</td>
                     <td>
-                        <form action="{{ url_for('admin.deactivate_invite', invite_id=invite.id) }}" method="POST">
-                            <button type="submit" class="btn btn-sm btn-warning">Deactivate</button>
+                        <form action="{{ url_for('admin.delete_invite', invite_id=invite.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this code?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                         </form>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="4" class="text-center text-muted">No active codes.</td>
+                    <td colspan="5" class="text-center text-muted">No active codes.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -79,20 +79,22 @@
                 <tr>
                     <th>Code</th>
                     <th>Permission Group</th>
+                    <th>Original Uses</th>
                     <th>Created On</th>
                 </tr>
             </thead>
             <tbody>
-                {% set inactive_codes = invites | rejectattr('is_active') | list %}
+                {% set inactive_codes = invites | selectattr('uses_left', 'equalto', 0) | list %}
                 {% for invite in inactive_codes %}
                 <tr>
                     <td class="text-muted"><del>{{ invite.code }}</del></td>
                     <td><span class="badge bg-light text-dark">{{ invite.group.name }}</span></td>
-                    <td class="text-muted">{{ invite.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ invite.total_uses }}</td>
+                    <td class="text-muted">{{ invite.created_at.strftime('%Y-%m-%d') }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="3" class="text-center text-muted">No used or inactive codes.</td>
+                    <td colspan="4" class="text-center text-muted">No used or inactive codes.</td>
                 </tr>
                 {% endfor %}
             </tbody>

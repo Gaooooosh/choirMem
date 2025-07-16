@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent p-0 mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('collection.list_collections') }}">乐集</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ collection.name }}</li>
+            </ol>
+        </nav>
+        <h1 class="display-5">{{ collection.name }}</h1>
+        <p class="text-muted">由 {{ collection.creator.username }} 创建</p>
+    </div>
+    {% if current_user == collection.creator or current_user.is_admin %}
+    <div class="text-nowrap">
+        <a href="{{ url_for('collection.edit_collection', collection_id=collection.id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-pencil"></i> 编辑乐集
+        </a>
+        <form action="{{ url_for('collection.delete_collection', collection_id=collection.id) }}" method="POST" class="d-inline" onsubmit="return confirm('确定要永久删除这个乐集吗？ (乐集内的曲目版本不会被删除)');">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-trash"></i> 删除乐集
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+{% if collection.description %}
+<div class="card mb-4 track-card">
+    <div class="card-body">
+        <h5 class="card-title">乐集简介</h5>
+        <div class="text-muted">
+            {{ collection.description | markdown | safe }}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<h4 class="mt-5 mb-3">包含的版本</h4>
+<div class="list-group">
+    {% for version in versions %}
+    <div class="list-group-item d-flex justify-content-between align-items-center p-3 mb-2 track-card">
+        <a href="{{ url_for('track.version_detail', version_id=version.id) }}" class="text-decoration-none text-dark flex-grow-1">
+            <h5 class="mb-1">{{ version.track.title }} <small class="text-muted fw-normal">- {{ version.title }}</small></h5>
+            <small class="text-muted">由 {{ version.creator.username }} 创建</small>
+            <div class="mt-2">
+                {% for tag in version.tags %}
+                <span class="badge rounded-pill" style="background-color: #e9ecef; color: #495057;">{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+        </a>
+        {% if current_user == collection.creator or current_user.is_admin %}
+        <form action="{{ url_for('collection.remove_from_collection', collection_id=collection.id, version_id=version.id) }}" method="POST" class="ms-3">
+            <button type="submit" class="btn btn-sm btn-outline-danger" title="从该乐集中移除">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    {% else %}
+    {% endfor %}
+</div>
+{% endblock %}

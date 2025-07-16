@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card track-card">
+            {# It checks if user.avatar_filename exists, otherwise it falls back to the default #}
+            <img src="{{ user.avatar }}" class="card-img-top" alt="User Avatar">
+            <div class="card-body text-center">
+                <h3 class="card-title">{{ user.username }}</h3>
+                {% if user.group %}<span class="badge bg-secondary">{{ user.group.name }}</span>{% endif %}
+                <div class="text-muted mt-3">
+                    {{ user.bio | markdown | safe if user.bio else '这位用户很神秘，什么也没留下...'}}
+                </div>
+                {% if user == current_user %}
+                <a href="{{ url_for('profile.edit_profile') }}" class="btn btn-primary mt-3">编辑个人资料</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card track-card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="profileTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="articles-tab" data-bs-toggle="tab"
+                            data-bs-target="#articles" type="button" role="tab">撰写的文章 ({{ articles|length }})</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="scores-tab" data-bs-toggle="tab" data-bs-target="#scores"
+                            type="button" role="tab">上传的乐谱 ({{ scores|length }})</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos"
+                            type="button" role="tab">上传的照片 ({{ photos|length }})</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="profileTabContent">
+                    <div class="tab-pane fade show active" id="articles" role="tabpanel">
+                        <div class="list-group">
+                            {% for article in articles %}
+                            <a href="{{ url_for('article.view_article', article_id=article.id) }}"
+                                class="list-group-item list-group-item-action">{{ article.title }}</a>
+                            {% else %}
+                            <p class="text-muted">还没有撰写任何文章。</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="scores" role="tabpanel">
+                        <div class="list-group">
+                            {% for score in scores %}
+                            <a href="{{ url_for('track.version_detail', version_id=score.version_id) }}"
+                                class="list-group-item list-group-item-action">
+                                {{ score.description }} <span class="text-muted small">- (for: {{
+                                    score.version.track.title }} / {{ score.version.title }})</span>
+                            </a>
+                            {% else %}
+                            <p class="text-muted">还没有上传任何乐谱。</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="photos" role="tabpanel">
+                        <div class="row row-cols-3 g-2">
+                            {% for photo in photos %}
+                            <div class="col">
+                                <a href="{{ url_for('track.version_detail', version_id=photo.version_id) }}">
+                                    <img src="{{ url_for('track.uploaded_file', filename=photo.filename) }}"
+                                        class="img-fluid rounded" style="aspect-ratio: 1 / 1; object-fit: cover;">
+                                </a>
+                            </div>
+                            {% else %}
+                            <div class="col-12">
+                                <p class="text-muted">还没有上传任何照片。</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

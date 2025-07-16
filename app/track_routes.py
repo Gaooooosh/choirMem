@@ -1,13 +1,15 @@
 import os
+import re
 from flask import (render_template, flash, redirect, url_for, request,
                    current_app, send_from_directory, abort, Blueprint, jsonify)
 from app import db
-from app.models import Track, Version, Score, Tag, Comment, Photo, Rating, User
+from app.models import Track, Version, Score, Tag, Comment, Photo, Rating, User, Collection
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from sqlalchemy import func
 from app.decorators import permission_required
+from pypinyin import pinyin, Style
 
 track_bp = Blueprint('track', __name__)
 
@@ -44,7 +46,7 @@ def create_track():
     return render_template('_form_helpers.html', title='创建新曲目', form_target=url_for('track.create_track'))
 
 @track_bp.route('/track/<int:track_id>')
-@login_required
+# @login_required
 def track_detail(track_id):
     track = Track.query.get_or_404(track_id)
     versions = track.versions.order_by(Version.timestamp.desc()).all()
@@ -69,7 +71,7 @@ def create_version(track_id):
     return render_template('_form_helpers.html', title=f'为 {track.title} 添加新版本', form_target=url_for('track.create_version', track_id=track_id))
 
 @track_bp.route('/version/<int:version_id>')
-@login_required
+# @login_required
 def version_detail(version_id):
     version = Version.query.get_or_404(version_id)
     scores = version.scores.order_by(Score.timestamp.desc()).all()
@@ -170,6 +172,10 @@ def add_comment():
         db.session.add(comment)
         db.session.commit()
         flash('评论已添加。', 'success')
+        current_user.comment_count = (current_user.comment_count or 0) + 1
+        current_user.recalculate_activity_score()
+        db.session.add(comment)
+        db.session.commit()
     return redirect(request.referrer or url_for('main.index'))
 
 @track_bp.route('/version/<int:version_id>/tags/add', methods=['POST'])
@@ -206,10 +212,61 @@ def remove_tag(version_id, tag_id):
 # File Upload and Deletion Routes
 # # # # # # # # # # # # # # # # # # # #
 
+@track_bp.route('/score/<int:score_id>/preview')
+@login_required
+@permission_required('can_view_scores')
+def preview_score(score_id):
+    """Serves a PDF file with headers that encourage inline browser display."""
+    score = Score.query.get_or_404(score_id)
+    return send_from_directory(
+        current_app.config['UPLOAD_FOLDER'],
+        score.filename,
+        # This mimetype and as_attachment=False are hints for the browser
+        mimetype='application/pdf',
+        as_attachment=False
+    )
+
+@track_bp.route('/score/<int:score_id>/download')
+@login_required
+@permission_required('can_view_scores')
+def download_score(score_id):
+    """Serves a PDF file with headers that force a download with a custom filename."""
+    score = Score.query.get_or_404(score_id)
+    
+    # Create the beautiful filename
+    track_name = score.version.track.title
+    version_name = score.version.title
+    uploader_name = score.uploader.username
+    
+    # Sanitize the parts to remove characters that are invalid in filenames
+    track_name = re.sub(r'[\s/\\?%*:|"<>]', '-', track_name)
+    version_name = re.sub(r'[\s/\\?%*:|"<>]', '-', version_name)
+    uploader_name = re.sub(r'[\s/\\?%*:|"<>]', '-', uploader_name)
+    
+    custom_filename = f"{track_name}-{version_name}-{uploader_name}.pdf"
+    
+    return send_from_directory(
+        current_app.config['UPLOAD_FOLDER'],
+        score.filename,
+        as_attachment=True,
+        download_name=custom_filename
+    )
+
 @track_bp.route('/uploads/<path:filename>')
 @login_required
 @permission_required('can_view_scores')
 def uploaded_file(filename):
+    # We check the permission inside the function based on file type.
+    
+    # Check if the requested file is a PDF score
+    if filename.lower().endswith('.pdf'):
+        # If it is, enforce the score viewing permission
+        if not current_user.can('can_view_scores'):
+            abort(403) # Forbidden
+            
+    # For all other files (like images), access is granted to any logged-in user.
+    # An additional 'can_view_photos' permission could be added here if needed in the future.
+    
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
 @track_bp.route('/version/<int:version_id>/upload', methods=['POST'])
@@ -231,7 +288,25 @@ def upload_score(version_id):
     db.session.add(score)
     db.session.commit()
     flash('乐谱上传成功！', 'success')
+    current_user.score_upload_count = (current_user.score_upload_count or 0) + 1
+    current_user.recalculate_activity_score()
+    db.session.add(score)
+    db.session.commit()
     return redirect(url_for('track.version_detail', version_id=version_id))
+
+@track_bp.route('/uploads/score/<path:filename>')
+@login_required
+@permission_required('can_view_scores') # This route is protected by score-viewing permissions
+def view_score(filename):
+    """Serves a score PDF file."""
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+
+@track_bp.route('/uploads/photo/<path:filename>')
+# @login_required
+# This route has no special permissions; any logged-in user can view photos.
+def view_photo(filename):
+    """Serves a photo or avatar image file."""
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
 @track_bp.route('/version/<int:version_id>/photos/upload', methods=['POST'])
 @login_required
@@ -253,6 +328,10 @@ def upload_photo(version_id):
     db.session.add(photo)
     db.session.commit()
     flash('照片上传成功！', 'success')
+    current_user.photo_upload_count = (current_user.photo_upload_count or 0) + 1
+    current_user.recalculate_activity_score()
+    db.session.add(photo)
+    db.session.commit()
     return redirect(url_for('track.version_detail', version_id=version_id))
 
 @track_bp.route('/score/<int:score_id>/delete', methods=['POST'])
@@ -325,3 +404,27 @@ def delete_track(track_id):
     db.session.commit()
     flash(f'曲目 "{track_title}" 已经被完全删除', 'success')
     return redirect(url_for('main.index'))
+
+@track_bp.route('/track/check-title', methods=['POST'])
+@login_required
+def check_track_title():
+    """API endpoint to check for existing tracks with similar titles."""
+    search_term = request.json.get('title', '').strip()
+    
+    if not search_term or len(search_term) < 2:
+        return jsonify({'similar_tracks': []}) # Return empty list if input is too short
+        
+    # Find up to 5 tracks where the title contains the search term (case-insensitive)
+    tracks = Track.query.filter(Track.title.ilike(f'%{search_term}%')).limit(3).all()
+    
+    # Prepare the data for the JSON response
+    similar_tracks_data = [
+        {
+            'id': track.id,
+            'title': track.title,
+            'url': url_for('track.track_detail', track_id=track.id)
+        } 
+        for track in tracks
+    ]
+    
+    return jsonify({'similar_tracks': similar_tracks_data})

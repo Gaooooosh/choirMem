@@ -1,21 +1,89 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ title }}</h1>
-<div class="card">
-    <div class="card-body">
-        <form method="POST" action="{{ form_target }}">
-            <div class="mb-3">
-                <label for="title" class="form-label">标题</label>
-                <input type="text" class="form-control" id="title" name="title" required>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card track-card">
+            <div class="card-header">
+                <h3>{{ title }}</h3>
             </div>
-            <div class="mb-3">
-                <label for="description" class="form-label">介绍/说明 (支持 Markdown)</label>
-                <textarea class="form-control" id="notes" name="notes" rows="10" placeholder="支持Markdown格式。可以介绍作品背景、演唱要点、排练计划等..."></textarea>
+            <div class="card-body">
+                <form method="POST" action="{{ form_target }}">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">标题</label>
+                        <input type="text" class="form-control" id="title" name="title" required onkeyup="checkTrackTitle(this.value)" autocomplete="off">
+                        <div id="title-check-status" class="form-text mt-2"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">介绍/说明 (支持 Markdown)</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="10" placeholder="支持Markdown格式。可以介绍作品背景、演唱要点、排练计划等..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <a href="{{ request.referrer or url_for('main.index') }}" class="btn btn-secondary">取消</a>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary">保存</button>
-            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">取消</a>
-        </form>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // --- UPGRADED JAVASCRIPT FOR SIMILARITY CHECK ---
+
+    let debounceTimeout;
+
+    function checkTrackTitle(title) {
+        clearTimeout(debounceTimeout);
+        const statusDiv = document.getElementById('title-check-status');
+        
+        // Don't search for very short strings
+        if (title.trim().length < 1) {
+            statusDiv.innerHTML = '';
+            statusDiv.style.display = 'none';
+            return;
+        }
+
+        // Wait for 500ms after the user stops typing
+        debounceTimeout = setTimeout(() => {
+            statusDiv.innerHTML = '<i>Checking...</i>';
+            statusDiv.style.display = 'block';
+
+            fetch("{{ url_for('track.check_track_title') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: title })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.similar_tracks && data.similar_tracks.length > 0) {
+                    let linksHtml = data.similar_tracks.map(track => 
+                        `<li><a href="${track.url}">${track.title}</a></li>`
+                    ).join('');
+
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-warning p-2 small">
+                            <strong><i class="bi bi-exclamation-triangle-fill"></i> 以下相似曲目已存在，如果是你想添加的曲目请直接点击跳转：</strong>
+                            <ul class="mb-0">${linksHtml}</ul>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <span class="text-success">
+                            <i class="bi bi-check-circle-fill"></i> 
+                            这个曲目看起来是全新的。
+                        </span>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error("Error checking title:", error);
+                statusDiv.innerHTML = '';
+                statusDiv.style.display = 'none';
+            });
+        }, 500); 
+    }
+</script>
 {% endblock %}

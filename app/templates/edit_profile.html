@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Add some style to indicate which avatar is selected */
+    .avatar-choice input[type="radio"]:checked+label img {
+        border: 4px solid var(--accent-color);
+        box-shadow: 0 0 10px rgba(0, 122, 255, 0.5);
+    }
+
+    .avatar-choice label {
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .avatar-choice label:hover {
+        transform: scale(1.05);
+    }
+</style>
+
+<h1 class="display-5 mb-4">{{ title }}</h1>
+<form method="POST" enctype="multipart/form-data">
+    <div class="card track-card">
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">用户名</label>
+                        <input type="text" class="form-control" id="username" name="username"
+                            value="{{ current_user.username }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">个人简介 (支持Markdown)</label>
+                        <textarea class="form-control" id="bio" name="bio"
+                            rows="6">{{ current_user.bio or '' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <a href="{{ url_for('main.change_password') }}">想要修改密码？</a>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">更换头像</label>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">选择一个预设头像:</p>
+                                <div class="d-flex justify-content-start flex-wrap">
+                                    {% for avatar_file in default_avatars %}
+                                    <div class="avatar-choice me-2 mb-2">
+                                        <input type="radio" class="form-check-input visually-hidden"
+                                            name="selected_avatar" id="avatar-{{ loop.index }}"
+                                            value="{{ avatar_file }}">
+                                        <label for="avatar-{{ loop.index }}">
+                                            <img src="{{ url_for('track.view_photo', filename=avatar_file) }}" class="rounded-circle" width="64" height="64" style="object-fit: cover;">
+                                        </label>
+                                    </div>
+                                    {% else %}
+                                    <p class="small text-muted">管理员还未上传任何预设头像。</p>
+                                    {% endfor %}
+                                </div>
+                                <hr>
+                                <label for="avatar" class="form-label small text-muted">或者上传您自己的图片:</label>
+                                <input type="file" class="form-control form-control-sm" name="avatar" id="avatar"
+                                    accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <button type="submit" class="btn btn-primary">保存更改</button>
+            <a href="{{ url_for('profile.user_profile', username=current_user.username) }}"
+                class="btn btn-secondary">取消</a>
+        </div>
+    </div>
+</form>
+{% endblock %}

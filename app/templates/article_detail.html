@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<article>
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1 class="display-4">{{ article.title }}</h1>
+            <p class="lead text-muted">作者：{{ article.author.username }} | 发布于：{{ article.timestamp.strftime('%Y-%m-%d') }}</p>
+        </div>
+        
+        {% if current_user == article.author or current_user.is_admin %}
+        <div class="ms-3 text-nowrap">
+            <a href="{{ url_for('article.edit_article', article_id=article.id) }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-pencil"></i> 编辑文章
+            </a>
+            <form action="{{ url_for('article.delete_article', article_id=article.id) }}" method="POST" class="d-inline" onsubmit="return confirm('确定要永久删除这篇文章吗？');">
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash"></i> 删除文章
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <hr>
+    <div class="article-body">
+        {{ article.body | markdown | safe }}
+    </div>
+</article>
+<a href="{{ url_for('article.list_articles') }}" class="btn btn-secondary mt-4">返回文章列表</a>
+{% endblock %}

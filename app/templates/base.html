@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }} - 北邮爱乐合唱团</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Source+Sans+Pro:wght@400;600&display=swap"
+        rel="stylesheet">
+
     <style>
         :root {
             /* Color Palette (Unchanged) */
@@ -19,68 +22,81 @@
             --primary-text-color: #1d1d1f;
             --secondary-text-color: #6e6e73;
             --accent-color: #007AFF;
-            --border-color: #e5e5e5; /* Slightly lighter for subtlety */
-            
+            --border-color: #e5e5e5;
+            /* Slightly lighter for subtlety */
+
             /* Typography (Unchanged) */
             --font-heading: 'Montserrat', sans-serif;
             --font-body: 'Source Sans Pro', sans-serif;
-            
+
             /* Spacing & Style (Unchanged) */
             --card-border-radius: 12px;
-            --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            --card-shadow-hover: 0 6px 20px rgba(0,0,0,0.12);
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --card-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.12);
         }
-        
+
         body {
             background-color: var(--bg-color);
             font-family: var(--font-body);
             color: var(--primary-text-color);
             padding-top: 70px;
         }
-        
+
         .navbar {
             backdrop-filter: blur(20px);
-            background-color: rgba(255,255,255,0.7) !important;
+            background-color: rgba(255, 255, 255, 0.7) !important;
         }
-    
-        h1, h2, h3, h4, h5, h6, .navbar-brand, .card-title {
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .navbar-brand,
+        .card-title {
             font-family: var(--font-heading);
             font-weight: 600;
         }
-    
+
         .main-content-area {
             max-width: 960px;
             margin: 0 auto;
         }
-    
+
         /* --- GLOBAL LAYOUT & SPACING IMPROVEMENTS --- */
-    
+
         /* Add consistent spacing between major sections */
-        .card, h4, .list-group {
+        .card,
+        h4,
+        .list-group {
             margin-bottom: 2rem !important;
         }
-    
+
         h4 {
             padding-bottom: 0.5rem;
             border-bottom: 1px solid var(--border-color);
         }
-        
+
         /* --- CARD & LIST REFINEMENTS --- */
-    
+
         .track-card {
             background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color); /* Add a subtle border */
+            border: 1px solid var(--border-color);
+            /* Add a subtle border */
             border-radius: var(--card-border-radius);
-            box-shadow: none; /* Simplify by removing shadow by default */
+            box-shadow: none;
+            /* Simplify by removing shadow by default */
             transition: all 0.3s ease-in-out;
         }
-        
+
         .track-card:hover {
             transform: translateY(-5px);
-            box-shadow: var(--card-shadow-hover); /* Add shadow back on hover */
+            box-shadow: var(--card-shadow-hover);
+            /* Add shadow back on hover */
             border-color: transparent;
         }
-        
+
         /* Refine card headers for a cleaner section title look */
         .card-header {
             background-color: transparent;
@@ -90,36 +106,55 @@
             font-weight: 600;
             color: var(--primary-text-color);
         }
-        
+
         /* Improve alignment in list items (e.g., score list) */
         .list-group-item.d-flex {
             align-items: center;
         }
-    
+
         /* --- PHOTO HOVER EFFECT (Unchanged) --- */
         .photo-card {
-            position: relative;
-            overflow: hidden;
             padding: 0;
-            border: 1px solid var(--border-color);
+            /* Remove any padding from the card */
+            border: none;
+            /* Remove any border from the card */
+            background: transparent;
+            /* Make the card's own background invisible */
+            box-shadow: none;
+            /* The shadow will be on the image itself */
         }
-        .photo-card:hover { border-color: transparent; } /* Hide border on hover */
-        
+
         .photo-card img {
-            transition: transform 0.3s ease-in-out;
+            display: block;
+            /* CRUCIAL: Fixes the inline gap issue */
+            width: 100%;
+            /* Make image fill the container horizontally */
+            height: auto;
+            /* Let height be natural for the waterfall effect */
+            border-radius: var(--card-border-radius);
+            /* Apply rounding to the image */
+            box-shadow: var(--card-shadow);
+            /* Apply shadow directly to the image */
+            transition: all 0.3s ease-in-out;
         }
-    
+
+        .photo-card:hover {
+            border-color: transparent;
+        }
+
         .photo-card:hover img {
-            transform: scale(1.05);
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: var(--card-shadow-hover);
+            filter: brightness(50%);
         }
-        
+
         .photo-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 60%);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 60%);
             color: #fff;
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
@@ -128,73 +163,169 @@
             justify-content: flex-end;
             padding: 1rem;
         }
-        
+
         .photo-card:hover .photo-overlay {
             opacity: 1;
         }
-        
+
         .photo-overlay-title {
             font-family: var(--font-heading);
             font-weight: 600;
             font-size: 1.1rem;
             margin: 0;
         }
-        
+
         .photo-overlay-caption {
             font-size: 0.9rem;
             opacity: 0.8;
         }
-    
+
+        .photo-delete-overlay {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .photo-card:hover .photo-delete-overlay {
+            opacity: 1;
+        }
+
         /* --- FORM & BUTTON POLISH (Unchanged) --- */
         .btn-primary {
             background-color: var(--accent-color);
             border-color: var(--accent-color);
             transition: all 0.2s ease-in-out;
         }
-        .btn-primary:hover, .btn-primary:focus {
+
+        .btn-primary:hover,
+        .btn-primary:focus {
             filter: brightness(1.1);
         }
+
         .btn:active {
             transform: scale(0.97);
         }
+
+        #photo-modal-img {
+            transition: transform 0.3s ease-in-out;
+            /* For smooth zooming */
+            transform-origin: center center;
+            /* Ensure zoom is centered */
+        }
+
+        .masonry-css-columns {
+            column-count: 3;
+            column-gap: 1.5rem;
+            /* Matches Bootstrap's g-4 gap */
+        }
+
+        .masonry-css-columns .card {
+            display: inline-block;
+            /* Prevents cards from breaking across columns */
+            width: 100%;
+        }
+
+        #page-loader {
+            /* Styles for the main loading spinner */
+            padding: 4rem 0;
+        }
+
+        #masonry-container {
+            /* Hide the container by default */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #masonry-container.loaded {
+            /* A class to fade the container in when it's ready */
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Responsive breakpoints */
+        @media (max-width: 992px) {
+            .masonry-css-columns {
+                column-count: 2;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .masonry-css-columns {
+                column-count: 1;
+            }
+        }
     </style>
 </head>
+<script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/macy@2"></script>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-light fixed-top border-bottom">
         <div class="container-fluid main-content-area">
             <a class="navbar-brand" href="{{ url_for('main.index') }}"><i class="bi bi-music-note-list"></i> 爱乐爱家</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if current_user.is_anonymous %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.login') }}">登录</a></li>
-                    <li class="nav-item"><a class="nav-link btn btn-primary text-white ms-2 px-3" href="{{ url_for('main.register') }}">注册</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-primary text-white ms-2 px-3"
+                            href="{{ url_for('main.register') }}">注册</a></li>
                     {% else %}
+                    <!-- <li class="nav-item"><a class="nav-link" href="{{ url_for('collection.list_collections') }}">乐集</a> -->
+                    <!-- </li> -->
+                    {% if current_user.is_authenticated and current_user.can('can_create_tracks') %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('track.create_track') }}">创建曲目</a></li>
+                    {% endif %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.help_page') }}">帮助/说明</a></li>
-                    <li><hr class="dropdown-divider"></li>
-
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('article.list_articles') }}">署名文章</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="activity-feed-trigger" title="最新动态">
+                            <i class="bi bi-chat-square-text-fill">最新动态</i>
+                            <span class="d-lg-none ms-2"></span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.members_list') }}">爱乐名人堂</a>
+                    </li>
                     {% if current_user.is_admin %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarAdminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarAdminDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             管理
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarAdminDropdown">
                             <li><a class="dropdown-item" href="{{ url_for('admin.user_management') }}">用户管理</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.system_settings') }}">系统设置</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.group_management') }}">权限组管理</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin.announcement_management') }}">公告管理</a></li> <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.announcement_management') }}">公告管理</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.invite_management') }}">邀请码管理</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.manage_default_avatars') }}">默认头像管理</a>
                         </ul>
                     </li>
                     {% endif %}
                     <li class="nav-item dropdown">
-                         <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i> {{ current_user.username }}
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="{{ current_user.avatar }}" class="rounded-circle" width="24" height="24"
+                                style="object-fit: cover;">
+                            {{ current_user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                            <li><a class="dropdown-item"
+                                    href="{{ url_for('profile.user_profile', username=current_user.username) }}">我的主页</a>
+                            </li>
                             <li><a class="dropdown-item" href="{{ url_for('main.change_password') }}">修改密码</a></li>
 
                             <li><a class="dropdown-item text-danger" href="{{ url_for('main.logout') }}">登出</a></li>
@@ -206,81 +337,209 @@
         </div>
     </nav>
 
-    <main class="container-fluid mt-5 mb-5 main-content-area">
+    <main class="container-fluid main-content-area my-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category if category else 'info' }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
         {% endif %}
         {% endwith %}
-
         {% block content %}{% endblock %}
     </main>
 
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="activityFeedOffcanvas"
+        aria-labelledby="activityFeedOffcanvasLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="activityFeedOffcanvasLabel">最新动态</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" id="activity-feed-body">
+        </div>
+    </div>
+
+    <div class="modal fade" id="photoPreviewModal" tabindex="-1" aria-labelledby="photoPreviewModalLabel"
+        aria-hidden="true">
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/macy@2"></script>
 
+    {% block scripts %}
+    <script>
+        // --- NEW, ROBUST JAVASCRIPT FOR ALL PAGES ---
 
-{% block scripts %}
-<script>
-// --- NEW, ROBUST JAVASCRIPT FOR ALL PAGES ---
-
-// Toggles between the display view and the edit form for a given section
-function toggleEdit(sectionId) {
-    const displayEl = document.getElementById(sectionId + '-display');
-    const formEl = document.getElementById(sectionId + '-edit-form');
-    if (displayEl && formEl) {
-        displayEl.classList.toggle('d-none');
-        formEl.classList.toggle('d-none');
-    }
-}
-
-// Submits the content of a form to a specific URL using Fetch
-function saveContent(formElement, url) {
-    const formData = new FormData(formElement);
-    
-    fetch(url, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => { throw new Error(err.message || 'A server error occurred.') });
+        // Toggles between the display view and the edit form for a given section
+        function toggleEdit(sectionId) {
+            const displayEl = document.getElementById(sectionId + '-display');
+            const formEl = document.getElementById(sectionId + '-edit-form');
+            if (displayEl && formEl) {
+                displayEl.classList.toggle('d-none');
+                formEl.classList.toggle('d-none');
+            }
         }
-        return response.json();
-    })
-    .then(data => {
-        if(data.status === 'success') {
-            location.reload(); // Reload the page to show changes
-        } else {
-            alert(data.message || 'Could not save content.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while saving: ' + error.message);
-    });
-}
 
-// Handles the PDF preview modal
-document.addEventListener('DOMContentLoaded', function () {
-    var pdfPreviewModal = document.getElementById('pdfPreviewModal');
-    if(pdfPreviewModal) {
-        pdfPreviewModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var pdfUrl = button.getAttribute('data-pdf-url');
-            var iframe = document.getElementById('pdf-iframe');
-            iframe.src = pdfUrl;
+        // Submits the content of a form to a specific URL using Fetch
+        function saveContent(formElement, url) {
+            const formData = new FormData(formElement);
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.message || 'A server error occurred.') });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        location.reload(); // Reload the page to show changes
+                    } else {
+                        alert(data.message || 'Could not save content.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while saving: ' + error.message);
+                });
+        }
+        function openPhotoPreview(element) {
+            const photoModalEl = document.getElementById('photoPreviewModal');
+            if (!photoModalEl) return;
+
+            const photoModalInstance = bootstrap.Modal.getOrCreateInstance(photoModalEl);
+
+            const photoUrl = element.getAttribute('data-photo-url');
+            const photoCaption = element.getAttribute('data-photo-caption');
+            const modalTitle = document.getElementById('photoPreviewModalLabel');
+            const modalImage = document.getElementById('photo-modal-img');
+
+            if (modalTitle) modalTitle.textContent = photoCaption;
+            if (modalImage) modalImage.src = photoUrl;
+            modalImage.style.transform = 'scale(1)'; // Reset zoom on open
+
+            photoModalInstance.show();
+        }
+        // Handles the PDF preview modal
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // --- Welcome Modal Logic ---
+            const welcomeModalEl = document.getElementById('welcomeModal');
+            if (welcomeModalEl) {
+                const welcomeModal = new bootstrap.Modal(welcomeModalEl);
+                welcomeModal.show();
+            }
+            // --- ACTIVITY FEED LOGIC (CORRECTED) ---
+            const activityTrigger = document.getElementById('activity-feed-trigger');
+            const activityFeedEl = document.getElementById('activityFeedOffcanvas');
+            if (activityTrigger && activityFeedEl) {
+                const offcanvas = new bootstrap.Offcanvas(activityFeedEl);
+
+                activityTrigger.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    offcanvas.show();
+                });
+
+                activityFeedEl.addEventListener('show.bs.offcanvas', function () {
+                    const feedBody = document.getElementById('activity-feed-body');
+                    if (feedBody.innerHTML.trim() === '' || feedBody.innerHTML.includes('spinner')) {
+                        feedBody.innerHTML = '<div class="text-center p-5"><div class="spinner-border spinner-border-sm" role="status"></div></div>';
+                        fetch("{{ url_for('api.latest_comments') }}")
+                            .then(response => response.json())
+                            .then(data => {
+                                feedBody.innerHTML = '';
+                                if (data.length > 0) {
+                                    data.forEach(comment => {
+                                        const commentHtml = `
+                                            <div class="d-flex mb-3 pb-3 border-bottom">
+                                                <a href="${comment.author_url}" class="flex-shrink-0"><img class="rounded-circle" src="${comment.author_avatar}" alt="${comment.author_name}'s avatar" width="32" height="32"></a>
+                                                <div class="flex-grow-1 ms-3 small">
+                                                    <div>${comment.body}</div>
+                                                    <div class="text-muted mt-1">
+                                                        <a href="${comment.author_url}" class="text-dark text-decoration-none"><strong>${comment.author_name}</strong></a>
+                                                        评论于 <a href="${comment.context_url}" class="text-dark text-decoration-none"><strong>${comment.context_name}</strong></a>
+                                                    </div>
+                                                </div>
+                                            </div>`;
+                                        feedBody.insertAdjacentHTML('beforeend', commentHtml);
+                                    });
+                                } else {
+                                    feedBody.innerHTML = '<p class="text-center text-muted">还没有任何评论。</p>';
+                                }
+                            });
+                    }
+                });
+            }
+            // --- PDF Modal Logic ---
+            const pdfModalEl = document.getElementById('pdfPreviewModal');
+            if (pdfModalEl) {
+                pdfModalEl.addEventListener('show.bs.modal', function (event) {
+                    // Ensure this event isn't for the photo modal
+                    if (event.relatedTarget && event.relatedTarget.hasAttribute('data-pdf-url')) {
+                        const button = event.relatedTarget;
+                        const pdfUrl = button.getAttribute('data-pdf-url');
+                        const iframe = document.getElementById('pdf-iframe');
+                        if (iframe) iframe.src = pdfUrl;
+                    }
+                });
+                pdfModalEl.addEventListener('hidden.bs.modal', function () {
+                    const iframe = document.getElementById('pdf-iframe');
+                    if (iframe) iframe.src = 'about:blank';
+                });
+            }
+
+            // --- Photo Modal Logic ---
+            const photoModalEl = document.getElementById('photoPreviewModal');
+            if (photoModalEl) {
+                const modalBody = photoModalEl.querySelector('.modal-body');
+                const modalImage = photoModalEl.querySelector('#photo-modal-img');
+                let scale = 1;
+                const zoomFactor = 0.1;
+
+                modalBody.addEventListener('wheel', function (e) {
+                    e.preventDefault();
+                    if (e.deltaY < 0) {
+                        scale += zoomFactor;
+                    } else {
+                        scale -= zoomFactor;
+                        if (scale < 1) scale = 1; // Prevent zooming out too far
+                    }
+                    modalImage.style.transform = `scale(${scale})`;
+                }, { passive: false }); // Prevent default scrolling
+            }
         });
-        pdfPreviewModal.addEventListener('hidden.bs.modal', function (event) {
-            document.getElementById('pdf-iframe').src = 'about:blank';
+    </script>
+
+    {% if session.pop('show_welcome_popup', None) %}
+    <div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="welcomeModalLabel">欢迎来到乐谱库！</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% include 'help.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Script to automatically show the modal on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            var welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+            welcomeModal.show();
         });
-    }
-});
-</script>
-{% endblock %}
+    </script>
+    {% endif %}
+
+    {% endblock %}
 </body>
+
 </html>

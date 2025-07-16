@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-5">爱乐名人堂</h1>
+    <p class="lead text-muted">认识北邮爱乐合唱团的每一位伙伴</p>
+</div>
+
+<div id="masonry-container">
+    </div>
+
+<div id="page-loader" class="text-center my-5">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div id="end-of-content" class="text-center text-muted my-4" style="display: none;">
+    <p>已显示全部成员，期待你的加入</p>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }} {# Includes base.html scripts like Macy.js and imagesLoaded #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('masonry-container');
+    if (!container) return;
+
+    let macyInstance = null;
+    let page = 1;
+    let hasNextPage = true;
+    let isLoading = false;
+    
+    const loader = document.getElementById('page-loader');
+    const endOfContent = document.getElementById('end-of-content');
+
+    const initializeMacy = () => {
+        if (macyInstance) return;
+        macyInstance = Macy({
+            container: '#masonry-container',
+            trueOrder: true,
+            waitForImages: true,
+            margin: { x: 24, y: 24 },
+            columns: 4, // More columns for smaller cards
+            breakAt: { 1200: 4, 992: 3, 768: 2, 576: 2 }
+        });
+    };
+
+    const loadMoreItems = () => {
+        if (!hasNextPage || isLoading) return;
+        isLoading = true;
+        loader.style.display = 'block';
+        
+        fetch(`{{ url_for('api.load_members') }}?page=${page}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.html.trim().length > 0) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = data.html;
+                    const newItems = Array.from(tempDiv.children);
+                    container.append(...newItems);
+                    
+                    initializeMacy(); // Initialize on first load
+                    macyInstance.recalculate(true); // Recalculate for all loads
+                }
+                
+                // Hide loader after first load is processed
+                if (page === 1) {
+                    loader.style.display = 'none';
+                    container.classList.add('loaded');
+                }
+                
+                hasNextPage = data.has_next;
+                page++;
+                isLoading = false;
+
+                if (!hasNextPage) {
+                    endOfContent.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error("Error loading more members:", error);
+                isLoading = false;
+                loader.style.display = 'none';
+            });
+    };
+
+    window.addEventListener('scroll', () => {
+        if (isLoading || !hasNextPage) return;
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 400) {
+            loadMoreItems();
+        }
+    });
+
+    // Load the initial set of members
+    loadMoreItems();
+});
+</script>
+{% endblock %}

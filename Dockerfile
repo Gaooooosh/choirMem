@@ -14,10 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt -i https://mirrors.aliyun.com
 # Copy all application code to the working directory
 COPY . .
 
-# Make entrypoint script executable
-RUN chmod +x /app/entrypoint.sh
-
-# No need to expose port here, docker-compose handles it
-
-# Set the entrypoint
 CMD ["gunicorn", "-b", "0.0.0.0:1000", "--access-logfile", "-", "--error-logfile", "-", "run:app"]

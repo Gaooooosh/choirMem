@@ -4,8 +4,8 @@ services:
   web:
     build: .
     container_name: choir_web_app
-    ports:
-      - "1000:1000"
+    # ports:
+      # - "1000:1000"
     volumes:
       - choir_data:/app/instance
       - choir_uploads:/app/uploads
@@ -16,9 +16,15 @@ services:
       - ADMIN_PASSWORD=Wodemima052488
       # You can set FLASK_DEBUG=1 for development if needed
       - FLASK_DEBUG=0
-      - SECRET_KEY=e9f06fb2fd134abd89de0d3948a7f04b95842fb34325be85b35bf3f342c51a76
+      # - SECRET_KEY=e9f06fb2fd134abd89de0d3948a7f04b95842fb34325be85b35bf3f342c51a76
+    networks:
+      - caddy_network # Connect the web app to the shared network
 
 volumes:
   choir_data:
   choir_uploads:
   choir_migrations:
+
+networks:
+  caddy_network:
+    external: true # Connect to the pre-existing shared network

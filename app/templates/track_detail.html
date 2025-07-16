@@ -54,7 +54,7 @@
 </div>
 
 <h4 class="mt-5 mb-3">可用版本</h4>
-<p class="text-muted small">一首曲目可以有多种编排（如四部合唱、领唱版等）。每个版本下都可以有独立的乐谱、照片和讨论。点击下方卡片查看详情。</p>
+<p class="text-muted small">一首曲目可以有多个版本（如四部合唱、领唱版、独唱、不同词曲作者等）。每个版本下都可以有独立的乐谱、照片和讨论。点击下方卡片查看详情。</p>
 <div class="list-group">
     {% for version in versions %}
     <div class="list-group-item flex-column align-items-start p-3 mb-2 track-card">
@@ -109,12 +109,28 @@
 <div class="row row-cols-2 row-cols-lg-4 g-2">
     {% for photo in random_photos %}
     <div class="col">
-        <div class="card track-card photo-card">
-            <img src="{{ url_for('track.uploaded_file', filename=photo.filename) }}" class="img-fluid rounded" alt="{{ photo.caption or '' }}" style="aspect-ratio: 1 / 1; object-fit: cover;">
+        <div class="card track-card photo-card"
+             onclick="openPhotoPreview(this)"
+             data-photo-url="{{ url_for('track.view_photo', filename=photo.filename) }}"
+             data-photo-caption="{{ photo.caption or photo.version.track.title }}">
+            {# CORRECTED ROUTE #}
+            <img src="{{ url_for('track.view_photo', filename=photo.filename) }}" class="img-fluid rounded" alt="{{ photo.caption or '' }}" style="aspect-ratio: 1 / 1; object-fit: cover;">
             <div class="photo-overlay">
-                <h5 class="photo-overlay-title">{{ photo.version.track.title }}</h5>
-                <p class="photo-overlay-caption">{{ photo.caption or '' }}</p>
-            </div>
+                <p class="photo-overlay-caption mb-0">{{ photo.caption or 'No caption' }}</p>
+                <div class="position-absolute top-0 end-0 p-1">
+                    <!-- <a href="{{ url_for('track.view_photo', filename=photo.filename) }}"
+                        class="btn btn-sm btn-secondary" title="View Fullscreen">
+                        <i class="bi bi-arrows-fullscreen"></i>
+                    </a> -->
+                    {% if current_user == photo.uploader or current_user.is_admin %}
+                    <form action="{{ url_for('track.delete_photo', photo_id=photo.id) }}" method="POST"
+                        class="d-inline" onsubmit="return confirm('确定要删除这张照片吗？');">
+                        <button type="submit" class="btn btn-sm btn-danger" title="Delete Photo">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
         </div>
     </div>
     {% endfor %}

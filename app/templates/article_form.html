@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="display-5 mb-4">{{ title }}</h1>
+        <div class="card track-card">
+            <div class="card-body">
+                {# The form now posts to the current URL, which works for both create and edit #}
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">文章标题</label>
+                        {# Pre-fill title if we are editing an existing article #}
+                        <input type="text" class="form-control" name="title" required value="{{ article.title if article else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="body" class="form-label">文章内容</label>
+                        {# Pre-fill body if we are editing an existing article #}
+                        <textarea class="form-control" name="body" rows="15" placeholder="支持Markdown格式。要插入图片，请使用格式：![图片描述](图片网址)">{{ article.body if article else '' }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">发布文章</button>
+                    <a href="{{ url_for('article.list_articles') }}" class="btn btn-secondary">取消</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

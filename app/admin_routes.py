@@ -1,3 +1,4 @@
+import os
 import uuid
 from flask import render_template, flash, redirect, url_for, request, abort, Blueprint, current_app
 from app import db
@@ -5,6 +6,7 @@ from app.models import User, SystemSetting, PermissionGroup, Announcement, Invit
 from flask_login import current_user, login_required
 import random
 import string
+from werkzeug.utils import secure_filename
 
 # Create a new Blueprint for admin pages
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -67,7 +69,7 @@ def add_user():
     username = request.form.get('username')
     password = request.form.get('password')
     is_admin = request.form.get('is_admin') == 'on'
-
+    group_id = request.form.get('group_id')
     if not username or not password:
         flash('Username and password are required.', 'danger')
         return redirect(url_for('admin.user_management'))
@@ -75,8 +77,17 @@ def add_user():
     if User.query.filter_by(username=username).first():
         flash('Username already exists.', 'danger')
         return redirect(url_for('admin.user_management'))
+    
+    chosen_avatar = None
+    try:
+        AVATAR_DIR = os.path.join(current_app.static_folder, 'avatars')
+        default_avatars = [f for f in os.listdir(AVATAR_DIR) if f != 'fallback.png']
+        if default_avatars:
+            chosen_avatar = random.choice(default_avatars)
+    except FileNotFoundError:
+        print("Default avatars directory not found. Skipping random avatar assignment.")
 
-    new_user = User(username=username, is_admin=is_admin)
+    new_user = User(username=username, is_admin=is_admin, group_id=group_id if group_id != '0' else None,avatar_filename=chosen_avatar)
     new_user.set_password(password)
     db.session.add(new_user)
     db.session.commit()
@@ -229,17 +240,35 @@ def invite_management():
 @admin_bp.route('/invites/generate', methods=['POST'])
 def generate_invite():
     group_id = request.form.get('group_id')
+    try:
+        # Get the number of uses from the form, default to 1 if not provided or invalid
+        total_uses = int(request.form.get('total_uses', 1))
+        if total_uses < 1:
+            total_uses = 1
+    except (ValueError, TypeError):
+        total_uses = 1
+        
     if not group_id:
         flash('You must select a permission group.', 'danger')
         return redirect(url_for('admin.invite_management'))
     
     new_code = InvitationCode(
         code=uuid.uuid4().hex,
-        group_id=group_id
+        group_id=group_id,
+        total_uses=total_uses,
+        uses_left=total_uses  # Initialize uses_left to the total amount
     )
     db.session.add(new_code)
     db.session.commit()
-    flash(f'New code "{new_code.code}" generated for group "{new_code.group.name}".', 'success')
+    flash(f'New code "{new_code.code}" generated with {total_uses} uses.', 'success')
+    return redirect(url_for('admin.invite_management'))
+
+@admin_bp.route('/invites/<int:invite_id>/delete', methods=['POST'])
+def delete_invite(invite_id):
+    invite = InvitationCode.query.get_or_404(invite_id)
+    db.session.delete(invite)
+    db.session.commit()
+    flash(f'Code "{invite.code}" has been permanently deleted.', 'success')
     return redirect(url_for('admin.invite_management'))
 
 @admin_bp.route('/invites/<int:invite_id>/deactivate', methods=['POST'])
@@ -249,3 +278,51 @@ def deactivate_invite(invite_id):
     db.session.commit()
     flash(f'Code "{invite.code}" has been deactivated.', 'info')
     return redirect(url_for('admin.invite_management'))
+
+@admin_bp.route('/admin/default-avatars', methods=['GET', 'POST'])
+def manage_default_avatars():
+    """Page for admins to manage the pool of default avatars."""
+    AVATAR_DIR = AVATAR_DIR = current_app.config['UPLOAD_FOLDER']
+    if not os.path.exists(AVATAR_DIR):
+        os.makedirs(AVATAR_DIR)
+
+    if request.method == 'POST':
+        if 'avatar_upload' not in request.files:
+            flash('No file part in the request.', 'warning')
+            return redirect(request.url)
+        file = request.files['avatar_upload']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            if not filename.startswith('default_'):
+                filename = f"default_{filename}"
+            file.save(os.path.join(AVATAR_DIR, filename))
+            flash(f'Default avatar "{filename}" uploaded successfully.', 'success')
+            return redirect(url_for('admin.manage_default_avatars'))
+
+    all_uploads = [f for f in os.listdir(AVATAR_DIR) if os.path.isfile(os.path.join(AVATAR_DIR, f))]
+    default_avatars = sorted([f for f in all_uploads if f.startswith('default_')])
+    return render_template('admin_avatars.html', title="Manage Default Avatars", default_avatars=default_avatars)
+
+@admin_bp.route('/admin/default-avatars/delete/<filename>', methods=['POST'])
+def delete_default_avatar(filename):
+    """Deletes a default avatar file."""
+    # Basic security check to prevent path traversal
+    if '..' in filename or filename.startswith('/'):
+        flash('Invalid filename.', 'danger')
+        return redirect(url_for('admin.manage_default_avatars'))
+        
+    AVATAR_DIR = os.path.join(current_app.static_folder, 'avatars')
+    file_path = os.path.join(AVATAR_DIR, filename)
+    
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        flash(f'Default avatar "{filename}" has been deleted.', 'success')
+    else:
+        flash('File not found.', 'danger')
+        
+    return redirect(url_for('admin.manage_default_avatars'))
+
+# You will need an allowed_file function, you can add it here or in a utils.py file
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
