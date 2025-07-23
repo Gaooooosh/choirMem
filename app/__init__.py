@@ -137,13 +137,14 @@ def create_app(config_class=Config):
             print(f"Error: Backup file not found at uploads/{filename}")
             print("Please make sure the backup file is inside the 'choir_uploads' volume.")
             return
-            
+
         try:
             # Stop the database connection to release the file lock
             db.session.remove()
             db.engine.dispose()
 
             shutil.copy2(backup_path, db_path)
+            db.create_all()  # Re-establish database connection
             print("="*50)
             print("✅ Database import successful!")
             print(f"   The database has been restored from uploads/{filename}.")

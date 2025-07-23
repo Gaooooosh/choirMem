@@ -59,6 +59,9 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.Text)
     comments = db.relationship('Comment', back_populates='author', lazy='dynamic', cascade="all, delete-orphan")
     activity_score = db.Column(db.Integer, default=0, index=True)
+    score_upload_count = db.Column(db.Integer, default=0)
+    photo_upload_count = db.Column(db.Integer, default=0)
+    comment_count = db.Column(db.Integer, default=0)
     last_seen = db.Column(db.DateTime, default=datetime.now)
 
     def set_password(self, password):
@@ -117,8 +120,8 @@ class User(UserMixin, db.Model):
                 chosen_avatar = default_avatars[self.id % len(default_avatars)]
                 return url_for('track.view_photo', filename=chosen_avatar)
 
-            except (FileNotFoundError, IndexError):
-                # Handle cases where the uploads directory or files don't exist
+            except (FileNotFoundError, IndexError) as e:
+                app.logger.error(f"Avatar file not found: {e}")
                 return url_for('static', filename='images/fallback.png')
 
 

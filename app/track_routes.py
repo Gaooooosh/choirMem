@@ -341,7 +341,8 @@ def delete_score(score_id):
     if score.uploader != current_user and not current_user.is_admin: abort(403)
     try:
         os.remove(os.path.join(current_app.config['UPLOAD_FOLDER'], score.filename))
-    except OSError: pass
+    except OSError as e:
+        app.logger.error(f"Failed to remove score file: {e}")
     db.session.delete(score)
     db.session.commit()
     flash('乐谱文件已删除。', 'success')
@@ -364,7 +365,8 @@ def delete_photo(photo_id):
     if photo.uploader != current_user and not current_user.is_admin: abort(403)
     try:
         os.remove(os.path.join(current_app.config['UPLOAD_FOLDER'], photo.filename))
-    except OSError: pass
+    except OSError as e:
+        app.logger.error(f"Failed to remove photo file: {e}")
     db.session.delete(photo)
     db.session.commit()
     flash('照片已删除。', 'success')

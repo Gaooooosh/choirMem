@@ -11,7 +11,7 @@ def permission_required(permission_name):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if not current_user.can(permission_name):
-                abort(403)  # HTTP 403 Forbidden error
+                abort(403, description=f"Permission denied: {permission_name} is required.")
             return f(*args, **kwargs)
         return decorated_function
     return decorator
