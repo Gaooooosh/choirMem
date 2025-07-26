@@ -78,9 +78,14 @@ def version_detail(version_id):
     comments = version.comments.order_by(Comment.timestamp.asc()).all()
     top_tags = db.session.query(Tag, func.count(Tag.id).label('total')).join(Version.tags).group_by(Tag).order_by(func.count(Tag.id).desc()).limit(10).all()
     suggested_tags = [tag for tag, count in top_tags]
+    # Get collections created by the current user
+    if current_user.is_authenticated:
+        collections = Collection.query.filter_by(creator_id=current_user.id).all()
+    else:
+        collections = []
     return render_template('version_detail.html', 
                            title=f'{version.track.title} - {version.title}', version=version, 
-                           scores=scores, comments=comments, suggested_tags=suggested_tags)
+                           scores=scores, comments=comments, suggested_tags=suggested_tags, collections=collections)
 
 @track_bp.route('/track/<int:track_id>/edit', methods=['POST'])
 @login_required
