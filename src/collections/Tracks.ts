@@ -2,9 +2,14 @@ import type { CollectionConfig } from 'payload'
 
 export const Tracks: CollectionConfig = {
   slug: 'tracks',
+  labels: {
+    singular: 'Track',
+    plural: 'Tracks',
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'createdAt', 'updatedAt'],
+    description: '曲目，是音乐作品的最高层级实体。',
   },
   fields: [
     {
@@ -12,18 +17,28 @@ export const Tracks: CollectionConfig = {
       type: 'text',
       required: true,
       index: true,
+      label: 'Title',
+      admin: {
+        description: '曲目的名称或标题',
+      },
     },
     {
       name: 'title_sort',
       type: 'text',
+      label: 'Sort Key',
       admin: {
         hidden: true,
+        description: '用于中文拼音排序的内部字段',
       },
       index: true,
     },
     {
       name: 'description',
       type: 'richText',
+      label: 'Description',
+      admin: {
+        description: '曲目的详细描述和介绍',
+      },
     },
     {
       name: 'slug',
@@ -31,8 +46,10 @@ export const Tracks: CollectionConfig = {
       required: true,
       unique: true,
       index: true,
+      label: 'Slug',
       admin: {
         position: 'sidebar',
+        description: '用于 URL 中的唯一标识符，如果留空将根据标题自动生成',
       },
     },
   ],

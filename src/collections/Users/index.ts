@@ -4,6 +4,10 @@ import { authenticated } from '../../access/authenticated'
 
 export const Users: CollectionConfig = {
   slug: 'users',
+  labels: {
+    singular: 'User',
+    plural: 'Users',
+  },
   access: {
     admin: authenticated,
     create: authenticated,
@@ -14,12 +18,14 @@ export const Users: CollectionConfig = {
   admin: {
     defaultColumns: ['name', 'email', 'username', 'group', 'activity_score'],
     useAsTitle: 'name',
+    description: '用户模型，支持认证、权限和个人信息管理。',
   },
   auth: true,
   fields: [
     {
       name: 'name',
       type: 'text',
+      label: 'Name',
     },
     {
       name: 'username',
@@ -27,29 +33,46 @@ export const Users: CollectionConfig = {
       required: true,
       unique: true,
       index: true,
+      label: 'Username',
+      admin: {
+        description: '用于登录的唯一用户名',
+      },
     },
     {
       name: 'group',
       type: 'relationship',
       relationTo: 'permission-groups',
       hasMany: false,
+      label: 'Permission Group',
+      admin: {
+        description: '用户所属的权限组，决定其在系统中的操作权限',
+      },
     },
     {
       name: 'avatar',
       type: 'relationship',
       relationTo: 'photos',
       hasMany: false,
+      label: 'Avatar',
+      admin: {
+        description: '用户头像图片',
+      },
     },
     {
       name: 'bio',
       type: 'richText',
+      label: 'Bio',
+      admin: {
+        description: '用户的个人简介和自我介绍',
+      },
     },
     {
       name: 'activity_score',
       type: 'number',
+      label: 'Activity Score',
       admin: {
         readOnly: true,
-        description: 'Activity score calculated from user contributions',
+        description: '根据用户贡献（上传乐谱、发表评论等）自动计算的活动分数',
       },
       defaultValue: 0,
     },

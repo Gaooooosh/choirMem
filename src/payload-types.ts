@@ -160,13 +160,24 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * 曲目，是音乐作品的最高层级实体。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tracks".
  */
 export interface Track {
   id: number;
+  /**
+   * 曲目的名称或标题
+   */
   title: string;
+  /**
+   * 用于中文拼音排序的内部字段
+   */
   title_sort?: string | null;
+  /**
+   * 曲目的详细描述和介绍
+   */
   description?: {
     root: {
       type: string;
@@ -182,17 +193,28 @@ export interface Track {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * 用于 URL 中的唯一标识符，如果留空将根据标题自动生成
+   */
   slug: string;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * 版本，代表一个曲目的特定编排或演绎。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "track-versions".
  */
 export interface TrackVersion {
   id: number;
+  /**
+   * 该版本的标题或名称，如 "SATB 版本" 或 "无伴奏版"
+   */
   title: string;
+  /**
+   * 关于该版本的详细说明和注意事项
+   */
   notes?: {
     root: {
       type: string;
@@ -208,27 +230,53 @@ export interface TrackVersion {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * 该版本所属的曲目
+   */
   track: number | Track;
+  /**
+   * 创建或上传该版本的用户
+   */
   creator: number | User;
+  /**
+   * 用于分类和检索的标签
+   */
   tags?: (number | Tag)[] | null;
+  /**
+   * 点赞该版本的用户列表
+   */
   likes?: (number | User)[] | null;
   /**
-   * Average difficulty rating calculated from user ratings
+   * 根据用户评分计算的平均难度等级（1-5分）
    */
   avg_difficulty?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * 用户模型，支持认证、权限和个人信息管理。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
   name?: string | null;
+  /**
+   * 用于登录的唯一用户名
+   */
   username: string;
+  /**
+   * 用户所属的权限组，决定其在系统中的操作权限
+   */
   group?: (number | null) | PermissionGroup;
+  /**
+   * 用户头像图片
+   */
   avatar?: (number | null) | Photo;
+  /**
+   * 用户的个人简介和自我介绍
+   */
   bio?: {
     root: {
       type: string;
@@ -245,7 +293,7 @@ export interface User {
     [k: string]: unknown;
   } | null;
   /**
-   * Activity score calculated from user contributions
+   * 根据用户贡献（上传乐谱、发表评论等）自动计算的活动分数
    */
   activity_score?: number | null;
   updatedAt: string;
@@ -267,27 +315,55 @@ export interface User {
   password?: string | null;
 }
 /**
+ * 权限组，定义了不同用户组的操作权限。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "permission-groups".
  */
 export interface PermissionGroup {
   id: number;
+  /**
+   * 权限组的名称，如 "管理员"、"用户"、"客人" 等
+   */
   name: string;
+  /**
+   * 允许查看和下载乐谱 PDF 文件
+   */
   can_view_scores?: boolean | null;
+  /**
+   * 允许上传新的乐谱 PDF 文件
+   */
   can_upload_scores?: boolean | null;
+  /**
+   * 允许上传演出或活动相关照片
+   */
   can_upload_photos?: boolean | null;
+  /**
+   * 允许在曲目和版本下发表评论
+   */
   can_post_comments?: boolean | null;
+  /**
+   * 允许创建新的曲目条目
+   */
   can_create_tracks?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * 照片文件，用于记录演出或活动。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "photos".
  */
 export interface Photo {
   id: number;
+  /**
+   * 照片的替代文本描述，用于可访问性和 SEO
+   */
   alt: string;
+  /**
+   * 照片的详细说明和描述
+   */
   caption?: {
     root: {
       type: string;
@@ -303,7 +379,13 @@ export interface Photo {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * 该照片相关的曲目版本（可选）
+   */
   track_version?: (number | null) | TrackVersion;
+  /**
+   * 上传该照片的用户
+   */
   uploader: number | User;
   updatedAt: string;
   createdAt: string;
@@ -344,24 +426,43 @@ export interface Photo {
   };
 }
 /**
+ * 标签，用于对版本进行分类。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tags".
  */
 export interface Tag {
   id: number;
+  /**
+   * 标签的名称，如 "SATB"、"无伴奏"、"经典" 等
+   */
   name: string;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * 乐谱文件，通常是 PDF 格式。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "scores".
  */
 export interface Score {
   id: number;
+  /**
+   * 乐谱文件的描述和说明，如 "第一章"、"完整版" 等
+   */
   description: string;
+  /**
+   * 该乐谱所属的曲目版本
+   */
   track_version: number | TrackVersion;
+  /**
+   * 上传该乐谱文件的用户
+   */
   uploader: number | User;
+  /**
+   * 用于可访问性的替代文本描述
+   */
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -376,12 +477,20 @@ export interface Score {
   focalY?: number | null;
 }
 /**
+ * 署名文章，由用户撰写的独立内容。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "articles".
  */
 export interface Article {
   id: number;
+  /**
+   * 文章的标题
+   */
   title: string;
+  /**
+   * 文章的正文内容
+   */
   body: {
     root: {
       type: string;
@@ -397,19 +506,36 @@ export interface Article {
     };
     [k: string]: unknown;
   };
+  /**
+   * 文章的作者
+   */
   author: number | User;
+  /**
+   * 文章发布日期
+   */
   publishedAt?: string | null;
+  /**
+   * 用于 URL 中的唯一标识符，如果留空将根据标题自动生成
+   */
   slug: string;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * 乐集，用户创建的版本集合。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "user-collections".
  */
 export interface UserCollection {
   id: number;
+  /**
+   * 乐集的名称
+   */
   name: string;
+  /**
+   * 乐集的描述和说明
+   */
   description?: {
     root: {
       type: string;
@@ -425,51 +551,93 @@ export interface UserCollection {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * 创建该乐集的用户
+   */
   creator: number | User;
+  /**
+   * 乐集中包含的曲目版本列表
+   */
   track_versions?: (number | TrackVersion)[] | null;
+  /**
+   * 用于 URL 中的唯一标识符，如果留空将根据名称自动生成
+   */
   slug: string;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * 评论，可以附加到曲目或版本上。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "comments".
  */
 export interface Comment {
   id: number;
+  /**
+   * 评论的内容文本
+   */
   body: string;
+  /**
+   * 发表评论的用户
+   */
   author: number | User;
+  /**
+   * 评论所属的曲目（与版本二选一）
+   */
   track?: (number | null) | Track;
+  /**
+   * 评论所属的版本（与曲目二选一）
+   */
   track_version?: (number | null) | TrackVersion;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * 评分，用户对版本的难度评分。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "track-version-ratings".
  */
 export interface TrackVersionRating {
   id: number;
+  /**
+   * 进行评分的用户
+   */
   user: number | User;
+  /**
+   * 被评分的曲目版本
+   */
   track_version: number | TrackVersion;
+  /**
+   * 难度评分（1-5 分，1 为最简单，5 为最难）
+   */
   difficulty: number;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * 注册邀请码，用于控制新用户注册及其初始权限组。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "invitation-codes".
  */
 export interface InvitationCode {
   id: number;
+  /**
+   * 邀请码字符串，用户注册时需要输入
+   */
   code: string;
+  /**
+   * 使用该邀请码注册的用户将被分配到该权限组
+   */
   group: number | PermissionGroup;
   /**
-   * Total number of times this invitation code can be used (0 for unlimited)
+   * 该邀请码可使用的总次数（0 为无限制）
    */
   total_uses?: number | null;
   /**
-   * Number of uses remaining (automatically decremented)
+   * 剩余使用次数（使用后自动递减）
    */
   uses_left?: number | null;
   updatedAt: string;

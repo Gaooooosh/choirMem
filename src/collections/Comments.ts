@@ -2,15 +2,24 @@ import type { CollectionConfig } from 'payload'
 
 export const Comments: CollectionConfig = {
   slug: 'comments',
+  labels: {
+    singular: 'Comment',
+    plural: 'Comments',
+  },
   admin: {
     useAsTitle: 'body',
     defaultColumns: ['body', 'author', 'track', 'track_version', 'createdAt'],
+    description: '评论，可以附加到曲目或版本上。',
   },
   fields: [
     {
       name: 'body',
       type: 'textarea',
       required: true,
+      label: 'Comment Body',
+      admin: {
+        description: '评论的内容文本',
+      },
     },
     {
       name: 'author',
@@ -19,6 +28,10 @@ export const Comments: CollectionConfig = {
       required: true,
       hasMany: false,
       index: true,
+      label: 'Author',
+      admin: {
+        description: '发表评论的用户',
+      },
     },
     {
       name: 'track',
@@ -26,6 +39,10 @@ export const Comments: CollectionConfig = {
       relationTo: 'tracks',
       hasMany: false,
       index: true,
+      label: 'Track',
+      admin: {
+        description: '评论所属的曲目（与版本二选一）',
+      },
     },
     {
       name: 'track_version',
@@ -33,6 +50,10 @@ export const Comments: CollectionConfig = {
       relationTo: 'track-versions',
       hasMany: false,
       index: true,
+      label: 'Track Version',
+      admin: {
+        description: '评论所属的版本（与曲目二选一）',
+      },
     },
   ],
   hooks: {
