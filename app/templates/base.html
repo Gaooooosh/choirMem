@@ -317,6 +317,7 @@
                             <li><a class="dropdown-item" href="{{ url_for('admin.group_management') }}">权限组管理</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.announcement_management') }}">公告管理</a>
                             </li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.ai_polish_settings') }}">AI润色设置</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -524,6 +525,76 @@
                 }, { passive: false }); // Prevent default scrolling
             }
         });
+    </script>
+
+    <script>
+        // AI文本润色功能（简化版）
+        function polishText() {
+            const textarea = document.getElementById('notes-textarea');
+            const text = textarea.value.trim();
+            
+            if (!text) {
+                alert('请先输入需要润色的文本内容');
+                return;
+            }
+            
+            // 获取当前页面的曲目和版本信息
+            const trackTitle = document.querySelector('.breadcrumb-item:nth-child(2) a')?.textContent || '未知曲目';
+            const versionTitle = document.querySelector('.breadcrumb-item.active')?.textContent || '未知版本';
+            
+            const loadingDiv = document.getElementById('polish-loading');
+            const polishBtn = event.target;
+            
+            // 显示加载状态
+            loadingDiv.classList.remove('d-none');
+            polishBtn.disabled = true;
+            
+            const requestBody = {
+                text: text,
+                prompt_type: 'default',
+                track_title: trackTitle,
+                version_title: versionTitle
+            };
+            
+            fetch("{{ url_for('track.polish_text') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    textarea.value = data.polished_text;
+                    // 添加成功提示
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+                    alertDiv.innerHTML = `
+                        <i class="bi bi-check-circle"></i> 文本已润色完成！
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.getElementById('notes-edit-form').appendChild(alertDiv);
+                    
+                    // 3秒后自动移除提示
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) {
+                            alertDiv.remove();
+                        }
+                    }, 3000);
+                } else {
+                    alert('润色失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('润色请求失败，请稍后重试');
+            })
+            .finally(() => {
+                loadingDiv.classList.add('d-none');
+                polishBtn.disabled = false;
+            });
+        }
     </script>
 
     {% if session.pop('show_welcome_popup', None) %}

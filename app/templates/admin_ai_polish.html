@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>{{ title }}</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">管理后台</a></li>
+                    <li class="breadcrumb-item active">AI润色提示词管理</li>
+                </ol>
+            </nav>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">预设提示词模板</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">管理员可以配置不同的AI润色风格模板。每个模板都支持变量替换：</p>
+                    <ul>
+                        <li><code>{track_title}</code> - 曲目名称</li>
+                        <li><code>{version_title}</code> - 版本名称</li>
+                    </ul>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">AI润色提示词</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('admin.update_ai_polish_prompt') }}">
+                                <input type="hidden" name="prompt_type" value="default">
+                                <div class="mb-3">
+                                    <label for="prompt_content" class="form-label">提示词内容：</label>
+                                    <textarea class="form-control" id="prompt_content" name="prompt_content" rows="8" required>{{ prompts.get('default', '') }}</textarea>
+                                    <div class="form-text">支持变量：{track_title}（曲目名称）、{version_title}（版本名称）</div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">保存</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>注意：</strong> 提示词修改后需要重启应用才能生效。
+                        在实际生产环境中，建议将配置保存到数据库或配置文件中。
+                    </div>
+
+                    <div class="mt-4">
+                        <h6>使用说明：</h6>
+                        <p>统一配置AI润色提示词，系统将使用此提示词对所有版本描述进行润色。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

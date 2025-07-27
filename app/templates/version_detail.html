@@ -122,11 +122,20 @@
             {% endif %}
         </div>
         <form id="notes-edit-form" class="d-none mt-2"
-            onsubmit="saveContent(this, '{{ url_for("track.edit_version", version_id=version.id) }}'); return false;">
-            <textarea name="notes" class="form-control" rows="8">{{ version.notes or '' }}</textarea>
+            onsubmit="saveContent(this, '{{ url_for('track.edit_version', version_id=version.id) }}'); return false;">
+            <textarea name="notes" id="notes-textarea" class="form-control" rows="8">{{ version.notes or '' }}</textarea>
             <div class="mt-2">
+                <button type="button" class="btn btn-info btn-sm" onclick='polishText("notes-textarea", "{{ track.title }}", "{{ version.title }}")'>
+                    <i class="bi bi-magic"></i> AI润色
+                </button>
                 <button type="submit" class="btn btn-primary btn-sm">保存</button>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit('notes')">取消</button>
+            </div>
+            <div id="polish-loading" class="d-none mt-2">
+                <div class="spinner-border spinner-border-sm text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="ms-2">正在润色中...</span>
             </div>
         </form>
     </div>

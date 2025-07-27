@@ -18,6 +18,8 @@ services:
       # You can set FLASK_DEBUG=1 for development if needed
       - FLASK_DEBUG=0
       # - SECRET_KEY=e9f06fb2fd134abd89de0d3948a7f04b95842fb34325be85b35bf3f342c51a76
+    env_file:
+      - .env
     networks:
       - caddy_network # Connect the web app to the shared network
 

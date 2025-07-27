@@ -44,10 +44,13 @@
             {% if track.description %}{{ track.description | markdown | safe }}{% else %}<p>还没有介绍，点击编辑来添加吧！</p>{% endif %}
         </div>
         <form id="description-edit-form" class="d-none mt-2" onsubmit="saveContent(this, '{{ url_for("track.edit_track", track_id=track.id) }}'); return false;">
-            <textarea name="description" class="form-control" rows="8">{{ track.description or '' }}</textarea>
+            <textarea name="description" id="description-textarea" class="form-control" rows="8">{{ track.description or '' }}</textarea>
             <div class="mt-2">
                 <button type="submit" class="btn btn-primary btn-sm">保存</button>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit('description')">取消</button>
+                <button type="button" class="btn btn-info btn-sm" onclick='polishText("description-textarea", "{{ track.title }}", "")'>
+                    <i class="bi bi-magic"></i> AI润色
+                </button>
             </div>
         </form>
     </div>

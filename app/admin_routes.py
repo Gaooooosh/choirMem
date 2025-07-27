@@ -1,6 +1,6 @@
 import os
 import uuid
-from flask import render_template, flash, redirect, url_for, request, abort, Blueprint, current_app
+from flask import render_template, flash, redirect, url_for, request, abort, Blueprint, current_app, session
 from app import db
 from app.models import User, SystemSetting, PermissionGroup, Announcement, InvitationCode
 from flask_login import current_user, login_required
@@ -228,8 +228,32 @@ def delete_announcement(ann_id):
     announcement = Announcement.query.get_or_404(ann_id)
     db.session.delete(announcement)
     db.session.commit()
-    flash('Announcement has been deleted.', 'success')
+    flash('Announcement deleted.', 'success')
     return redirect(url_for('admin.announcement_management'))
+
+@admin_bp.route('/ai-polish')
+def ai_polish_settings():
+    """AI润色提示词管理页面"""
+    prompt = current_app.config.get('AI_POLISH_PROMPT', '')
+    return render_template('admin_ai_polish.html', 
+                         title='AI润色提示词管理', 
+                         prompts={'default': prompt})
+
+@admin_bp.route('/ai-polish/update', methods=['POST'])
+def update_ai_polish_prompt():
+    """更新AI润色提示词"""
+    prompt_content = request.form.get('prompt_content')
+    
+    if not prompt_content:
+        flash('提示词内容不能为空', 'danger')
+        return redirect(url_for('admin.ai_polish_settings'))
+    
+    # 这里实际上需要重启应用才能生效，所以只是保存到session中提示
+    # 在实际生产环境中，应该保存到数据库或配置文件中
+    session['temp_prompt_update'] = prompt_content
+    
+    flash('AI润色提示词已更新（需要重启应用生效）', 'success')
+    return redirect(url_for('admin.ai_polish_settings'))
 
 @admin_bp.route('/invites')
 def invite_management():

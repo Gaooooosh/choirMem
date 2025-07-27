@@ -85,7 +85,8 @@ def version_detail(version_id):
         collections = []
     return render_template('version_detail.html', 
                            title=f'{version.track.title} - {version.title}', version=version, 
-                           scores=scores, comments=comments, suggested_tags=suggested_tags, collections=collections)
+                           track=version.track, scores=scores, comments=comments, 
+                           suggested_tags=suggested_tags, collections=collections)
 
 @track_bp.route('/track/<int:track_id>/edit', methods=['POST'])
 @login_required
@@ -435,3 +436,77 @@ def check_track_title():
     ]
     
     return jsonify({'similar_tracks': similar_tracks_data})
+
+@track_bp.route('/api/polish-text', methods=['POST'])
+@login_required
+def polish_text():
+    """API endpoint to polish text using Alibaba Cloud DashScope AI."""
+    import requests
+    import json
+    
+    text = request.json.get('text', '').strip()
+    prompt_type = request.json.get('prompt_type', 'default')
+    track_title = request.json.get('track_title', '')
+    version_title = request.json.get('version_title', '')
+    
+    if not text:
+        return jsonify({'status': 'error', 'message': '文本内容不能为空'}), 400
+    
+    try:
+        # 阿里云DashScope API配置
+        api_key = current_app.config.get('DASHSCOPE_API_KEY')
+        if not api_key:
+            return jsonify({'status': 'error', 'message': 'AI服务未配置，请联系管理员'}), 500
+            
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        }
+        
+        # 使用统一配置的提示词模板
+        prompt_template = current_app.config.get('AI_POLISH_PROMPT',
+            '你是一个专业的文本润色助手。请对用户提供的文本进行润色，使其更加通顺、专业、优美，但不要改变原意。直接返回润色后的文本，不要添加解释或其他内容。')
+        
+        # 替换模板中的变量
+        system_content = prompt_template.format(
+            track_title=track_title,
+            version_title=version_title
+        )
+        
+        # 使用通义千问模型进行文本润色
+        payload = {
+            'model': 'qwen-plus-latest',
+            'input': {
+                'messages': [
+                    {
+                        'role': 'system',
+                        'content': system_content
+                    },
+                    {
+                        'role': 'user',
+                        'content': f'请处理以下文本：{text}'
+                    }
+                ]
+            },
+            'parameters': {
+                'result_format': 'message'
+            }
+        }
+        
+        response = requests.post(
+            'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation',
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            polished_text = result.get('output', {}).get('choices', [{}])[0].get('message', {}).get('content', text)
+            return jsonify({'status': 'success', 'polished_text': polished_text.strip()})
+        else:
+            return jsonify({'status': 'error', 'message': 'AI服务调用失败，请稍后重试'}), 500
+            
+    except Exception as e:
+        current_app.logger.error(f'AI polish error: {str(e)}')
+        return jsonify({'status': 'error', 'message': 'AI服务暂时不可用，请稍后重试'}), 500

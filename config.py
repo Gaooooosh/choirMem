@@ -15,3 +15,9 @@ class Config:
         
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
+    
+    # 阿里云DashScope API配置
+    DASHSCOPE_API_KEY = os.environ.get('DASHSCOPE_API_KEY')
+    
+    # AI润色提示词配置 - 管理员统一配置
+    AI_POLISH_PROMPT = '你是一个专业的文本润色助手。当前正在处理曲目《{track_title}》的{version_title}版本。请对用户提供的文本进行润色，使其更加通顺、专业、优美，并适当结合音乐曲目的特点，但不要改变原意。直接返回润色后的文本，不要添加解释或其他内容。'
