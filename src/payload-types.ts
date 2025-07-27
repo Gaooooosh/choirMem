@@ -356,7 +356,7 @@ export interface Media {
   /**
    * 媒体文件的替代文本描述，用于可访问性和 SEO
    */
-  alt: string;
+  alt?: string | null;
   /**
    * 媒体文件的详细说明和描述
    */

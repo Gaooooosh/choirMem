@@ -49,7 +49,7 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
-      required: true,
+      required: false,
       label: 'Alt Text',
       admin: {
         description: '媒体文件的替代文本描述，用于可访问性和 SEO',

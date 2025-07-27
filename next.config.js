@@ -20,14 +20,19 @@ const nextConfig = {
       }),
     ],
   },
-  webpack: (webpackConfig) => {
-    webpackConfig.resolve.extensionAlias = {
-      '.cjs': ['.cts', '.cjs'],
-      '.js': ['.ts', '.tsx', '.js', '.jsx'],
-      '.mjs': ['.mts', '.mjs'],
-    }
-
-    return webpackConfig
+  turbopack: {
+    resolveExtensions: [
+      '.mdx',
+      '.tsx',
+      '.ts',
+      '.jsx', 
+      '.js',
+      '.mjs',
+      '.json',
+      '.cts',
+      '.cjs',
+      '.mts'
+    ]
   },
   reactStrictMode: true,
   redirects,
