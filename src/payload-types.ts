@@ -71,7 +71,6 @@ export interface Config {
     'track-versions': TrackVersion;
     scores: Score;
     photos: Photo;
-    articles: Article;
     'user-collections': UserCollection;
     tags: Tag;
     comments: Comment;
@@ -95,7 +94,6 @@ export interface Config {
     'track-versions': TrackVersionsSelect<false> | TrackVersionsSelect<true>;
     scores: ScoresSelect<false> | ScoresSelect<true>;
     photos: PhotosSelect<false> | PhotosSelect<true>;
-    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'user-collections': UserCollectionsSelect<false> | UserCollectionsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
@@ -477,51 +475,6 @@ export interface Score {
   focalY?: number | null;
 }
 /**
- * 署名文章，由用户撰写的独立内容。
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "articles".
- */
-export interface Article {
-  id: number;
-  /**
-   * 文章的标题
-   */
-  title: string;
-  /**
-   * 文章的正文内容
-   */
-  body: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * 文章的作者
-   */
-  author: number | User;
-  /**
-   * 文章发布日期
-   */
-  publishedAt?: string | null;
-  /**
-   * 用于 URL 中的唯一标识符，如果留空将根据标题自动生成
-   */
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * 乐集，用户创建的版本集合。
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -684,10 +637,6 @@ export interface Page {
               | ({
                   relationTo: 'tracks';
                   value: number | Track;
-                } | null)
-              | ({
-                  relationTo: 'articles';
-                  value: number | Article;
                 } | null);
             url?: string | null;
             label: string;
@@ -892,10 +841,6 @@ export interface CallToActionBlock {
             | ({
                 relationTo: 'tracks';
                 value: number | Track;
-              } | null)
-            | ({
-                relationTo: 'articles';
-                value: number | Article;
               } | null);
           url?: string | null;
           label: string;
@@ -950,10 +895,6 @@ export interface ContentBlock {
             | ({
                 relationTo: 'tracks';
                 value: number | Track;
-              } | null)
-            | ({
-                relationTo: 'articles';
-                value: number | Article;
               } | null);
           url?: string | null;
           label: string;
@@ -1000,7 +941,7 @@ export interface ArchiveBlock {
     [k: string]: unknown;
   } | null;
   populateBy?: ('collection' | 'selection') | null;
-  relationTo?: ('posts' | 'tracks' | 'articles') | null;
+  relationTo?: ('posts' | 'tracks') | null;
   limit?: number | null;
   selectedDocs?:
     | (
@@ -1011,10 +952,6 @@ export interface ArchiveBlock {
         | {
             relationTo: 'tracks';
             value: number | Track;
-          }
-        | {
-            relationTo: 'articles';
-            value: number | Article;
           }
       )[]
     | null;
@@ -1064,8 +1001,8 @@ export interface Search {
         value: number | Track;
       }
     | {
-        relationTo: 'articles';
-        value: number | Article;
+        relationTo: 'posts';
+        value: number | Post;
       };
   slug?: string | null;
   meta?: {
@@ -1198,10 +1135,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'photos';
         value: number | Photo;
-      } | null)
-    | ({
-        relationTo: 'articles';
-        value: number | Article;
       } | null)
     | ({
         relationTo: 'user-collections';
@@ -1399,19 +1332,6 @@ export interface PhotosSelect<T extends boolean = true> {
               filename?: T;
             };
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "articles_select".
- */
-export interface ArticlesSelect<T extends boolean = true> {
-  title?: T;
-  body?: T;
-  author?: T;
-  publishedAt?: T;
-  slug?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1909,10 +1829,6 @@ export interface Header {
             | ({
                 relationTo: 'tracks';
                 value: number | Track;
-              } | null)
-            | ({
-                relationTo: 'articles';
-                value: number | Article;
               } | null);
           url?: string | null;
           label: string;
@@ -1946,10 +1862,6 @@ export interface Footer {
             | ({
                 relationTo: 'tracks';
                 value: number | Track;
-              } | null)
-            | ({
-                relationTo: 'articles';
-                value: number | Article;
               } | null);
           url?: string | null;
           label: string;

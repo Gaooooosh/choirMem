@@ -1,5 +1,18 @@
 import type { CollectionConfig } from 'payload'
 
+import {
+  BlocksFeature,
+  FixedToolbarFeature,
+  HeadingFeature,
+  HorizontalRuleFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
+
+import { Banner } from '../blocks/Banner/config'
+import { Code } from '../blocks/Code/config'
+import { MediaBlock } from '../blocks/MediaBlock/config'
+
 export const Tracks: CollectionConfig = {
   slug: 'tracks',
   labels: {
@@ -35,6 +48,18 @@ export const Tracks: CollectionConfig = {
     {
       name: 'description',
       type: 'richText',
+      editor: lexicalEditor({
+        features: ({ rootFeatures }) => {
+          return [
+            ...rootFeatures,
+            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+            BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
+            FixedToolbarFeature(),
+            InlineToolbarFeature(),
+            HorizontalRuleFeature(),
+          ]
+        },
+      }),
       label: 'Description',
       admin: {
         description: '曲目的详细描述和介绍',

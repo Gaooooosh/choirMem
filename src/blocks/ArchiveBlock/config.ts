@@ -58,10 +58,6 @@ export const Archive: Block = {
           label: 'Tracks',
           value: 'tracks',
         },
-        {
-          label: 'Articles',
-          value: 'articles',
-        },
       ],
     },
     // Removed categories field - categories collection removed
@@ -83,7 +79,7 @@ export const Archive: Block = {
       },
       hasMany: true,
       label: 'Selection',
-      relationTo: ['posts', 'tracks', 'articles'],
+      relationTo: ['posts', 'tracks'],
     },
   ],
   labels: {

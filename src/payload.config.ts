@@ -11,7 +11,6 @@ import { Tracks } from './collections/Tracks'
 import { TrackVersions } from './collections/TrackVersions'
 import { Scores } from './collections/Scores'
 import { Photos } from './collections/Photos'
-import { Articles } from './collections/Articles'
 import { UserCollections } from './collections/UserCollections'
 import { Tags } from './collections/Tags'
 import { Comments } from './collections/Comments'
@@ -86,7 +85,6 @@ export default buildConfig({
     TrackVersions,
     Scores,
     Photos,
-    Articles,
     UserCollections,
     Tags,
     Comments,

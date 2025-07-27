@@ -54,7 +54,7 @@ export const plugins: Plugin[] = [
   // Removed formBuilderPlugin - not needed for choir management
   // Update search plugin for choir collections
   searchPlugin({
-    collections: ['tracks', 'articles'],
+    collections: ['tracks', 'posts'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
       fields: ({ defaultFields }) => {
