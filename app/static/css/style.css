@@ -2,3 +2,75 @@
 body {
     padding-bottom: 60px; /* 避免页脚遮挡内容 */
 }
+
+/* 增强现代化设计的自定义样式 */
+.main-content-area {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+@media (min-width: 576px) {
+    .main-content-area {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+/* 改进卡片样式 */
+.improved-card {
+    transition: all 0.3s var(--transition-cubic-bezier);
+    border: none;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.improved-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* 改进按钮样式 */
+.btn-improved {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: all 0.2s var(--transition-cubic-bezier);
+}
+
+.btn-improved:active {
+    transform: scale(0.98);
+}
+
+/* 改进表单元素样式 */
+.form-control-improved {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    transition: all 0.2s var(--transition-cubic-bezier);
+}
+
+.form-control-improved:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* 改进标签样式 */
+.badge-improved {
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    font-weight: 600;
+}
+
+/* 改进导航栏样式 */
+.navbar-improved {
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.8);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* 改进页脚样式 */
+.footer-improved {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    background-color: #f9fafb;
+}

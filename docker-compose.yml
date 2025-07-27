@@ -25,7 +25,6 @@ volumes:
   choir_data:
   choir_uploads:
   choir_migrations:
-
 networks:
   caddy_network:
     external: true # Connect to the pre-existing shared network

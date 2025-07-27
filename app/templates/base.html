@@ -16,7 +16,7 @@
 
     <style>
         :root {
-            /* Color Palette (Unchanged) */
+            /* Color Palette */
             --bg-color: #f5f5f7;
             --card-bg-color: #ffffff;
             --primary-text-color: #1d1d1f;
@@ -25,14 +25,15 @@
             --border-color: #e5e5e5;
             /* Slightly lighter for subtlety */
 
-            /* Typography (Unchanged) */
+            /* Typography */
             --font-heading: 'Montserrat', sans-serif;
             --font-body: 'Source Sans Pro', sans-serif;
 
-            /* Spacing & Style (Unchanged) */
-            --card-border-radius: 12px;
-            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --card-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.12);
+            /* Spacing & Style */
+            --card-border-radius: 16px;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition-cubic-bezier: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
@@ -87,7 +88,7 @@
             border-radius: var(--card-border-radius);
             box-shadow: none;
             /* Simplify by removing shadow by default */
-            transition: all 0.3s ease-in-out;
+            transition: all 0.3s var(--transition-cubic-bezier);
         }
 
         .track-card:hover {
@@ -135,7 +136,7 @@
             /* Apply rounding to the image */
             box-shadow: var(--card-shadow);
             /* Apply shadow directly to the image */
-            transition: all 0.3s ease-in-out;
+            transition: all 0.3s var(--transition-cubic-bezier);
         }
 
         .photo-card:hover {
@@ -148,20 +149,29 @@
             filter: brightness(50%);
         }
 
+        .photo-card {
+            position: relative;
+        }
+        
         .photo-overlay {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            bottom: 0;
             background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 60%);
             color: #fff;
             opacity: 0;
-            transition: opacity 0.3s ease-in-out;
+            transition: opacity 0.3s var(--transition-cubic-bezier);
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             padding: 1rem;
+            pointer-events: none;
+        }
+        
+        .photo-overlay a {
+            pointer-events: auto;
         }
 
         .photo-card:hover .photo-overlay {
@@ -185,7 +195,7 @@
             top: 5px;
             right: 5px;
             opacity: 0;
-            transition: opacity 0.2s ease-in-out;
+            transition: opacity 0.2s var(--transition-cubic-bezier);
         }
 
         .photo-card:hover .photo-delete-overlay {
@@ -196,7 +206,7 @@
         .btn-primary {
             background-color: var(--accent-color);
             border-color: var(--accent-color);
-            transition: all 0.2s ease-in-out;
+            transition: all 0.2s var(--transition-cubic-bezier);
         }
 
         .btn-primary:hover,
@@ -209,7 +219,7 @@
         }
 
         #photo-modal-img {
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.3s var(--transition-cubic-bezier);
             /* For smooth zooming */
             transform-origin: center center;
             /* Ensure zoom is centered */
@@ -263,7 +273,7 @@
 <script src="https://cdn.jsdelivr.net/npm/macy@2"></script>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top border-bottom">
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-improved">
         <div class="container-fluid main-content-area">
             <a class="navbar-brand" href="{{ url_for('main.index') }}"><i class="bi bi-music-note-list"></i> 爱乐爱家</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -274,7 +284,7 @@
                 <ul class="navbar-nav ms-auto">
                     {% if current_user.is_anonymous %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.login') }}">登录</a></li>
-                    <li class="nav-item"><a class="nav-link btn btn-primary text-white ms-2 px-3"
+                    <li class="nav-item"><a class="nav-link btn btn-primary text-white ms-2 px-3 btn-improved"
                             href="{{ url_for('main.register') }}">注册</a></li>
                     {% else %}
                     <!-- <li class="nav-item"><a class="nav-link" href="{{ url_for('collection.list_collections') }}">乐集</a> -->

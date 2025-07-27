@@ -15,7 +15,7 @@
             <button class="btn btn-link btn-lg text-muted" onclick="toggleEdit('title')"><i class="bi bi-pencil-square"></i></button>
             {% endif %}
         </div>
-        <form id="title-edit-form" class="d-none" onsubmit="saveContent(this, '{{ url_for('track.edit_track', track_id=track.id) }}'); return false;">
+        <form id="title-edit-form" class="d-none" onsubmit="saveContent(this, '{{ url_for("track.edit_track", track_id=track.id) }}'); return false;">
             <div class="input-group">
                 <input type="text" name="title" class="form-control form-control-lg" value="{{ track.title }}">
                 <button type="submit" class="btn btn-primary">保存</button>
@@ -43,7 +43,7 @@
         <div id="description-display" class="text-muted mt-2">
             {% if track.description %}{{ track.description | markdown | safe }}{% else %}<p>还没有介绍，点击编辑来添加吧！</p>{% endif %}
         </div>
-        <form id="description-edit-form" class="d-none mt-2" onsubmit="saveContent(this, '{{ url_for('track.edit_track', track_id=track.id) }}'); return false;">
+        <form id="description-edit-form" class="d-none mt-2" onsubmit="saveContent(this, '{{ url_for("track.edit_track", track_id=track.id) }}'); return false;">
             <textarea name="description" class="form-control" rows="8">{{ track.description or '' }}</textarea>
             <div class="mt-2">
                 <button type="submit" class="btn btn-primary btn-sm">保存</button>
@@ -131,8 +131,8 @@
                     </form>
                     {% endif %}
                 </div>
+            </div>
         </div>
-    </div>
     {% endfor %}
 </div>
 {% endif %}

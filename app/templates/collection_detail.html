@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-5 gap-4">
     <div>
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb bg-transparent p-0 mb-2">
+            <ol class="breadcrumb bg-transparent p-0 mb-3">
                 <li class="breadcrumb-item"><a href="{{ url_for('collection.list_collections') }}">乐集</a></li>
                 <li class="breadcrumb-item active" aria-current="page">{{ collection.name }}</li>
             </ol>
         </nav>
-        <h1 class="display-5">{{ collection.name }}</h1>
-        <p class="text-muted">由 {{ collection.creator.username }} 创建</p>
+        <h1 class="display-5 mb-3">{{ collection.name }}</h1>
+        <p class="text-muted mb-0">由 {{ collection.creator.username }} 创建</p>
     </div>
     {% if current_user == collection.creator or current_user.is_admin %}
-    <div class="text-nowrap">
+    <div class="d-flex gap-2">
         <a href="{{ url_for('collection.edit_collection', collection_id=collection.id) }}" class="btn btn-outline-secondary">
             <i class="bi bi-pencil"></i> 编辑乐集
         </a>
@@ -27,9 +27,9 @@
 </div>
 
 {% if collection.description %}
-<div class="card mb-4 track-card">
+<div class="card mb-5 track-card shadow-sm">
     <div class="card-body">
-        <h5 class="card-title">乐集简介</h5>
+        <h5 class="card-title mb-4">乐集简介</h5>
         <div class="text-muted">
             {{ collection.description | markdown | safe }}
         </div>
@@ -37,26 +37,28 @@
 </div>
 {% endif %}
 
-<h4 class="mt-5 mb-3">包含的版本</h4>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">包含的版本</h4>
+</div>
 <div class="list-group">
     {% for version in versions %}
-    <div class="list-group-item d-flex justify-content-between align-items-center p-3 mb-2 track-card">
+    <div class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center p-4 mb-3 track-card improved-card gap-3">
         <a href="{{ url_for('track.version_detail', version_id=version.id) }}" class="text-decoration-none text-dark flex-grow-1">
-            <h5 class="mb-1">{{ version.track.title }} <small class="text-muted fw-normal">- {{ version.title }}</small></h5>
-            <small class="text-muted">由 {{ version.creator.username }} 创建</small>
-            <div class="mt-2">
+            <h5 class="mb-2">{{ version.track.title }} <small class="text-muted fw-normal">- {{ version.title }}</small></h5>
+            <small class="text-muted d-block mb-2">由 {{ version.creator.username }} 创建</small>
+            <div>
                 {% for tag in version.tags %}
-                <span class="badge rounded-pill" style="background-color: #e9ecef; color: #495057;">{{ tag.name }}</span>
-                {% endfor %}
+                <span class="badge rounded-pill me-1 badge-improved" style="background-color: #e9ecef; color: #495057;">{{ tag.name }}</span>
+                {% endfor %
             </div>
         </a>
-        {% if current_user == collection.creator or current_user.is_admin %}
-        <form action="{{ url_for('collection.remove_from_collection', collection_id=collection.id, version_id=version.id) }}" method="POST" class="ms-3" onsubmit="return confirm('确定要将此版本从乐集中移除吗？');">
-            <button type="submit" class="btn btn-sm btn-outline-danger" title="从该乐集中移除">
+        {% if current_user == collection.creator or current_user.is_admin %
+        <form action="{{ url_for('collection.remove_from_collection', collection_id=collection.id, version_id=version.id) }}" method="POST" class="" onsubmit="return confirm('确定要将此版本从乐集中移除吗？');">
+            <button type="submit" class="btn btn-sm btn-outline-danger btn-improved" title="从该乐集中移除">
                 <i class="bi bi-x-lg"></i>
             </button>
         </form>
-        {% endif %}
+        {% endif %
     </div>
     {% else %}
     {% endfor %}

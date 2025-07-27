@@ -80,7 +80,7 @@ def version_detail(version_id):
     suggested_tags = [tag for tag, count in top_tags]
     # Get collections created by the current user
     if current_user.is_authenticated:
-        collections = Collection.query.filter_by(creator_id=current_user.id).all()
+        collections = Collection.query.filter_by(user_id=current_user.id).all()
     else:
         collections = []
     return render_template('version_detail.html', 
