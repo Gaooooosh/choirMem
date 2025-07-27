@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-export const Versions: CollectionConfig = {
-  slug: 'versions',
+export const TrackVersions: CollectionConfig = {
+  slug: 'track-versions',
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'track', 'creator', 'avg_difficulty', 'createdAt'],

@@ -8,7 +8,7 @@ export const Scores: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'description',
-    defaultColumns: ['description', 'version', 'uploader', 'createdAt'],
+    defaultColumns: ['description', 'track_version', 'uploader', 'createdAt'],
   },
   fields: [
     {
@@ -18,9 +18,9 @@ export const Scores: CollectionConfig = {
       label: 'Score Description',
     },
     {
-      name: 'version',
+      name: 'track_version',
       type: 'relationship',
-      relationTo: 'versions',
+      relationTo: 'track-versions',
       required: true,
       hasMany: false,
       index: true,

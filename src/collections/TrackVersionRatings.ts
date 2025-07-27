@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-export const Ratings: CollectionConfig = {
-  slug: 'ratings',
+export const TrackVersionRatings: CollectionConfig = {
+  slug: 'track-version-ratings',
   admin: {
-    defaultColumns: ['user', 'version', 'difficulty', 'createdAt'],
+    defaultColumns: ['user', 'track_version', 'difficulty', 'createdAt'],
   },
   fields: [
     {
@@ -15,9 +15,9 @@ export const Ratings: CollectionConfig = {
       index: true,
     },
     {
-      name: 'version',
+      name: 'track_version',
       type: 'relationship',
-      relationTo: 'versions',
+      relationTo: 'track-versions',
       required: true,
       hasMany: false,
       index: true,

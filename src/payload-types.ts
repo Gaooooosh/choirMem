@@ -68,14 +68,14 @@ export interface Config {
   blocks: {};
   collections: {
     tracks: Track;
-    versions: Version;
+    'track-versions': TrackVersion;
     scores: Score;
     photos: Photo;
     articles: Article;
     'user-collections': UserCollection;
     tags: Tag;
     comments: Comment;
-    ratings: Rating;
+    'track-version-ratings': TrackVersionRating;
     'permission-groups': PermissionGroup;
     'invitation-codes': InvitationCode;
     users: User;
@@ -92,14 +92,14 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     tracks: TracksSelect<false> | TracksSelect<true>;
-    versions: VersionsSelect<false> | VersionsSelect<true>;
+    'track-versions': TrackVersionsSelect<false> | TrackVersionsSelect<true>;
     scores: ScoresSelect<false> | ScoresSelect<true>;
     photos: PhotosSelect<false> | PhotosSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'user-collections': UserCollectionsSelect<false> | UserCollectionsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
-    ratings: RatingsSelect<false> | RatingsSelect<true>;
+    'track-version-ratings': TrackVersionRatingsSelect<false> | TrackVersionRatingsSelect<true>;
     'permission-groups': PermissionGroupsSelect<false> | PermissionGroupsSelect<true>;
     'invitation-codes': InvitationCodesSelect<false> | InvitationCodesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -188,9 +188,9 @@ export interface Track {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "versions".
+ * via the `definition` "track-versions".
  */
-export interface Version {
+export interface TrackVersion {
   id: number;
   title: string;
   notes?: {
@@ -303,7 +303,7 @@ export interface Photo {
     };
     [k: string]: unknown;
   } | null;
-  version?: (number | null) | Version;
+  track_version?: (number | null) | TrackVersion;
   uploader: number | User;
   updatedAt: string;
   createdAt: string;
@@ -360,7 +360,7 @@ export interface Tag {
 export interface Score {
   id: number;
   description: string;
-  version: number | Version;
+  track_version: number | TrackVersion;
   uploader: number | User;
   alt?: string | null;
   updatedAt: string;
@@ -426,7 +426,7 @@ export interface UserCollection {
     [k: string]: unknown;
   } | null;
   creator: number | User;
-  versions?: (number | Version)[] | null;
+  track_versions?: (number | TrackVersion)[] | null;
   slug: string;
   updatedAt: string;
   createdAt: string;
@@ -440,18 +440,18 @@ export interface Comment {
   body: string;
   author: number | User;
   track?: (number | null) | Track;
-  version?: (number | null) | Version;
+  track_version?: (number | null) | TrackVersion;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ratings".
+ * via the `definition` "track-version-ratings".
  */
-export interface Rating {
+export interface TrackVersionRating {
   id: number;
   user: number | User;
-  version: number | Version;
+  track_version: number | TrackVersion;
   difficulty: number;
   updatedAt: string;
   createdAt: string;
@@ -1020,8 +1020,8 @@ export interface PayloadLockedDocument {
         value: number | Track;
       } | null)
     | ({
-        relationTo: 'versions';
-        value: number | Version;
+        relationTo: 'track-versions';
+        value: number | TrackVersion;
       } | null)
     | ({
         relationTo: 'scores';
@@ -1048,8 +1048,8 @@ export interface PayloadLockedDocument {
         value: number | Comment;
       } | null)
     | ({
-        relationTo: 'ratings';
-        value: number | Rating;
+        relationTo: 'track-version-ratings';
+        value: number | TrackVersionRating;
       } | null)
     | ({
         relationTo: 'permission-groups';
@@ -1143,9 +1143,9 @@ export interface TracksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "versions_select".
+ * via the `definition` "track-versions_select".
  */
-export interface VersionsSelect<T extends boolean = true> {
+export interface TrackVersionsSelect<T extends boolean = true> {
   title?: T;
   notes?: T;
   track?: T;
@@ -1162,7 +1162,7 @@ export interface VersionsSelect<T extends boolean = true> {
  */
 export interface ScoresSelect<T extends boolean = true> {
   description?: T;
-  version?: T;
+  track_version?: T;
   uploader?: T;
   alt?: T;
   updatedAt?: T;
@@ -1184,7 +1184,7 @@ export interface ScoresSelect<T extends boolean = true> {
 export interface PhotosSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
-  version?: T;
+  track_version?: T;
   uploader?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1253,7 +1253,7 @@ export interface UserCollectionsSelect<T extends boolean = true> {
   name?: T;
   description?: T;
   creator?: T;
-  versions?: T;
+  track_versions?: T;
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1275,17 +1275,17 @@ export interface CommentsSelect<T extends boolean = true> {
   body?: T;
   author?: T;
   track?: T;
-  version?: T;
+  track_version?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ratings_select".
+ * via the `definition` "track-version-ratings_select".
  */
-export interface RatingsSelect<T extends boolean = true> {
+export interface TrackVersionRatingsSelect<T extends boolean = true> {
   user?: T;
-  version?: T;
+  track_version?: T;
   difficulty?: T;
   updatedAt?: T;
   createdAt?: T;

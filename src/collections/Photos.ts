@@ -28,7 +28,7 @@ export const Photos: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'alt',
-    defaultColumns: ['alt', 'version', 'uploader', 'createdAt'],
+    defaultColumns: ['alt', 'track_version', 'uploader', 'createdAt'],
   },
   fields: [
     {
@@ -43,12 +43,12 @@ export const Photos: CollectionConfig = {
       label: 'Photo Caption',
     },
     {
-      name: 'version',
+      name: 'track_version',
       type: 'relationship',
-      relationTo: 'versions',
+      relationTo: 'track-versions',
       hasMany: false,
       index: true,
-      label: 'Related Version',
+      label: 'Related Track Version',
     },
     {
       name: 'uploader',

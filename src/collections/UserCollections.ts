@@ -4,7 +4,7 @@ export const UserCollections: CollectionConfig = {
   slug: 'user-collections',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'creator', 'versions', 'createdAt'],
+    defaultColumns: ['name', 'creator', 'track_versions', 'createdAt'],
   },
   fields: [
     {
@@ -26,9 +26,9 @@ export const UserCollections: CollectionConfig = {
       index: true,
     },
     {
-      name: 'versions',
+      name: 'track_versions',
       type: 'relationship',
-      relationTo: 'versions',
+      relationTo: 'track-versions',
       hasMany: true,
     },
     {

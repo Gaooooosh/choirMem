@@ -8,14 +8,14 @@ import { fileURLToPath } from 'url'
 
 // Import new collections for choir management
 import { Tracks } from './collections/Tracks'
-import { Versions } from './collections/Versions'
+import { TrackVersions } from './collections/TrackVersions'
 import { Scores } from './collections/Scores'
 import { Photos } from './collections/Photos'
 import { Articles } from './collections/Articles'
 import { UserCollections } from './collections/UserCollections'
 import { Tags } from './collections/Tags'
 import { Comments } from './collections/Comments'
-import { Ratings } from './collections/Ratings'
+import { TrackVersionRatings } from './collections/TrackVersionRatings'
 import { PermissionGroups } from './collections/PermissionGroups'
 import { InvitationCodes } from './collections/InvitationCodes'
 import { Users } from './collections/Users'
@@ -83,14 +83,14 @@ export default buildConfig({
   collections: [
     // Core choir management collections
     Tracks,
-    Versions,
+    TrackVersions,
     Scores,
     Photos,
     Articles,
     UserCollections,
     Tags,
     Comments,
-    Ratings,
+    TrackVersionRatings,
     PermissionGroups,
     InvitationCodes,
     Users,

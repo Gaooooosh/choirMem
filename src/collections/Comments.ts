@@ -4,7 +4,7 @@ export const Comments: CollectionConfig = {
   slug: 'comments',
   admin: {
     useAsTitle: 'body',
-    defaultColumns: ['body', 'author', 'track', 'version', 'createdAt'],
+    defaultColumns: ['body', 'author', 'track', 'track_version', 'createdAt'],
   },
   fields: [
     {
@@ -28,9 +28,9 @@ export const Comments: CollectionConfig = {
       index: true,
     },
     {
-      name: 'version',
+      name: 'track_version',
       type: 'relationship',
-      relationTo: 'versions',
+      relationTo: 'track-versions',
       hasMany: false,
       index: true,
     },
@@ -38,16 +38,16 @@ export const Comments: CollectionConfig = {
   hooks: {
     beforeChange: [
       ({ data }) => {
-        // Validate that either track or version is set, but not both
+        // Validate that either track or track_version is set, but not both
         const hasTrack = data.track
-        const hasVersion = data.version
+        const hasTrackVersion = data.track_version
 
-        if (!hasTrack && !hasVersion) {
-          throw new Error('Comment must be associated with either a track or a version')
+        if (!hasTrack && !hasTrackVersion) {
+          throw new Error('Comment must be associated with either a track or a track version')
         }
 
-        if (hasTrack && hasVersion) {
-          throw new Error('Comment cannot be associated with both a track and a version')
+        if (hasTrack && hasTrackVersion) {
+          throw new Error('Comment cannot be associated with both a track and a track version')
         }
       },
     ],
