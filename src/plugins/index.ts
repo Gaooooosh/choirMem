@@ -1,13 +1,12 @@
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
-import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
-import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
+// Removed formBuilderPlugin and nestedDocsPlugin - not needed for choir management
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
 import { Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
-import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+// Removed lexical editor imports - not needed without formBuilderPlugin
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 
@@ -15,7 +14,7 @@ import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
+  return doc?.title ? `${doc.title} | 北京邮电大学爱乐合唱团` : '北京邮电大学爱乐合唱团'
 }
 
 const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
@@ -47,42 +46,15 @@ export const plugins: Plugin[] = [
       },
     },
   }),
-  nestedDocsPlugin({
-    collections: ['categories'],
-    generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
-  }),
+  // Removed nestedDocsPlugin - categories collection removed
   seoPlugin({
     generateTitle,
     generateURL,
   }),
-  formBuilderPlugin({
-    fields: {
-      payment: false,
-    },
-    formOverrides: {
-      fields: ({ defaultFields }) => {
-        return defaultFields.map((field) => {
-          if ('name' in field && field.name === 'confirmationMessage') {
-            return {
-              ...field,
-              editor: lexicalEditor({
-                features: ({ rootFeatures }) => {
-                  return [
-                    ...rootFeatures,
-                    FixedToolbarFeature(),
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-                  ]
-                },
-              }),
-            }
-          }
-          return field
-        })
-      },
-    },
-  }),
+  // Removed formBuilderPlugin - not needed for choir management
+  // Update search plugin for choir collections
   searchPlugin({
-    collections: ['posts'],
+    collections: ['tracks', 'articles'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
       fields: ({ defaultFields }) => {

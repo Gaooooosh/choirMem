@@ -12,7 +12,7 @@ export const Users: CollectionConfig = {
     update: authenticated,
   },
   admin: {
-    defaultColumns: ['name', 'email'],
+    defaultColumns: ['name', 'email', 'username', 'group', 'activity_score'],
     useAsTitle: 'name',
   },
   auth: true,
@@ -20,6 +20,38 @@ export const Users: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+    },
+    {
+      name: 'username',
+      type: 'text',
+      required: true,
+      unique: true,
+      index: true,
+    },
+    {
+      name: 'group',
+      type: 'relationship',
+      relationTo: 'permission-groups',
+      hasMany: false,
+    },
+    {
+      name: 'avatar',
+      type: 'relationship',
+      relationTo: 'photos',
+      hasMany: false,
+    },
+    {
+      name: 'bio',
+      type: 'richText',
+    },
+    {
+      name: 'activity_score',
+      type: 'number',
+      admin: {
+        readOnly: true,
+        description: 'Activity score calculated from user contributions',
+      },
+      defaultValue: 0,
     },
   ],
   timestamps: true,

@@ -54,18 +54,17 @@ export const Archive: Block = {
           label: 'Posts',
           value: 'posts',
         },
+        {
+          label: 'Tracks',
+          value: 'tracks',
+        },
+        {
+          label: 'Articles',
+          value: 'articles',
+        },
       ],
     },
-    {
-      name: 'categories',
-      type: 'relationship',
-      admin: {
-        condition: (_, siblingData) => siblingData.populateBy === 'collection',
-      },
-      hasMany: true,
-      label: 'Categories To Show',
-      relationTo: 'categories',
-    },
+    // Removed categories field - categories collection removed
     {
       name: 'limit',
       type: 'number',
@@ -84,7 +83,7 @@ export const Archive: Block = {
       },
       hasMany: true,
       label: 'Selection',
-      relationTo: ['posts'],
+      relationTo: ['posts', 'tracks', 'articles'],
     },
   ],
   labels: {

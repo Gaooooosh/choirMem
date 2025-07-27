@@ -6,11 +6,27 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { Categories } from './collections/Categories'
+// Import new collections for choir management
+import { Tracks } from './collections/Tracks'
+import { Versions } from './collections/Versions'
+import { Scores } from './collections/Scores'
+import { Photos } from './collections/Photos'
+import { Articles } from './collections/Articles'
+import { UserCollections } from './collections/UserCollections'
+import { Tags } from './collections/Tags'
+import { Comments } from './collections/Comments'
+import { Ratings } from './collections/Ratings'
+import { PermissionGroups } from './collections/PermissionGroups'
+import { InvitationCodes } from './collections/InvitationCodes'
+import { Users } from './collections/Users'
+
+// Import global settings
+import { SystemSettings } from './globals/SystemSettings'
+
+// Original template collections (to be removed later)
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
-import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -64,9 +80,32 @@ export default buildConfig({
       url: process.env.DATABASE_URI || '',
     },
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
+  collections: [
+    // Core choir management collections
+    Tracks,
+    Versions,
+    Scores,
+    Photos,
+    Articles,
+    UserCollections,
+    Tags,
+    Comments,
+    Ratings,
+    PermissionGroups,
+    InvitationCodes,
+    Users,
+    // Original template collections (to be removed later)
+    Pages,
+    Posts,
+    Media,
+  ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer],
+  globals: [
+    SystemSettings,
+    // Original template globals
+    Header,
+    Footer,
+  ],
   plugins: [
     ...plugins,
     // storage-adapter-placeholder
