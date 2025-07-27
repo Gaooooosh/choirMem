@@ -51,7 +51,7 @@ export const Users: CollectionConfig = {
     {
       name: 'avatar',
       type: 'relationship',
-      relationTo: 'photos',
+      relationTo: 'media',
       hasMany: false,
       label: 'Avatar',
       admin: {

@@ -70,7 +70,6 @@ export interface Config {
     tracks: Track;
     'track-versions': TrackVersion;
     scores: Score;
-    photos: Photo;
     'user-collections': UserCollection;
     tags: Tag;
     comments: Comment;
@@ -93,7 +92,6 @@ export interface Config {
     tracks: TracksSelect<false> | TracksSelect<true>;
     'track-versions': TrackVersionsSelect<false> | TrackVersionsSelect<true>;
     scores: ScoresSelect<false> | ScoresSelect<true>;
-    photos: PhotosSelect<false> | PhotosSelect<true>;
     'user-collections': UserCollectionsSelect<false> | UserCollectionsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
@@ -271,7 +269,7 @@ export interface User {
   /**
    * 用户头像图片
    */
-  avatar?: (number | null) | Photo;
+  avatar?: (number | null) | Media;
   /**
    * 用户的个人简介和自我介绍
    */
@@ -348,19 +346,19 @@ export interface PermissionGroup {
   createdAt: string;
 }
 /**
- * 照片文件，用于记录演出或活动。
+ * 媒体文件，包括图像和视频，可选择关联到曲目版本。
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "photos".
+ * via the `definition` "media".
  */
-export interface Photo {
+export interface Media {
   id: number;
   /**
-   * 照片的替代文本描述，用于可访问性和 SEO
+   * 媒体文件的替代文本描述，用于可访问性和 SEO
    */
   alt: string;
   /**
-   * 照片的详细说明和描述
+   * 媒体文件的详细说明和描述
    */
   caption?: {
     root: {
@@ -378,11 +376,15 @@ export interface Photo {
     [k: string]: unknown;
   } | null;
   /**
-   * 该照片相关的曲目版本（可选）
+   * 媒体类型，由系统根据文件类型自动检测
+   */
+  mediaType?: ('image' | 'video') | null;
+  /**
+   * 该媒体文件相关的曲目版本（可选）
    */
   track_version?: (number | null) | TrackVersion;
   /**
-   * 上传该照片的用户
+   * 上传该媒体文件的用户
    */
   uploader: number | User;
   updatedAt: string;
@@ -405,7 +407,7 @@ export interface Photo {
       filesize?: number | null;
       filename?: string | null;
     };
-    card?: {
+    square?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -413,7 +415,39 @@ export interface Photo {
       filesize?: number | null;
       filename?: string | null;
     };
-    tablet?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    xlarge?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    og?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -711,98 +745,6 @@ export interface Post {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt?: string | null;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    square?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    small?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    xlarge?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    og?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1133,10 +1075,6 @@ export interface PayloadLockedDocument {
         value: number | Score;
       } | null)
     | ({
-        relationTo: 'photos';
-        value: number | Photo;
-      } | null)
-    | ({
         relationTo: 'user-collections';
         value: number | UserCollection;
       } | null)
@@ -1277,61 +1215,6 @@ export interface ScoresSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "photos_select".
- */
-export interface PhotosSelect<T extends boolean = true> {
-  alt?: T;
-  caption?: T;
-  track_version?: T;
-  uploader?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        card?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        tablet?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1591,6 +1474,9 @@ export interface PostsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  mediaType?: T;
+  track_version?: T;
+  uploader?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

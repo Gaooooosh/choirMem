@@ -10,7 +10,6 @@ import { fileURLToPath } from 'url'
 import { Tracks } from './collections/Tracks'
 import { TrackVersions } from './collections/TrackVersions'
 import { Scores } from './collections/Scores'
-import { Photos } from './collections/Photos'
 import { UserCollections } from './collections/UserCollections'
 import { Tags } from './collections/Tags'
 import { Comments } from './collections/Comments'
@@ -84,7 +83,6 @@ export default buildConfig({
     Tracks,
     TrackVersions,
     Scores,
-    Photos,
     UserCollections,
     Tags,
     Comments,
