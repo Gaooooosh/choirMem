@@ -29,15 +29,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         if (response.ok) {
           const userData = await response.json()
-          setUser({
-            id: userData.user.id,
-            email: userData.user.email,
-            name: userData.user.name,
-            username: userData.user.username,
-          })
+          // 确保userData.user存在再设置用户状态
+          if (userData && userData.user) {
+            setUser({
+              id: userData.user.id,
+              email: userData.user.email,
+              name: userData.user.name,
+              username: userData.user.username,
+            })
+          } else {
+            // 如果没有用户数据，确保user状态为null
+            setUser(null)
+          }
+        } else {
+          // 如果响应不成功，确保user状态为null
+          setUser(null)
         }
       } catch (error) {
         console.error('Error checking auth status:', error)
+        // 发生错误时确保user状态为null
+        setUser(null)
       }
     }
 

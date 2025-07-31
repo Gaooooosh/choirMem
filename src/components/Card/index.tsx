@@ -4,17 +4,23 @@ import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
-import type { Post } from '@/payload-types'
+import type { Post, Track } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 
 export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
+export type CardTrackData = Pick<Track, 'slug' | 'title'> & {
+  meta?: {
+    description?: string
+    image?: string
+  }
+}
 
 export const Card: React.FC<{
   alignItems?: 'center'
   className?: string
-  doc?: CardPostData
-  relationTo?: 'posts'
+  doc?: CardPostData | CardTrackData
+  relationTo?: 'posts' | 'tracks'
   showCategories?: boolean
   title?: string
 }> = (props) => {
@@ -22,7 +28,17 @@ export const Card: React.FC<{
   const { className, doc, relationTo, showCategories, title: titleFromProps } = props
 
   const { slug, categories, meta, title } = doc || {}
-  const { description, image: metaImage } = meta || {}
+  
+  // Handle track data
+  let description, metaImage
+  if (relationTo === 'tracks') {
+    description = (doc as CardTrackData)?.meta?.description
+    metaImage = (doc as CardTrackData)?.meta?.image
+  } else {
+    // Handle post data
+    description = meta?.description
+    metaImage = meta?.image
+  }
 
   const hasCategories = categories && Array.isArray(categories) && categories.length > 0
   const titleToUse = titleFromProps || title

@@ -67,6 +67,7 @@ const resetDatabase = async () => {
         username: 'admin',
         group: adminGroup.id,
         activity_score: 0,
+        is_admin: true,
       },
     })
 

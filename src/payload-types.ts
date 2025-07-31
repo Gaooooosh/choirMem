@@ -1732,6 +1732,10 @@ export interface SystemSetting {
    * Prompt template for AI text polishing feature
    */
   ai_polish_prompt?: string | null;
+  /**
+   * Welcome message template for homepage, use {username} as placeholder for user name
+   */
+  welcome_message?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1809,6 +1813,7 @@ export interface SystemSettingsSelect<T extends boolean = true> {
   registration_enabled?: T;
   homepage_photo_max?: T;
   ai_polish_prompt?: T;
+  welcome_message?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

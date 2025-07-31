@@ -5,7 +5,7 @@ import { hasPermission } from '../access/hasPermission'
 export const SystemSettings: GlobalConfig = {
   slug: 'system-settings',
   access: {
-    read: hasPermission('can_manage_system_settings'),
+    read: () => true, // 允许所有用户读取系统设置
     update: hasPermission('can_manage_system_settings'),
   },
   admin: {
@@ -36,6 +36,14 @@ export const SystemSettings: GlobalConfig = {
         rows: 5,
       },
       defaultValue: '请润色以下文本，使其更加流畅自然：',
+    },
+    {
+      name: 'welcome_message',
+      type: 'text',
+      admin: {
+        description: 'Welcome message template for homepage, use {username} as placeholder for user name',
+      },
+      defaultValue: '欢迎 {username} 回到爱乐',
     },
   ],
 }
