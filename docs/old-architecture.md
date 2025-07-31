@@ -252,7 +252,7 @@ classDiagram
 | User | 用户模型，支持认证、权限和个人信息。 | username, password_hash, is_admin, avatar_filename, bio, activity_score | group (M-1, PermissionGroup), versions (1-M), scores (1-M), photos (1-M), comments (1-M), liked_versions (M-M, Version), ratings (1-M), articles (1-M), collections (1-M) |
 | PermissionGroup | 权限组，定义了不同用户组的操作权限。 | name, can_view_scores, can_upload_scores, can_create_tracks, etc. | users (1-M, User) |
 | InvitationCode | 注册邀请码，用于控制新用户注册及其初始权限组。 | code, group_id, uses_left | group (M-1, PermissionGroup) |
-| Track | 曲目，是音乐作品的最高层级实体。 | title, title_sort (拼音排序), description | versions (1-M, Version), comments (1-M, Comment) |
+| Track | 曲目，是音乐作品的最高层级实体。 | title, description | versions (1-M, Version), comments (1-M, Comment) |
 | Version | 版本，代表一个曲目的特定编排或演绎。 | title, notes, track_id, user_id | track (M-1, Track), creator (M-1, User), scores (1-M), photos (1-M), comments (1-M), likes (M-M, User), ratings (1-M), tags (M-M, Tag), collections (M-M, Collection) |
 | Score | 乐谱文件，通常是 PDF。 | description, filename, version_id | version (M-1, Version), uploader (M-1, User) |
 | Photo | 照片文件，用于记录演出或活动。 | filename, caption, version_id | version (M-1, Version), uploader (M-1, User) |

@@ -1,5 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { hasPermission } from '../access/hasPermission'
+import { authenticated } from '../access/authenticated'
+import { increaseActivityScore } from '../hooks/increaseActivityScore'
+
 export const Scores: CollectionConfig = {
   slug: 'scores',
   labels: {
@@ -9,6 +13,15 @@ export const Scores: CollectionConfig = {
   upload: {
     staticDir: 'scores',
     mimeTypes: ['application/pdf'],
+  },
+  access: {
+    create: hasPermission('can_upload_scores'),
+    read: hasPermission('can_view_scores'),
+    update: authenticated,
+    delete: authenticated,
+  },
+  hooks: {
+    afterChange: [increaseActivityScore],
   },
   admin: {
     useAsTitle: 'description',

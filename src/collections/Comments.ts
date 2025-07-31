@@ -1,10 +1,20 @@
 import type { CollectionConfig } from 'payload'
 
+import { authenticated } from '../access/authenticated'
+import { anyone } from '../access/anyone'
+import { increaseActivityScore } from '../hooks/increaseActivityScore'
+
 export const Comments: CollectionConfig = {
   slug: 'comments',
   labels: {
     singular: 'Comment',
     plural: 'Comments',
+  },
+  access: {
+    create: authenticated,
+    read: anyone,
+    update: authenticated,
+    delete: authenticated,
   },
   admin: {
     useAsTitle: 'body',
@@ -72,5 +82,6 @@ export const Comments: CollectionConfig = {
         }
       },
     ],
+    afterChange: [increaseActivityScore],
   },
 }

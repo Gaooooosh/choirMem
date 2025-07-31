@@ -1,7 +1,13 @@
 import type { GlobalConfig } from 'payload'
 
+import { hasPermission } from '../access/hasPermission'
+
 export const SystemSettings: GlobalConfig = {
   slug: 'system-settings',
+  access: {
+    read: hasPermission('can_manage_system_settings'),
+    update: hasPermission('can_manage_system_settings'),
+  },
   admin: {
     description: 'Global system settings for the choir management platform',
   },

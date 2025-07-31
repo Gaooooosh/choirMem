@@ -13,11 +13,21 @@ import { Banner } from '../blocks/Banner/config'
 import { Code } from '../blocks/Code/config'
 import { MediaBlock } from '../blocks/MediaBlock/config'
 
+import { hasPermission } from '../access/hasPermission'
+import { authenticated } from '../access/authenticated'
+import { anyone } from '../access/anyone'
+
 export const Tracks: CollectionConfig = {
   slug: 'tracks',
   labels: {
     singular: 'Track',
     plural: 'Tracks',
+  },
+  access: {
+    create: hasPermission('can_create_tracks'),
+    read: anyone,
+    update: authenticated,
+    delete: authenticated,
   },
   admin: {
     useAsTitle: 'title',
@@ -34,16 +44,6 @@ export const Tracks: CollectionConfig = {
       admin: {
         description: '曲目的名称或标题',
       },
-    },
-    {
-      name: 'title_sort',
-      type: 'text',
-      label: 'Sort Key',
-      admin: {
-        hidden: true,
-        description: '用于中文拼音排序的内部字段',
-      },
-      index: true,
     },
     {
       name: 'description',
@@ -81,16 +81,11 @@ export const Tracks: CollectionConfig = {
   hooks: {
     beforeChange: [
       ({ data, operation }) => {
-        if (data.title && (operation === 'create' || operation === 'update')) {
-          // This will be populated with pinyin sorting in a later phase
-          data.title_sort = data.title.toLowerCase()
-        }
-        
         // Auto-generate slug from title if not provided
         if (data.title && !data.slug) {
           data.slug = data.title
             .toLowerCase()
-            .replace(/[^a-z0-9\u4e00-\u9fff]+/g, '-')
+            .replace(/[^a-z0-9一-鿿]+/g, '-')
             .replace(/^-+|-+$/g, '')
         }
       },

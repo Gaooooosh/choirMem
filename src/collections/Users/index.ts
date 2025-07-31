@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
+import { hasPermission } from '../../access/hasPermission'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -10,10 +11,10 @@ export const Users: CollectionConfig = {
   },
   access: {
     admin: authenticated,
-    create: authenticated,
-    delete: authenticated,
+    create: hasPermission('can_manage_users'),
+    delete: hasPermission('can_manage_users'),
     read: authenticated,
-    update: authenticated,
+    update: hasPermission('can_manage_users'),
   },
   admin: {
     defaultColumns: ['name', 'email', 'username', 'group', 'activity_score'],
@@ -75,6 +76,15 @@ export const Users: CollectionConfig = {
         description: '根据用户贡献（上传乐谱、发表评论等）自动计算的活动分数',
       },
       defaultValue: 0,
+    },
+    {
+      name: 'is_admin',
+      type: 'checkbox',
+      label: 'Is Admin',
+      admin: {
+        description: '标识用户是否为系统管理员',
+      },
+      defaultValue: false,
     },
   ],
   timestamps: true,

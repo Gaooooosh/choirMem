@@ -7,16 +7,19 @@ import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 // Import new collections for choir management
+import { Articles } from './collections/Articles'
 import { Tracks } from './collections/Tracks'
 import { TrackVersions } from './collections/TrackVersions'
 import { Scores } from './collections/Scores'
 import { UserCollections } from './collections/UserCollections'
 import { Tags } from './collections/Tags'
 import { Comments } from './collections/Comments'
-import { TrackVersionRatings } from './collections/TrackVersionRatings'
 import { PermissionGroups } from './collections/PermissionGroups'
 import { InvitationCodes } from './collections/InvitationCodes'
 import { Users } from './collections/Users'
+
+// Import custom endpoints
+import { register } from './endpoints/auth/register'
 
 // Import global settings
 import { SystemSettings } from './globals/SystemSettings'
@@ -80,14 +83,14 @@ export default buildConfig({
   }),
   collections: [
     // Core choir management collections
+    Articles,
     Tracks,
     TrackVersions,
     Scores,
     UserCollections,
     Tags,
     Comments,
-    TrackVersionRatings,
-    PermissionGroups,
+      PermissionGroups,
     InvitationCodes,
     Users,
     // Original template collections (to be removed later)
@@ -111,6 +114,13 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
+  endpoints: [
+    {
+      path: '/auth/register',
+      method: 'post',
+      handler: register,
+    },
+  ],
   jobs: {
     access: {
       run: ({ req }: { req: PayloadRequest }): boolean => {

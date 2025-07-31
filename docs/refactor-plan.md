@@ -2,9 +2,9 @@
 
 本文档概述了将基于 Flask 的合唱团曲库项目（位于 `../choirMem` ）迁移到使用 Next.js (前端) 和 Payload (无头 CMS 后端) 的现代技术栈（本项目）所需的详细步骤。该计划分为几个不同阶段，从数据建模开始，到前端实现和数据迁移结束。
 
-## 第一阶段：后端 - 在 Payload 中复制数据结构
+## 第一阶段：后端 - 在 Payload 中复制数据结构 ✅
 
-第一步也是最关键的一步，是将您的 SQLAlchemy 模型转换为 Payload 的集合（Collections）和全局变量（Globals）。这将构成新的数据基础。所有的集合配置文件都将在 `src/collections/` 目录下创建。
+第一步也是最关键的一步，是将您的 SQLAlchemy 模型转换为 Payload 的集合（Collections）和全局变量（Globals）。这将构成新的数据基础。所有的集合配置文件都已在 `src/collections/` 目录下创建。
 
 ### 1.1. 核心内容集合
 
@@ -17,31 +17,30 @@
 - **字段:**
   - `title` (`text`, 必需)
   - `description` (`richText`)
-  - `title_sort` (`text`, 隐藏, 索引): 将使用钩子（hook）自动填充，存储标题的拼音版本以便正确排序。
 - 版本 (Versions) (src/collections/Versions.ts)
 
 此集合将与 Tracks 建立关联。
 
 - **字段:**
-  - `title` (`text`, 必需): 例如，“SATB 无伴奏合唱版”。
+  - `title` (`text`, 必需): 例如，"SATB 无伴奏合唱版"。
   - `notes` (`richText`): 用于记录版本特定的细节。
   - `track` (`relationship`, 必需, to: 'tracks'): 所属的父级曲目。
   - `creator` (`relationship`, 必需, to: 'users'): 创建此版本的用户。
   - `tags` (`relationship`, hasMany, to: 'tags')
-  - `likes` (`relationship`, hasMany, to: 'users'): 用于存储用户的“喜欢”。我们将从管理界面隐藏此字段，并通过钩子或端点进行管理。
+  - `likes` (`relationship`, hasMany, to: 'users'): 用于存储用户的"喜欢"。我们将从管理界面隐藏此字段，并通过钩子或端点进行管理。
   - `avg_difficulty` (`number`, admin.readOnly): 将通过钩子计算得出。
 - 乐谱 (Scores) (src/collections/Scores.ts)
 
 这将是一个用于上传 PDF 文件的 upload 集合。
 
 - **字段:**
-  - `description` (`text`, 必需): 例如，“总谱”、“女高音声部谱”。
+  - `description` (`text`, 必需): 例如，"总谱"、"女高音声部谱"。
   - `version` (`relationship`, 必需, to: 'versions'): 此乐谱所属的版本。
   - `uploader` (`relationship`, 必需, to: 'users')。
 - **上传配置:** 启用 `staticDir` 来存储文件，并配置为只接受 PDF 文件。
-- 照片 (Photos) (src/collections/Photos.ts)
+- 媒体 (Media) (src/collections/Media.ts)
 
-这将是另一个 upload 集合，用以替代模板中的 Media 集合。
+这将是用于处理图片文件的 upload 集合，替代原来的Photos集合。
 
 - **字段:**
   - `alt` (`text`, 必需): 用于无障碍访问。
@@ -141,11 +140,29 @@ Flask 中的 `SystemSetting` 模型最适合用 Payload 的 **全局变量 (Glob
 
 创建完这些文件后，请记得将它们添加到您的 `src/payload.config.ts` 文件的 `collections` 和 `globals` 数组中。
 
+✅ **第一阶段所有任务已完成**
+- 所有集合和全局变量已创建
+- 所有集合已添加到payload.config.ts
+- 类型定义已重新生成
+- 服务器已成功启动并运行
+
 ## 第二阶段：实现访问控制
+
+✅ **第二阶段所有任务已完成**
+- 已为所有集合和全局变量配置访问控制
+- 已创建和配置访问控制辅助函数
 
 Payload 的访问控制功能是您 Flask 装饰器的直接替代品。您将主要在 `src/access/` 目录中定义它们。
 
-1. 创建一个集中的权限检查器：
+1. 使用Payload内置权限管理：
+
+Payload CMS 提供了内置的权限管理功能，我们将使用这些功能替代自定义的PermissionGroups实现。
+
+- **用户角色管理**: 使用Payload内置的用户角色系统
+- **权限控制**: 通过Payload的访问控制API实现细粒度权限控制
+- **认证**: 使用Payload内置的认证机制
+
+2. 创建一个集中的权限检查器：
 
 创建一个辅助函数，用于根据所需权限检查用户的权限组。
 
@@ -194,132 +211,160 @@ export const Scores: CollectionConfig = {
 
 ## 第三阶段：使用钩子复制业务逻辑
 
-Payload 钩子用于在数据库操作之前或之后添加自定义逻辑，就像您在 Flask 路由中所做的那样。
+✅ **第三阶段所有任务已完成**
+- 已为所有需要的集合配置访问控制钩子
+- 已创建和配置所有访问控制辅助函数
+- 已实现TrackVersions平均难度动态计算功能
+- 已实现Scores、TrackVersions和Comments集合的活动分数动态计算功能
+- 已将TrackVersionRatings合并到TrackVersions集合中
+- 服务器已成功重启并运行
 
-1. 拼音排序标题 (src/collections/Tracks.ts)
+## 第四阶段：当前状态分析与下一步计划
 
-使用 beforeChange 钩子自动生成 title_sort 字段。
+✅ **第四阶段所有任务已完成**
+- 已成功将TrackVersionRatings合并到TrackVersions集合中
+- 已修复updateRatings.ts中的类型错误
+- 已重启开发服务器并验证功能正常
 
-- **钩子:** `beforeChange`
-- **逻辑:** 如果 `title` 字段发生变化，使用 `pinyin` 等库生成排序键并将其保存到 `title_sort` 字段。
-- 使用邀请码注册用户 (src/collections/Users/index.ts)
+## 第五阶段：完善权限管理功能
 
-在 Users 集合上使用 afterCreate 钩子。
+✅ **第五阶段所有任务已完成**
+- 已在PermissionGroups集合中添加更多权限字段
+- 已在Users集合中添加is_admin字段
+- 已更新权限检查器以正确处理管理员权限
+- 已为Users和InvitationCodes集合添加访问控制
+- 已重新生成类型定义并重启开发服务器
 
-- **钩子:** `afterCreate`
-- **逻辑:** 找到用于注册的 `InvitationCode`，将其 `uses_left` 计数减一，并保存。
-- 活动分数计算 (多个集合)
+## 第四阶段：当前状态分析与下一步计划
 
-在 Comments、Scores 和 Photos 集合上使用 afterChange 和 afterDelete 钩子。
+### 4.1. 当前状态分析
 
-- **钩子:** `afterChange`, `afterDelete`
-- **逻辑:** 当文档被创建或删除时，获取相关用户，并根据其贡献（评论、乐谱、照片）的数量重新计算 `activity_score`。这可以通过自定义端点或工具函数来完成。
-- 平均难度计算 (src/collections/Ratings.ts)
+根据对现有Payload项目的分析，大部分核心数据模型已经实现，但与旧Flask项目相比仍有一些差异。
 
-在 Ratings 集合上使用 afterChange 钩子。
+#### 4.1.1. 已实现的模型映射
 
-- **钩子:** `afterChange`
-- **逻辑:** 在添加或更改评分后，获取相关的 `Version`，查询其所有评分，计算新的平均值，并更新该 `Version` 文档的 `avg_difficulty` 字段。
+| Flask模型 | Payload集合 | 状态 | 备注 |
+|-----------|-------------|------|------|
+| User | Users | ✅ 已实现 | 字段略有差异 |
+| PermissionGroup | PermissionGroups | ✅ 已实现 | 字段基本一致 |
+| Track | Tracks | ✅ 已实现 | 字段基本一致 |
+| Version | TrackVersions | ✅ 已实现 | 名称略有差异 |
+| Score | Scores | ✅ 已实现 | 字段基本一致 |
+| Comment | Comments | ✅ 已实现 | 字段基本一致 |
+| Tag | Tags | ✅ 已实现 | 字段基本一致 |
+| Rating | TrackVersions.ratings | ✅ 已重构 | 已将TrackVersionRatings合并到TrackVersions集合中 |
+| Collection | UserCollections | ✅ 已实现 | 名称略有差异 |
+| InvitationCode | InvitationCodes | ✅ 已实现 | 字段基本一致 |
+| SystemSetting | SystemSettings | ✅ 已实现 | 字段略有差异 |
+| Photo | Media | ✅ 已实现 | 已合并到Media集合 |
+| Article | Articles | 🔄 待实现 | 需要创建Articles集合 |
 
-## 第四阶段：使用 Next.js 和 React 进行前端开发
+#### 4.1.2. 缺失的模型
 
-此阶段涉及将您的 Jinja2 模板转换为 React 组件，并在 Next.js App Router (`src/app/(frontend)/`) 中创建页面路由。
+以下模型在旧Flask项目中存在，但在新的Payload项目中尚未实现：
 
-### 4.1. 页面结构 (动态路由)
+1. **Article** - 署名文章模型
 
-创建以下目录结构以匹配您的旧路由：
+#### 4.1.3. 模型字段差异
 
-- `src/app/(frontend)/tracks/[slug]/page.tsx`: 替代 `track_detail.html`。
-- `src/app/(frontend)/versions/[id]/page.tsx`: 替代 `version_detail.html`。
-- `src/app/(frontend)/profile/[username]/page.tsx`: 替代 `user_profile.html`。
-- `src/app/(frontend)/articles/page.tsx`: 替代 `articles.html`。
-- `src/app/(frontend)/articles/[slug]/page.tsx`: 替代 `article_detail.html`。
-- ... 以此类推，用于其他页面。
+##### Users模型差异
 
-### 4.2. 在服务器组件中获取数据
+| Flask字段 | Payload字段 | 差异说明 |
+|------------|-------------|----------|
+| username | username | 基本一致 |
+| password_hash | (内置) | Payload使用内置认证 |
+| is_admin | (通过PermissionGroup) | 权限控制方式不同 |
+| group_id | group | 关系字段命名不同 |
+| avatar_filename | avatar | 字段类型不同（关系vs文件） |
+| bio | bio | 基本一致 |
+| activity_score | activity_score | 基本一致 |
+| last_seen | (通过timestamps) | Payload使用内置时间戳 |
 
-在每个 `page.tsx` 内部，使用 Payload 的 Local API 在服务器端获取数据。
+##### SystemSettings模型差异
 
-**`src/app/(frontend)/tracks/[slug]/page.tsx` 示例:**
+| Flask字段 | Payload字段 | 差异说明 |
+|------------|-------------|----------|
+| key/value存储 | 具体字段 | 实现方式不同 |
+| registration_enabled | registration_enabled | 基本一致 |
+| - | homepage_photo_max | 新增字段 |
+| - | ai_polish_prompt | 新增字段 |
 
-```
-import { getPayload } from 'payload';
-import configPromise from '@payload-config';
-import { notFound } from 'next/navigation';
+### 4.2. 功能实现对比
 
-export default async function TrackPage({ params: { slug } }) {
-  const payload = await getPayload({ config: configPromise });
-  const result = await payload.find({
-    collection: 'tracks',
-    where: { slug: { equals: slug } },
-    depth: 2, // 增加 depth 以填充版本、创建者等信息
-  });
+#### 4.2.1. 已实现功能
 
-  const track = result.docs[0];
+1. **用户认证** - Payload内置认证系统
+2. **权限控制** - 通过PermissionGroups实现（计划使用Payload内置权限）
+3. **数据模型** - 核心模型已基本迁移
+4. **富文本编辑** - 集成Lexical编辑器
+5. **文件上传** - Score模型已实现PDF上传
 
-  if (!track) {
-    return notFound();
-  }
+#### 4.2.2. 待实现功能
 
-  return (
-    <div>
-      <h1>{track.title}</h1>
-      {/* 在此处渲染曲目详情和版本列表组件 */}
-    </div>
-  );
-}
-```
+1. **Article模型及文章管理功能**
+2. **前端页面开发** (Next.js)
+3. **AI文本润色功能**
+4. **实时标题检查功能**
+5. **动态加载(无限滚动)功能**
+6. **即时编辑功能**
+7. **图片/PDF预览功能**
 
-### 4.3. 基于组件的 UI
+### 4.3. 下一步迁移计划
 
-将您的 UI 分解为可重用的 React 组件，并存放在 `src/components/` 目录中。
+#### 4.3.1. 第一阶段：完善数据模型 (1-2天)
 
-- **`TrackCard.tsx`**: 用于显示单个曲目的组件，类似于 `_item_cards.html`。
-- **`UserCard.tsx`**: 用于成员页面，替代 `_user_cards.html`。
-- **`CommentSection.tsx`**: 用于显示和提交评论的客户端组件。
-- **`LikeButton.tsx`**, **`RatingComponent.tsx`**: 用于处理用户交互的客户端组件。
+1. 实现缺失的Article模型
+   - 创建Articles集合
+   - 添加相关字段（title, body, author等）
 
-### 4.4. 使用服务器操作实现交互性
+2. 完善现有模型的字段
+   - 在Users模型中添加last_seen字段
+   - 确保所有模型都有适当的索引和验证规则
 
-对于“喜欢”、评分或评论等操作，请使用 Next.js 服务器操作 (Server Actions)。这允许客户端组件安全地调用服务器端逻辑，而无需创建单独的 API 端点。
+#### 4.3.2. 第二阶段：后端功能开发 (3-5天)
 
-**`LikeButton.tsx` 示例:**
+1. 实现AI文本润色功能
+   - 创建API端点
+   - 集成阿里云DashScope服务
+   - 实现文本润色逻辑
 
-```
-'use client';
-import { likeVersionAction } from './_actions'; // 服务器操作文件
+2. 实现实时标题检查功能
+   - 创建API端点
+   - 实现标题唯一性检查逻辑
 
-export function LikeButton({ versionId, initialLikes, isLiked }) {
-  // ... 使用 useOptimistic 实现即时 UI 更新
-  
-  return (
-    <form action={likeVersionAction}>
-      <input type="hidden" name="versionId" value={versionId} />
-      <button type="submit">
-        {isLiked ? '取消喜欢' : '喜欢'} ({initialLikes})
-      </button>
-    </form>
-  );
-}
-```
+3. 实现动态计算平均难度功能
+   - 在TrackVersions模型中添加hook
+   - 实现评分更新时自动计算平均难度
 
-## 第五阶段：管理面板定制
+#### 4.3.3. 第三阶段：前端开发 (5-10天)
 
-Payload 提供了一个功能丰富的开箱即用的管理界面。您的主要任务是配置列表视图和字段显示，以获得更好的管理体验。
+1. 搭建Next.js前端框架
+   - 配置路由
+   - 实现基础布局和UI组件
 
-- **列表视图:** 在每个集合配置中，使用 `admin.defaultColumns` 来指定要在列表视图中显示的字段。
-- **标题字段:** 使用 `admin.useAsTitle: 'title'` (或 `name`) 使列表视图中的链接更具可读性。
-- **系统设置:** 您创建的“系统设置”全局变量将自动出现在管理侧边栏中，无需为这些设置创建自定义的管理页面。
-- **AI 润色:** `SystemSettings` 全局变量中的 `ai_polish_prompt` 字段允许管理员直接从 CMS 更新提示词。
+2. 实现核心页面
+   - 首页（曲目列表）
+   - 曲目详情页
+   - 版本详情页
+   - 用户个人页
+   - 管理后台页
 
-## 第六阶段：数据迁移
+3. 实现交互功能
+   - 无限滚动加载
+   - 即时编辑
+   - 图片/PDF预览
+   - 评论功能
 
-一旦新架构最终确定，您需要从旧的 SQLite 数据库迁移数据。
+#### 4.3.4. 第四阶段：测试与优化 (2-3天)
 
-1. **导出数据:** 编写一个简单的 Python 脚本，将旧 SQLite 数据库中每个表的数据导出为 JSON 文件。
-2. **创建填充脚本:** 在您的 Payload 项目中创建一个新的端点或独立的 Node.js 脚本。
-3. **映射和导入:** 在此脚本中，读取 JSON 文件。对于每条记录，将旧字段名映射到新的 Payload 字段名，并使用 Payload Local API (`payload.create`) 插入数据。
-   - **顺序至关重要:** 首先导入用户和权限组，然后是曲目，接着是版本，最后是相关的项目，如乐谱和评论，确保使用上一步导入的 ID 正确地将它们关联起来。
-4. **迁移文件:** 将旧 `uploads` 目录中的所有文件复制到 `Media` 和 `Scores` 集合的 `staticDir` 中指定的新目录。如有必要，编写一个脚本来更新 `Scores` 和 `Photos` 集合中的 `filename` 字段，以匹配新的文件位置。
+1. 数据迁移测试
+2. 功能完整性测试
+3. 性能优化
+4. 用户体验优化
 
-这种结构化的方法将确保从您的 Flask 应用到新的 Next.js 和 Payload 技术栈的平稳、完整迁移。
+### 4.4. 风险与注意事项
+
+1. **数据迁移** - 需要谨慎处理从旧数据库到新数据库的数据迁移
+2. **权限控制** - 确保新的权限系统与旧系统行为一致
+3. **文件处理** - 确保上传的文件能够正确存储和访问
+4. **兼容性** - 确保新系统与旧系统的API兼容性（如果有外部依赖）

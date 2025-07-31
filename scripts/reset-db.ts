@@ -51,6 +51,7 @@ const resetDatabase = async () => {
         can_upload_photos: true,
         can_post_comments: true,
         can_create_tracks: true,
+        can_manage_permission_groups: true,
       },
     })
 

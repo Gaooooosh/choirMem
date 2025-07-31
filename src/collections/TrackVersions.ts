@@ -13,11 +13,25 @@ import { Banner } from '../blocks/Banner/config'
 import { Code } from '../blocks/Code/config'
 import { MediaBlock } from '../blocks/MediaBlock/config'
 
+import { authenticated } from '../access/authenticated'
+import { anyone } from '../access/anyone'
+import { increaseActivityScore } from '../hooks/increaseActivityScore'
+import { updateRatings } from '../hooks/updateRatings'
+
 export const TrackVersions: CollectionConfig = {
   slug: 'track-versions',
   labels: {
     singular: 'Track Version',
     plural: 'Track Versions',
+  },
+  access: {
+    create: authenticated,
+    read: anyone,
+    update: authenticated,
+    delete: authenticated,
+  },
+  hooks: {
+    afterChange: [increaseActivityScore, updateRatings],
   },
   admin: {
     useAsTitle: 'title',
@@ -100,15 +114,31 @@ export const TrackVersions: CollectionConfig = {
       },
     },
     {
-      name: 'avg_difficulty',
-      type: 'number',
-      label: 'Average Difficulty',
+      name: 'ratings',
+      type: 'array',
+      label: 'Ratings',
       admin: {
-        readOnly: true,
-        description: '根据用户评分计算的平均难度等级（1-5分）',
+        hidden: true,
+        description: '用户对该版本的难度评分列表',
       },
-      min: 1,
-      max: 5,
+      fields: [
+        {
+          name: 'user',
+          type: 'relationship',
+          relationTo: 'users',
+          required: true,
+          hasMany: false,
+          label: 'User',
+        },
+        {
+          name: 'difficulty',
+          type: 'number',
+          min: 1,
+          max: 5,
+          required: true,
+          label: 'Difficulty (1-5)',
+        },
+      ],
     },
   ],
 }

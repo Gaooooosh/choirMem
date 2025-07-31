@@ -1,10 +1,19 @@
 import type { CollectionConfig } from 'payload'
 
+import { authenticated } from '../access/authenticated'
+import { hasPermission } from '../access/hasPermission'
+
 export const InvitationCodes: CollectionConfig = {
   slug: 'invitation-codes',
   labels: {
     singular: 'Invitation Code',
     plural: 'Invitation Codes',
+  },
+  access: {
+    create: hasPermission('can_manage_invitation_codes'),
+    read: authenticated,
+    update: hasPermission('can_manage_invitation_codes'),
+    delete: hasPermission('can_manage_invitation_codes'),
   },
   admin: {
     useAsTitle: 'code',
@@ -42,6 +51,15 @@ export const InvitationCodes: CollectionConfig = {
         description: '该邀请码可使用的总次数（0 为无限制）',
       },
       defaultValue: 0,
+      hooks: {
+        beforeChange: [
+          ({ value, originalDoc }) => {
+            // 如果设置为无限制（0），则 uses_left 也应为 0
+            // 在创建时设置 uses_left 等于 total_uses（除非是无限制）
+            return value;
+          },
+        ],
+      },
     },
     {
       name: 'uses_left',
@@ -51,6 +69,19 @@ export const InvitationCodes: CollectionConfig = {
         description: '剩余使用次数（使用后自动递减）',
       },
       defaultValue: 0,
-    },
+      index: true,
+      hooks: {
+        beforeChange: [
+          ({ value, originalDoc, data }) => {
+            // 在创建时，如果 total_uses > 0，则 uses_left 应该等于 total_uses
+            // 如果 total_uses = 0，则为无限制邀请码
+            if (!originalDoc && data.total_uses > 0) {
+              return data.total_uses;
+            }
+            return value;
+          },
+        ],
+      },
+    }
   ],
 }

@@ -67,13 +67,13 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    articles: Article;
     tracks: Track;
     'track-versions': TrackVersion;
     scores: Score;
     'user-collections': UserCollection;
     tags: Tag;
     comments: Comment;
-    'track-version-ratings': TrackVersionRating;
     'permission-groups': PermissionGroup;
     'invitation-codes': InvitationCode;
     users: User;
@@ -89,13 +89,13 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     tracks: TracksSelect<false> | TracksSelect<true>;
     'track-versions': TrackVersionsSelect<false> | TrackVersionsSelect<true>;
     scores: ScoresSelect<false> | ScoresSelect<true>;
     'user-collections': UserCollectionsSelect<false> | UserCollectionsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
-    'track-version-ratings': TrackVersionRatingsSelect<false> | TrackVersionRatingsSelect<true>;
     'permission-groups': PermissionGroupsSelect<false> | PermissionGroupsSelect<true>;
     'invitation-codes': InvitationCodesSelect<false> | InvitationCodesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -156,25 +156,16 @@ export interface UserAuthOperations {
   };
 }
 /**
- * 曲目，是音乐作品的最高层级实体。
+ * 文章，用于发布合唱团新闻、活动报道和教学资料。
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tracks".
+ * via the `definition` "articles".
  */
-export interface Track {
+export interface Article {
   id: number;
-  /**
-   * 曲目的名称或标题
-   */
   title: string;
-  /**
-   * 用于中文拼音排序的内部字段
-   */
-  title_sort?: string | null;
-  /**
-   * 曲目的详细描述和介绍
-   */
-  description?: {
+  author: number | User;
+  content: {
     root: {
       type: string;
       children: {
@@ -188,64 +179,10 @@ export interface Track {
       version: number;
     };
     [k: string]: unknown;
-  } | null;
-  /**
-   * 用于 URL 中的唯一标识符，如果留空将根据标题自动生成
-   */
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * 版本，代表一个曲目的特定编排或演绎。
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "track-versions".
- */
-export interface TrackVersion {
-  id: number;
-  /**
-   * 该版本的标题或名称，如 "SATB 版本" 或 "无伴奏版"
-   */
-  title: string;
-  /**
-   * 关于该版本的详细说明和注意事项
-   */
-  notes?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * 该版本所属的曲目
-   */
-  track: number | Track;
-  /**
-   * 创建或上传该版本的用户
-   */
-  creator: number | User;
-  /**
-   * 用于分类和检索的标签
-   */
+  };
+  status?: ('draft' | 'published') | null;
+  cover_image?: (number | null) | Media;
   tags?: (number | Tag)[] | null;
-  /**
-   * 点赞该版本的用户列表
-   */
-  likes?: (number | User)[] | null;
-  /**
-   * 根据用户评分计算的平均难度等级（1-5分）
-   */
-  avg_difficulty?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -292,6 +229,10 @@ export interface User {
    * 根据用户贡献（上传乐谱、发表评论等）自动计算的活动分数
    */
   activity_score?: number | null;
+  /**
+   * 标识用户是否为系统管理员
+   */
+  is_admin?: boolean | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -342,6 +283,22 @@ export interface PermissionGroup {
    * 允许创建新的曲目条目
    */
   can_create_tracks?: boolean | null;
+  /**
+   * 允许管理权限组
+   */
+  can_manage_permission_groups?: boolean | null;
+  /**
+   * 允许管理系统设置
+   */
+  can_manage_system_settings?: boolean | null;
+  /**
+   * 允许管理用户
+   */
+  can_manage_users?: boolean | null;
+  /**
+   * 允许管理邀请码
+   */
+  can_manage_invitation_codes?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -456,6 +413,102 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * 版本，代表一个曲目的特定编排或演绎。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "track-versions".
+ */
+export interface TrackVersion {
+  id: number;
+  /**
+   * 该版本的标题或名称，如 "SATB 版本" 或 "无伴奏版"
+   */
+  title: string;
+  /**
+   * 关于该版本的详细说明和注意事项
+   */
+  notes?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * 该版本所属的曲目
+   */
+  track: number | Track;
+  /**
+   * 创建或上传该版本的用户
+   */
+  creator: number | User;
+  /**
+   * 用于分类和检索的标签
+   */
+  tags?: (number | Tag)[] | null;
+  /**
+   * 点赞该版本的用户列表
+   */
+  likes?: (number | User)[] | null;
+  /**
+   * 用户对该版本的难度评分列表
+   */
+  ratings?:
+    | {
+        user: number | User;
+        difficulty: number;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * 曲目，是音乐作品的最高层级实体。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracks".
+ */
+export interface Track {
+  id: number;
+  /**
+   * 曲目的名称或标题
+   */
+  title: string;
+  /**
+   * 曲目的详细描述和介绍
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * 用于 URL 中的唯一标识符，如果留空将根据标题自动生成
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * 标签，用于对版本进行分类。
@@ -577,29 +630,6 @@ export interface Comment {
    * 评论所属的版本（与曲目二选一）
    */
   track_version?: (number | null) | TrackVersion;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * 评分，用户对版本的难度评分。
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "track-version-ratings".
- */
-export interface TrackVersionRating {
-  id: number;
-  /**
-   * 进行评分的用户
-   */
-  user: number | User;
-  /**
-   * 被评分的曲目版本
-   */
-  track_version: number | TrackVersion;
-  /**
-   * 难度评分（1-5 分，1 为最简单，5 为最难）
-   */
-  difficulty: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -1063,6 +1093,10 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'articles';
+        value: number | Article;
+      } | null)
+    | ({
         relationTo: 'tracks';
         value: number | Track;
       } | null)
@@ -1085,10 +1119,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'comments';
         value: number | Comment;
-      } | null)
-    | ({
-        relationTo: 'track-version-ratings';
-        value: number | TrackVersionRating;
       } | null)
     | ({
         relationTo: 'permission-groups';
@@ -1170,11 +1200,24 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  title?: T;
+  author?: T;
+  content?: T;
+  status?: T;
+  cover_image?: T;
+  tags?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tracks_select".
  */
 export interface TracksSelect<T extends boolean = true> {
   title?: T;
-  title_sort?: T;
   description?: T;
   slug?: T;
   updatedAt?: T;
@@ -1191,7 +1234,13 @@ export interface TrackVersionsSelect<T extends boolean = true> {
   creator?: T;
   tags?: T;
   likes?: T;
-  avg_difficulty?: T;
+  ratings?:
+    | T
+    | {
+        user?: T;
+        difficulty?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1252,17 +1301,6 @@ export interface CommentsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "track-version-ratings_select".
- */
-export interface TrackVersionRatingsSelect<T extends boolean = true> {
-  user?: T;
-  track_version?: T;
-  difficulty?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "permission-groups_select".
  */
 export interface PermissionGroupsSelect<T extends boolean = true> {
@@ -1272,6 +1310,10 @@ export interface PermissionGroupsSelect<T extends boolean = true> {
   can_upload_photos?: T;
   can_post_comments?: T;
   can_create_tracks?: T;
+  can_manage_permission_groups?: T;
+  can_manage_system_settings?: T;
+  can_manage_users?: T;
+  can_manage_invitation_codes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1298,6 +1340,7 @@ export interface UsersSelect<T extends boolean = true> {
   avatar?: T;
   bio?: T;
   activity_score?: T;
+  is_admin?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

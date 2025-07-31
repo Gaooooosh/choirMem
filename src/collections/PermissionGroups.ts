@@ -1,10 +1,20 @@
 import type { CollectionConfig } from 'payload'
 
+import { authenticated } from '../access/authenticated'
+import { hasPermission } from '../access/hasPermission'
+
 export const PermissionGroups: CollectionConfig = {
   slug: 'permission-groups',
   labels: {
     singular: 'Permission Group',
     plural: 'Permission Groups',
+  },
+  access: {
+    admin: authenticated,
+    create: hasPermission('can_manage_permission_groups'),
+    read: authenticated,
+    update: hasPermission('can_manage_permission_groups'),
+    delete: hasPermission('can_manage_permission_groups'),
   },
   admin: {
     useAsTitle: 'name',
@@ -66,6 +76,42 @@ export const PermissionGroups: CollectionConfig = {
       label: 'Can Create Tracks',
       admin: {
         description: '允许创建新的曲目条目',
+      },
+    },
+    {
+      name: 'can_manage_permission_groups',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Can Manage Permission Groups',
+      admin: {
+        description: '允许管理权限组',
+      },
+    },
+    {
+      name: 'can_manage_system_settings',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Can Manage System Settings',
+      admin: {
+        description: '允许管理系统设置',
+      },
+    },
+    {
+      name: 'can_manage_users',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Can Manage Users',
+      admin: {
+        description: '允许管理用户',
+      },
+    },
+    {
+      name: 'can_manage_invitation_codes',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Can Manage Invitation Codes',
+      admin: {
+        description: '允许管理邀请码',
       },
     },
   ],
