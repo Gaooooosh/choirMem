@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { cn } from '@/utilities/ui'
+import { motion } from 'framer-motion'
 
 // Import the Card component from our components directory
 import { Card as TrackCard } from '@/components/Card'
@@ -148,13 +149,18 @@ export const HomeClient: React.FC = () => {
   if (error) {
     return (
       <div className="container mx-auto py-8">
-        <div className="text-center py-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center py-12 backdrop-blur-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/20 rounded-xl shadow-xl max-w-md mx-auto"
+        >
           <h2 className="text-2xl font-bold mb-4">出错了</h2>
           <p className="text-red-500 mb-6">{error}</p>
           <Button onClick={() => window.location.reload()}>
             重新加载
           </Button>
-        </div>
+        </motion.div>
       </div>
     )
   }
@@ -168,24 +174,37 @@ export const HomeClient: React.FC = () => {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, index) => (
-            <Card key={index} className="flex flex-col animate-pulse">
-              <CardHeader className="pb-3">
-                <div className="h-6 bg-gray-200 rounded w-3/4 mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-full" />
-              </CardHeader>
-              <CardContent className="flex-1 pb-3">
-                <div className="h-4 bg-gray-200 rounded w-full mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-2/3" />
-              </CardContent>
-              <CardFooter className="flex justify-between items-center pt-3 border-t">
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
-                <div className="h-8 bg-gray-200 rounded w-20" />
-              </CardFooter>
-            </Card>
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="backdrop-blur-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/20 rounded-xl shadow-xl overflow-hidden"
+            >
+              <Card className="flex flex-col animate-pulse bg-transparent border-0">
+                <CardHeader className="pb-3">
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-gray-200 rounded w-full" />
+                </CardHeader>
+                <CardContent className="flex-1 pb-3">
+                  <div className="h-4 bg-gray-200 rounded w-full mb-2" />
+                  <div className="h-4 bg-gray-200 rounded w-2/3" />
+                </CardContent>
+                <CardFooter className="flex justify-between items-center pt-3 border-t border-white/20">
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                  <div className="h-8 bg-gray-200 rounded w-20" />
+                </CardFooter>
+              </Card>
+            </motion.div>
           ))}
         </div>
       ) : tracks.length === 0 ? (
-        <div className="text-center py-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center py-12 backdrop-blur-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/20 rounded-xl shadow-xl max-w-md mx-auto"
+        >
           <div className="max-w-md mx-auto">
             <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">暂无曲目</h2>
@@ -194,23 +213,34 @@ export const HomeClient: React.FC = () => {
               刷新页面
             </Button>
           </div>
-        </div>
+        </motion.div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {tracks.map((track) => (
-            <TrackCard 
+          {tracks.map((track, index) => (
+            <motion.div
               key={track.id}
-              doc={{
-                slug: track.slug,
-                title: track.title,
-                meta: {
-                  description: getDescriptionText(track.description),
-                  image: `/media/track-placeholder.svg`
-                }
-              } as any}
-              relationTo="tracks"
-              className="h-full"
-            />
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ 
+                y: -10,
+                transition: { duration: 0.3 }
+              }}
+              className="backdrop-blur-lg bg-gradient-to-br from-white/30 to-white/10 border border-white/20 rounded-xl shadow-lg overflow-hidden"
+            >
+              <TrackCard 
+                doc={{
+                  slug: track.slug,
+                  title: track.title,
+                  meta: {
+                    description: getDescriptionText(track.description),
+                    image: `/media/track-placeholder.svg`
+                  }
+                } as any}
+                relationTo="tracks"
+                className="h-full bg-transparent border-0"
+              />
+            </motion.div>
           ))}
         </div>
       )}

@@ -8,7 +8,9 @@ import type { Post, Track } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 
-export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
+export type CardPostData = Pick<Post, 'slug' | 'meta' | 'title'> & {
+  categories?: Array<{ title?: string }>
+}
 export type CardTrackData = Pick<Track, 'slug' | 'title'> & {
   meta?: {
     description?: string
@@ -27,7 +29,8 @@ export const Card: React.FC<{
   const { card, link } = useClickableCard({})
   const { className, doc, relationTo, showCategories, title: titleFromProps } = props
 
-  const { slug, categories, meta, title } = doc || {}
+  const { slug, meta, title } = doc || {}
+  const categories = relationTo === 'posts' ? (doc as CardPostData)?.categories : undefined
   
   // Handle track data
   let description, metaImage
@@ -48,7 +51,7 @@ export const Card: React.FC<{
   return (
     <article
       className={cn(
-        'border border-border rounded-lg overflow-hidden bg-card hover:cursor-pointer',
+        'border border-white/20 rounded-xl overflow-hidden bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl hover:cursor-pointer shadow-xl',
         className,
       )}
       ref={card.ref}
