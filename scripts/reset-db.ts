@@ -3,6 +3,7 @@ import payload from 'payload'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { seedData } from './seed-data'
 
 // Load environment variables
 dotenv.config()
@@ -22,7 +23,7 @@ const resetDatabase = async () => {
         await fs.unlink(file)
         console.log(`✅ 已删除 ${file}`)
       } catch (error) {
-        if ((error as any).code !== 'ENOENT') {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
           console.log(`⚠️  删除 ${file} 时出错:`, error)
         }
       }
@@ -58,7 +59,7 @@ const resetDatabase = async () => {
     console.log('👤 正在创建管理员用户...')
 
     // Create admin user
-    await payload.create({
+    const adminUser = await payload.create({
       collection: 'users',
       data: {
         email: 'admin@example.com',
@@ -71,38 +72,8 @@ const resetDatabase = async () => {
       },
     })
 
-    console.log('🎵 正在创建示例曲目数据...')
-
-    // Create sample tracks
-    const sampleTracks = [
-      {
-        title: '欢乐颂',
-        description: '贝多芬第九交响曲第四乐章的著名合唱曲目，表达了人类团结友爱的崇高理想。',
-        slug: 'ode-to-joy',
-      },
-      {
-        title: '天鹅湖',
-        description: '柴可夫斯基创作的经典芭蕾舞剧，讲述了王子与天鹅公主的动人爱情故事。',
-        slug: 'swan-lake',
-      },
-      {
-        title: '卡门序曲',
-        description: '比才歌剧《卡门》的开场音乐，热情奔放，充满西班牙风情。',
-        slug: 'carmen-overture',
-      },
-    ]
-
-    for (const trackData of sampleTracks) {
-      try {
-        await payload.create({
-          collection: 'tracks',
-          data: trackData,
-        })
-        console.log(`✅ 已创建曲目: ${trackData.title}`)
-      } catch (error) {
-        console.log(`⚠️  创建曲目 ${trackData.title} 时出错:`, error)
-      }
-    }
+    // Create seed data
+    await seedData(payload, String(adminUser.id))
 
     console.log('✅ 数据库重置完成!')
     console.log('📧 管理员邮箱: admin@example.com')

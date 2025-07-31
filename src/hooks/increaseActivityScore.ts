@@ -10,24 +10,29 @@ export const increaseActivityScore: CollectionAfterChangeHook = async ({
     const userId = doc.uploader || doc.author || doc.creator || doc.user
 
     if (userId) {
-      // 获取用户当前的活动分数
-      const user = await payload.findByID({
-        collection: 'users',
-        id: userId,
-        depth: 0,
-      })
+      try {
+        // 获取用户ID - 如果是对象则取其 id 属性
+        const userIdStr = typeof userId === 'object' && userId.id ? String(userId.id) : String(userId)
+        const user = await payload.findByID({
+          collection: 'users',
+          id: userIdStr,
+          depth: 0,
+        })
 
-      // 增加活动分数 (每次增加10分)
-      const newScore = (user.activity_score || 0) + 10
+        // 增加活动分数 (每次增加10分)
+        const newScore = (user.activity_score || 0) + 10
 
-      // 更新用户的活动分数
-      await payload.update({
-        collection: 'users',
-        id: userId,
-        data: {
-          activity_score: newScore,
-        },
-      })
+        // 更新用户的活动分数
+        await payload.update({
+          collection: 'users',
+          id: userIdStr,
+          data: {
+            activity_score: newScore,
+          },
+        })
+      } catch (error) {
+        console.log(`⚠️ 无法为用户 ${userId} 增加活动分数:`, error)
+      }
     }
   }
 
