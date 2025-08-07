@@ -63,6 +63,24 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(version.likes?.length || 0)
 
+  // 获取点赞状态
+  const fetchLikeStatus = async () => {
+    try {
+      const response = await fetch(`${payloadUrl}/api/versions/${version.id}/like`, {
+        method: 'GET',
+        credentials: 'include',
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setLiked(data.liked)
+        setLikeCount(data.likeCount)
+      }
+    } catch (error) {
+      console.error('获取点赞状态失败:', error)
+    }
+  }
+
   // 提取描述文本
   const getDescriptionText = (description: any) => {
     if (!description) return '暂无描述'
@@ -129,15 +147,38 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
+  // 初始化时获取点赞状态
+  useEffect(() => {
+    fetchLikeStatus()
+  }, [])
+
   // 处理点赞
   const handleLike = async () => {
     try {
-      // 这里应该调用API来处理点赞
-      // 暂时只更新UI状态
-      setLiked(!liked)
-      setLikeCount((prev) => (liked ? prev - 1 : prev + 1))
+      const response = await fetch(`${payloadUrl}/api/versions/${version.id}/like`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || '点赞失败')
+      }
+
+      const data = await response.json()
+      setLiked(data.liked)
+      setLikeCount(data.likeCount)
     } catch (error) {
       console.error('点赞失败:', error)
+      // 如果是未登录错误，可以提示用户登录
+      if (error instanceof Error && error.message.includes('未登录')) {
+        alert('请先登录后再点赞')
+      } else {
+        alert('点赞失败，请稍后重试')
+      }
     }
   }
 

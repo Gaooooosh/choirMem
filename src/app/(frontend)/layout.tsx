@@ -31,9 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {/* AdminBar removed */}
 
           <Header />
-          <main className="pt-16">
-            {children}
-          </main>
+          <main className="pt-16">{children}</main>
           {/* Footer removed */}
         </Providers>
       </body>
