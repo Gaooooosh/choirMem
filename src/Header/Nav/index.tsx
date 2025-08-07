@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 
@@ -26,6 +26,11 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
   const pathname = usePathname()
   const { user, setUser } = useAuth()
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -83,12 +88,14 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
           }}
         >
-          {theme === 'dark' ? (
+          {!mounted ? (
+            <Sun className="w-5 h-5 text-white/70 hover:text-yellow-300 transition-colors duration-300" />
+          ) : theme === 'dark' ? (
             <Sun className="w-5 h-5 text-white/70 hover:text-yellow-300 transition-colors duration-300" />
           ) : (
             <Moon className="w-5 h-5 text-white/70 hover:text-blue-300 transition-colors duration-300" />
           )}
-          <span className="sr-only">{theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式'}</span>
+          <span className="sr-only">{!mounted ? '切换主题' : theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式'}</span>
         </Button>
       </motion.div>
 
