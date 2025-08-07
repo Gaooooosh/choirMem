@@ -3,20 +3,20 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { cookies } from 'next/headers'
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const payload = await getPayload({ config: configPromise })
     const cookieStore = cookies()
-    
+
     // 获取当前用户
     const { user } = await payload.auth({ headers: request.headers })
-    
+
     if (!user) {
       return NextResponse.json({ error: '用户未登录' }, { status: 401 })
     }
 
-    const versionId = params.id
-    
+    const { id: versionId } = await params
+
     // 获取当前版本
     const version = await payload.findByID({
       collection: 'track-versions',
@@ -71,13 +71,15 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   }
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const payload = await getPayload({ config: configPromise })
+
+    // 获取当前用户
     const { user } = await payload.auth({ headers: request.headers })
-    
-    const versionId = params.id
-    
+
+    const { id: versionId } = await params
+
     // 获取当前版本的点赞信息
     const version = await payload.findByID({
       collection: 'track-versions',
@@ -90,7 +92,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     const currentLikes = version.likes || []
     const likeCount = currentLikes.length
-    
+
     let liked = false
     if (user) {
       liked = currentLikes.some((like: any) => {

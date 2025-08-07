@@ -69,14 +69,15 @@ export const HomeClient: React.FC<HomeClientProps> = ({
   // 批量获取曲目统计数据 - 性能优化
   const fetchBatchTrackStats = async (tracks: Track[]): Promise<TrackWithStats[]> => {
     try {
-      const trackIds = tracks.map(track => track.id)
+      const trackIds = tracks.map(track => track.id).filter(id => id != null && id !== '')
       
-      // 批量获取所有版本数据
+      // 批量获取所有版本数据，包含likes字段
       const versionsResponse = await fetch(
-        `${payloadUrl}/api/track-versions?where[track][in]=[${trackIds.join(',')}]&limit=1000`,
+        `${payloadUrl}/api/track-versions?where[track][in]=${trackIds.join(',')}&limit=1000&depth=1`,
         { credentials: 'include' },
       )
       const versionsData = await versionsResponse.json()
+
 
       // 按曲目ID分组统计
       const statsMap = new Map<string, { versionCount: number; totalLikes: number }>()
@@ -90,10 +91,13 @@ export const HomeClient: React.FC<HomeClientProps> = ({
       if (versionsData.docs) {
         versionsData.docs.forEach((version: any) => {
           const trackId = typeof version.track === 'object' ? version.track.id : version.track
-          const stats = statsMap.get(trackId)
+          const likesCount = version.likes?.length || 0
+          // 确保trackId是字符串类型以匹配statsMap的键
+          const trackIdStr = String(trackId)
+          const stats = statsMap.get(trackIdStr)
           if (stats) {
             stats.versionCount++
-            stats.totalLikes += version.likes?.length || 0
+            stats.totalLikes += likesCount
           }
         })
       }
