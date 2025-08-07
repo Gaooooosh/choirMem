@@ -8,9 +8,10 @@ import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import Link from 'next/link'
-import { SearchIcon, User, LogOut, Settings } from 'lucide-react'
+import { Sun, Moon, User, LogOut, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/providers/Auth'
+import { useTheme } from '@/providers/Theme'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
   const navItems = data?.navItems || []
   const pathname = usePathname()
   const { user, setUser } = useAuth()
+  const { theme, setTheme } = useTheme()
 
   const handleLogout = async () => {
     try {
@@ -65,7 +67,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
         )
       })}
 
-      {/* 搜索按钮 */}
+      {/* 主题切换按钮 */}
       <motion.div
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
@@ -74,17 +76,19 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
         <Button
           variant="ghost"
           size="sm"
-          asChild
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           className="relative p-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/30 hover:bg-white/15 hover:border-white/40 transition-all duration-300"
-              style={{
-                backdropFilter: 'blur(20px) saturate(1.3) contrast(1.2)',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-              }}
+          style={{
+            backdropFilter: 'blur(20px) saturate(1.3) contrast(1.2)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+          }}
         >
-          <Link href="/search">
-              <SearchIcon className="w-5 h-5 text-white/70 hover:text-blue-300 transition-colors duration-300" />
-              <span className="sr-only">搜索</span>
-            </Link>
+          {theme === 'dark' ? (
+            <Sun className="w-5 h-5 text-white/70 hover:text-yellow-300 transition-colors duration-300" />
+          ) : (
+            <Moon className="w-5 h-5 text-white/70 hover:text-blue-300 transition-colors duration-300" />
+          )}
+          <span className="sr-only">{theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式'}</span>
         </Button>
       </motion.div>
 

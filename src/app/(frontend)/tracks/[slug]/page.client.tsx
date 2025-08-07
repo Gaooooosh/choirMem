@@ -97,9 +97,9 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative">
       {/* 动态背景 */}
-      <div className="absolute inset-0 -z-10">
+      <div className="fixed inset-0 -z-10">
         <div
           className={`absolute inset-0 transition-all duration-1000 ${'bg-gradient-to-br from-slate-100 via-blue-50/30 to-purple-50/30 dark:from-slate-800 dark:via-blue-900/20 dark:to-purple-900/20'}`}
         />
@@ -116,7 +116,7 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
             ],
           }}
           transition={{
-            duration: 5,
+            duration: 30,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
@@ -137,7 +137,7 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
             ],
           }}
           transition={{
-            duration: 1,
+            duration: 30,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
@@ -193,7 +193,7 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
             rotate: [0, 360],
           }}
           transition={{
-            duration: 30,
+            duration: 60,
             repeat: Infinity,
             ease: 'linear',
           }}
@@ -211,12 +211,14 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
         />
       </div>
 
-      <div className="container mx-auto px-4 py-8 space-y-8 relative z-10">
+      {/* 可滚动内容区域 */}
+      <div className="relative z-10 min-h-screen overflow-y-auto">
+        <div className="container mx-auto px-4 py-8 space-y-8">
         {/* 返回按钮 */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 10 }}
         >
           <Link href="/">
             <Button className="mb-4 bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white border-0 rounded-xl py-3 px-6 font-medium transition-all duration-300 backdrop-blur-sm">
@@ -367,6 +369,7 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
         >
           <CommentSection trackId={track.id} showAggregated={true} />
         </motion.div>
+        </div>
       </div>
     </div>
   )

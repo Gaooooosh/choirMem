@@ -144,9 +144,9 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
   const trackInfo = getTrackInfo(version.track)
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* 动态背景 */}
-      <div className="absolute inset-0 -z-10">
+    <div className="min-h-screen relative">
+      {/* 动态背景 - 固定定位 */}
+      <div className="fixed inset-0 -z-10">
         <div className={`absolute inset-0 transition-all duration-1000 ${
           'bg-gradient-to-br from-slate-100 via-blue-50/30 to-purple-50/30 dark:from-slate-800 dark:via-blue-900/20 dark:to-purple-900/20'
         }`} />
@@ -257,7 +257,9 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
         />
       </div>
       
-      <div className="container mx-auto px-4 py-8 space-y-8 relative z-10">
+      {/* 可滚动内容区域 */}
+      <div className="relative z-10 min-h-screen overflow-y-auto">
+        <div className="container mx-auto px-4 py-8 space-y-8">
       {/* 返回按钮 */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -470,6 +472,7 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
       >
         <CommentSection trackVersionId={version.id} />
       </motion.div>
+        </div>
       </div>
     </div>
   )
