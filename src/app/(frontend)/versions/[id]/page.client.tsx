@@ -154,6 +154,7 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
         {/* 动态渐变带 */}
         <motion.div
           className="absolute top-0 left-0 w-full h-full opacity-40 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20"
+          style={{ willChange: 'background' }}
           animate={{
             background: [
               'linear-gradient(45deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2), rgba(236, 72, 153, 0.2))',
@@ -163,7 +164,7 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
             ]
           }}
           transition={{
-            duration: 8,
+            duration: 20,
             repeat: Infinity,
             ease: "easeInOut"
           }}
@@ -173,7 +174,8 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
         <motion.div
           className="absolute inset-0 overflow-hidden"
           style={{
-            background: 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%)'
+            background: 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%)',
+            willChange: 'background',
           }}
           animate={{
             background: [
@@ -183,7 +185,7 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
             ]
           }}
           transition={{
-            duration: 12,
+            duration: 25,
             repeat: Infinity,
             ease: "easeInOut"
           }}
@@ -212,16 +214,16 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
                 rgba(59, 130, 246, 0.3) 0%, 
                 rgba(147, 51, 234, 0.2) 50%, 
                 transparent 100%)`,
+              willChange: 'transform',
             }}
             animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3],
+              scale: [1, 1.05, 1],
             }}
             transition={{
-              duration: 20 + i * 5,
+              duration: 30,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: i * 3,
+              delay: i * 5,
             }}
           />
         ))}
@@ -234,6 +236,7 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
               rgba(59, 130, 246, 0.2) 0%, 
               rgba(147, 51, 234, 0.3) 50%, 
               rgba(236, 72, 153, 0.2) 100%)`,
+            willChange: 'transform',
           }}
           animate={{
             rotate: [0, 360],
