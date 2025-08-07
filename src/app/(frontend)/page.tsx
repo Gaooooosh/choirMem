@@ -29,7 +29,7 @@ export default async function HomePage() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: '合唱团记忆 - 首页',
+    title: '爱乐爱家 - 首页',
     description: '探索丰富的合唱曲目资源，发现优美的音乐作品',
   }
 }

@@ -8,7 +8,7 @@ import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import Link from 'next/link'
-import { SearchIcon, User, LogOut } from 'lucide-react'
+import { SearchIcon, User, LogOut, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/providers/Auth'
 import {
@@ -40,10 +40,12 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
   return (
     <nav className="flex items-center space-x-1">
       {navItems.map(({ link }, i) => {
-        const isActive = pathname === link?.url || 
-          (link?.reference && typeof link.reference.value === 'object' && 
-           pathname === `/${link.reference.relationTo}/${link.reference.value.slug}`)
-        
+        const isActive =
+          pathname === link?.url ||
+          (link?.reference &&
+            typeof link.reference.value === 'object' &&
+            pathname === `/${link.reference.relationTo}/${link.reference.value.slug}`)
+
         return (
           <motion.div
             key={i}
@@ -51,18 +53,18 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 10 }}
           >
-            <CMSLink 
-              {...link} 
-              className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                isActive 
-                  ? 'bg-gradient-to-r from-blue-500/20 to-purple-600/20 text-blue-600 dark:text-blue-400 border border-blue-500/30'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-white/20 hover:to-white/10 dark:hover:from-gray-800/20 dark:hover:to-gray-700/10 hover:text-blue-600 dark:hover:text-blue-400 border border-transparent hover:border-white/20 dark:hover:border-gray-700/30'
-              } backdrop-blur-sm`}
-            />
+            <CMSLink
+                {...link}
+                className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 backdrop-blur-2xl backdrop-saturate-125 backdrop-contrast-125 ${
+                  isActive
+                    ? 'bg-gradient-to-r from-blue-500/20 to-purple-600/20 text-blue-300 border border-blue-400/60 shadow-[0_4px_16px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_0_0_1px_rgba(255,255,255,0.1)]'
+                    : 'text-white/90 hover:bg-white/8 hover:text-blue-300 border border-transparent hover:border-white/30 shadow-[0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]'
+                }`}
+              />
           </motion.div>
         )
       })}
-      
+
       {/* 搜索按钮 */}
       <motion.div
         whileHover={{ scale: 1.1 }}
@@ -73,12 +75,16 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
           variant="ghost"
           size="sm"
           asChild
-          className="relative p-2 rounded-xl bg-gradient-to-r from-white/20 to-white/10 dark:from-gray-800/20 dark:to-gray-700/10 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 hover:from-white/30 hover:to-white/20 dark:hover:from-gray-800/30 dark:hover:to-gray-700/20 transition-all duration-300"
+          className="relative p-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/30 hover:bg-white/15 hover:border-white/40 transition-all duration-300"
+              style={{
+                backdropFilter: 'blur(20px) saturate(1.3) contrast(1.2)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+              }}
         >
           <Link href="/search">
-            <SearchIcon className="w-5 h-5 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300" />
-            <span className="sr-only">搜索</span>
-          </Link>
+              <SearchIcon className="w-5 h-5 text-white/70 hover:text-blue-300 transition-colors duration-300" />
+              <span className="sr-only">搜索</span>
+            </Link>
         </Button>
       </motion.div>
 
@@ -94,10 +100,21 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
             >
               <Button
                 variant="ghost"
-                className="relative p-1 rounded-xl bg-gradient-to-r from-white/20 to-white/10 dark:from-gray-800/20 dark:to-gray-700/10 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 hover:from-white/30 hover:to-white/20 dark:hover:from-gray-800/30 dark:hover:to-gray-700/20 transition-all duration-300"
+                className="relative p-1 rounded-xl bg-white/5 backdrop-blur-md border border-white/30 hover:bg-white/15 hover:border-white/40 transition-all duration-300"
+                style={{
+                  backdropFilter: 'blur(20px) saturate(1.3) contrast(1.2)',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)'
+                }}
               >
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={user.avatar && typeof user.avatar === 'object' && 'url' in user.avatar ? user.avatar.url : undefined} alt={user.username || user.email} />
+                  <AvatarImage
+                    src={
+                      user.avatar && typeof user.avatar === 'object' && 'url' in user.avatar
+                        ? user.avatar.url || undefined
+                        : undefined
+                    }
+                    alt={user.username || user.email}
+                  />
                   <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm">
                     {(user.username || user.email)?.charAt(0).toUpperCase()}
                   </AvatarFallback>
@@ -105,10 +122,17 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
               </Button>
             </motion.div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 border border-white/20 dark:border-gray-700/30">
+          <DropdownMenuContent
+            align="end"
+            className="w-56 backdrop-blur-2xl bg-black/85 border border-white/30 text-white"
+            style={{
+              backdropFilter: 'blur(32px) saturate(1.5) contrast(1.25)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)'
+            }}
+          >
             <div className="px-3 py-2">
-              <p className="text-sm font-medium">{user.username || '用户'}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
+              <p className="text-sm font-medium text-white">{user.username || '用户'}</p>
+              <p className="text-xs text-white/70">{user.email}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
@@ -117,8 +141,21 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
                 个人资料
               </Link>
             </DropdownMenuItem>
+            {user.is_admin && (
+              <>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin" className="flex items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    管理后台
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="flex items-center text-red-600 dark:text-red-400">
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="flex items-center text-red-400 hover:text-red-300"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               退出登录
             </DropdownMenuItem>
@@ -136,7 +173,11 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
               variant="ghost"
               size="sm"
               asChild
-              className="relative px-4 py-2 rounded-xl bg-gradient-to-r from-white/20 to-white/10 dark:from-gray-800/20 dark:to-gray-700/10 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 hover:from-white/30 hover:to-white/20 dark:hover:from-gray-800/30 dark:hover:to-gray-700/20 transition-all duration-300 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+              className="relative px-4 py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/30 hover:bg-white/15 hover:border-white/40 transition-all duration-300 text-white/90 hover:text-blue-300"
+              style={{
+                backdropFilter: 'blur(20px) saturate(1.3) contrast(1.2)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)'
+              }}
             >
               <Link href="/login">登录</Link>
             </Button>
@@ -149,7 +190,11 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
             <Button
               size="sm"
               asChild
-              className="relative px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="relative px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-600/20 backdrop-blur-md border border-blue-400/60 hover:from-blue-500/30 hover:to-purple-600/30 transition-all duration-300 text-blue-300 hover:text-blue-200"
+              style={{
+                backdropFilter: 'blur(20px) saturate(1.4) contrast(1.3)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)'
+              }}
             >
               <Link href="/register">注册</Link>
             </Button>

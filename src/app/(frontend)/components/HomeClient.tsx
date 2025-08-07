@@ -465,7 +465,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({ initialTracks, hasMore: 
 
         {/* 曲目瀑布流 */}
         {loading ? (
-          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 max-w-5xl mx-auto">
             {Array.from({ length: 12 }).map((_, index) => (
               <motion.div
                 key={index}
@@ -563,7 +563,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({ initialTracks, hasMore: 
         ) : (
           <>
             <AnimatePresence>
-              <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+              <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 max-w-5xl mx-auto">
                 {filteredTracks.map((track, index) => (
                   <motion.div
                     key={track.id}

@@ -5,8 +5,8 @@ import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
 import React from 'react'
 
-import { AdminBar } from '@/components/AdminBar'
-import { Footer } from '@/Footer/Component'
+// import { AdminBar } from '@/components/AdminBar'
+// import { Footer } from '@/Footer/Component' // 删除页脚
 import { Header } from '@/Header/Component'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
@@ -28,17 +28,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <Providers>
-          <AdminBar
-            adminBarProps={{
-              preview: isEnabled,
-            }}
-          />
+          {/* AdminBar removed */}
 
           <Header />
           <main className="pt-16">
             {children}
           </main>
-          <Footer />
+          {/* Footer removed */}
         </Providers>
       </body>
     </html>
