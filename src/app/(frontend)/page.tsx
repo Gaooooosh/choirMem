@@ -1,84 +1,35 @@
-import { PayloadRedirects } from '@/components/PayloadRedirects'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import { draftMode } from 'next/headers'
 import React from 'react'
-import { homeStatic } from '@/endpoints/seed/home-static'
-import { generateMeta } from '@/utilities/generateMeta'
-import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { Metadata } from 'next'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
 import { HomeClient } from './components/HomeClient'
 
-type Args = {
-  params: Promise<{
-    slug?: string
-  }>
-}
-
-export default async function Page({ params: paramsPromise }: Args) {
-  const { isEnabled: draft } = await draftMode()
-  const { slug = 'home' } = await paramsPromise
-  const url = '/' + slug
-
-  const payload = await getPayload({ config: configPromise })
-  
-  let page: any
-
-  // 获取页面数据
-  const result = await payload.find({
-    collection: 'pages',
-    draft,
-    limit: 1,
-    pagination: false,
-    overrideAccess: draft,
-    where: {
-      slug: {
-        equals: slug,
-      },
-    },
+export default async function HomePage() {
+  const payload = await getPayload({
+    config: configPromise,
   })
 
-  page = result.docs?.[0] || null
-
-  // Remove this code once your website is seeded
-  if (!page && slug === 'home') {
-    page = homeStatic
-  }
-
-  if (!page) {
-    return <PayloadRedirects url={url} />
-  }
-
-  return (
-    <article className="pt-16 pb-24">
-      {/* Allows redirects for valid pages too */}
-      <PayloadRedirects disableNotFound url={url} />
-
-      {draft && <LivePreviewListener />}
-      
-      <HomeClient />
-    </article>
-  )
-}
-
-export async function generateMetadata({ params: paramsPromise }: Args) {
-  const { slug = 'home' } = await paramsPromise
-  
-  const payload = await getPayload({ config: configPromise })
-  
-  const result = await payload.find({
-    collection: 'pages',
-    draft: false,
-    limit: 1,
-    pagination: false,
-    overrideAccess: false,
-    where: {
-      slug: {
-        equals: slug,
-      },
-    },
+  // 获取曲目数据作为首页内容
+  const tracks = await payload.find({
+    collection: 'tracks',
+    limit: 20, // 首次加载20个
   })
 
-  const page = result.docs?.[0] || null
+  // 转换Payload Track类型到客户端Track类型
+  const clientTracks = tracks.docs.map((track) => ({
+    id: track.id.toString(),
+    title: track.title,
+    description: track.description,
+    slug: track.slug,
+    createdAt: track.createdAt,
+  }))
 
-  return generateMeta({ doc: page })
+  return <HomeClient initialTracks={clientTracks} hasMore={tracks.hasNextPage} />
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: '合唱团记忆 - 首页',
+    description: '探索丰富的合唱曲目资源，发现优美的音乐作品',
+  }
 }

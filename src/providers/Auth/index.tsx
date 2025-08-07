@@ -2,12 +2,9 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 
-interface User {
-  id: string
-  email: string
-  name?: string
-  username?: string
-}
+import type { User as PayloadUser } from '@/payload-types'
+
+type User = PayloadUser
 
 interface AuthContextType {
   user: User | null
@@ -31,12 +28,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           const userData = await response.json()
           // 确保userData.user存在再设置用户状态
           if (userData && userData.user) {
-            setUser({
-              id: userData.user.id,
-              email: userData.user.email,
-              name: userData.user.name,
-              username: userData.user.username,
-            })
+            setUser(userData.user)
           } else {
             // 如果没有用户数据，确保user状态为null
             setUser(null)

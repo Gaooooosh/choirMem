@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../access/authenticated'
+import { canDeleteComment } from '../access/canDeleteComment'
 import { anyone } from '../access/anyone'
 import { increaseActivityScore } from '../hooks/increaseActivityScore'
 
@@ -14,7 +15,7 @@ export const Comments: CollectionConfig = {
     create: authenticated,
     read: anyone,
     update: authenticated,
-    delete: authenticated,
+    delete: canDeleteComment,
   },
   admin: {
     useAsTitle: 'body',
