@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 
 import type { User as PayloadUser } from '@/payload-types'
+import { getClientSideURL } from '@/utilities/getURL'
 
 type User = PayloadUser
 
@@ -20,7 +21,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // 检查是否存在认证信息
     const checkAuth = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/me`, {
+        const response = await fetch(`${getClientSideURL()}/api/users/me`, {
           credentials: 'include',
         })
         

@@ -8,7 +8,7 @@ import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import Link from 'next/link'
-import { Sun, Moon, User, LogOut, Settings } from 'lucide-react'
+import { Sun, Moon, User, LogOut, Settings, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/providers/Auth'
 import { useTheme } from '@/providers/Theme'
@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { LatestActivitySidebar } from '@/components/LatestActivitySidebar'
 
 export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
   const navItems = data?.navItems || []
@@ -27,6 +28,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
   const { user, setUser } = useAuth()
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [isActivitySidebarOpen, setIsActivitySidebarOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -71,6 +73,27 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
           </motion.div>
         )
       })}
+
+      {/* 最新动态按钮 */}
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsActivitySidebarOpen(true)}
+          className="relative p-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/30 hover:bg-white/15 hover:border-white/40 transition-all duration-300"
+          style={{
+            backdropFilter: 'blur(20px) saturate(1.3) contrast(1.2)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+          }}
+        >
+          <MessageCircle className="w-5 h-5 text-white/70 hover:text-blue-300 transition-colors duration-300" />
+          <span className="sr-only">最新动态</span>
+        </Button>
+      </motion.div>
 
       {/* 主题切换按钮 */}
       <motion.div
@@ -212,6 +235,12 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
           </motion.div>
         </div>
       )}
+      
+      {/* 最新动态侧边栏 */}
+      <LatestActivitySidebar 
+        isOpen={isActivitySidebarOpen} 
+        onClose={() => setIsActivitySidebarOpen(false)} 
+      />
     </nav>
   )
 }

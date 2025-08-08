@@ -12,6 +12,7 @@ import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
+import { Toaster } from '@/components/ui/toaster'
 
 import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Header />
           <main className="pt-16">{children}</main>
           {/* Footer removed */}
+          <Toaster />
         </Providers>
       </body>
     </html>

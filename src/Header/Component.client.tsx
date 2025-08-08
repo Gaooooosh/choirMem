@@ -33,13 +33,13 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-2xl bg-black/75 border-b border-white/20 backdrop-saturate-150 backdrop-contrast-125"
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-2xl bg-black/90 dark:bg-black/75 border-b border-white/20 dark:border-white/20 backdrop-saturate-150 backdrop-contrast-125"
       style={{
         backdropFilter: 'blur(6px) saturate(1.8) contrast(1.25) brightness(0.8)',
         boxShadow:
           '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.05)',
         background:
-          'linear-gradient(135deg, rgba(0, 0, 0, 0.75) 0%, rgba(20, 20, 20, 0.7) 50%, rgba(0, 0, 0, 0.75) 100%)',
+          'linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 20, 20, 0.85) 50%, rgba(0, 0, 0, 0.9) 100%)',
         WebkitBackdropFilter: 'blur(24px) saturate(1.5) contrast(1.25) brightness(1.1)',
       }}
       initial={{ y: -100, opacity: 0.5 }}
