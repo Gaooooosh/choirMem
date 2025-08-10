@@ -170,7 +170,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/profile/${user.username || user.id}`} className="flex items-center">
+              <Link href={`/users/${user.id}`} className="flex items-center">
                 <User className="mr-2 h-4 w-4" />
                 个人资料
               </Link>

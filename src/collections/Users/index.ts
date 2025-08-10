@@ -60,6 +60,26 @@ export const Users: CollectionConfig = {
       },
     },
     {
+      name: 'default_avatar',
+      type: 'select',
+      label: 'Default Avatar',
+      options: [
+        { label: '音符', value: 'music-note' },
+        { label: '麦克风', value: 'microphone' },
+        { label: '钢琴', value: 'piano' },
+        { label: '小提琴', value: 'violin' },
+        { label: '吉他', value: 'guitar' },
+        { label: '鼓', value: 'drums' },
+        { label: '萨克斯', value: 'saxophone' },
+        { label: '小号', value: 'trumpet' },
+        { label: '长笛', value: 'flute' },
+        { label: '大提琴', value: 'cello' },
+      ],
+      admin: {
+        description: '当没有上传自定义头像时使用的默认头像',
+      },
+    },
+    {
       name: 'bio',
       type: 'richText',
       label: 'Bio',

@@ -5,20 +5,22 @@ import config from '@payload-config'
 export async function POST(request: NextRequest) {
   try {
     const payload = await getPayload({ config })
+    
+    // 获取当前用户
+    const { user } = await payload.auth({ headers: request.headers })
+    if (!user) {
+      return NextResponse.json(
+        { message: '用户未认证' },
+        { status: 401 }
+      )
+    }
+    
     const formData = await request.formData()
     const file = formData.get('file') as File
-    const uploaderId = formData.get('uploader') as string
 
     if (!file) {
       return NextResponse.json(
         { message: '没有上传文件' },
-        { status: 400 }
-      )
-    }
-
-    if (!uploaderId) {
-      return NextResponse.json(
-        { message: '缺少上传者信息' },
         { status: 400 }
       )
     }
@@ -32,7 +34,7 @@ export async function POST(request: NextRequest) {
       collection: 'media',
       data: {
         alt: file.name,
-        uploader: parseInt(uploaderId),
+        uploader: user.id,
       },
       file: {
         data: buffer,

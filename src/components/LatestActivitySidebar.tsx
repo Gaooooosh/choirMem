@@ -190,11 +190,13 @@ export function LatestActivitySidebar({ isOpen, onClose }: LatestActivitySidebar
                         className="p-4 rounded-xl bg-white/40 dark:bg-gray-800/40 backdrop-blur-md backdrop-saturate-150 border border-white/40 dark:border-gray-700/40 hover:bg-white/60 dark:hover:bg-gray-800/60 transition-all duration-200"
                       >
                         <div className="flex items-start gap-3">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900 text-blue-600 dark:text-blue-300 text-sm">
-                              {getUserInitials(comment.author)}
-                            </AvatarFallback>
-                          </Avatar>
+                          <Link href={`/users/${comment.author.id}`} onClick={onClose}>
+                            <Avatar className="w-10 h-10 cursor-pointer hover:ring-2 hover:ring-blue-400 transition-all">
+                              <AvatarFallback className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900 text-blue-600 dark:text-blue-300 text-sm">
+                                {getUserInitials(comment.author)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </Link>
                           
                           <div className="flex-1 space-y-2">
                             {/* 用户信息和时间 */}

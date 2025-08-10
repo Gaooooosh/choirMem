@@ -208,6 +208,23 @@ export interface User {
    */
   avatar?: (number | null) | Media;
   /**
+   * 当没有上传自定义头像时使用的默认头像
+   */
+  default_avatar?:
+    | (
+        | 'music-note'
+        | 'microphone'
+        | 'piano'
+        | 'violin'
+        | 'guitar'
+        | 'drums'
+        | 'saxophone'
+        | 'trumpet'
+        | 'flute'
+        | 'cello'
+      )
+    | null;
+  /**
    * 用户的个人简介和自我介绍
    */
   bio?: {
@@ -1338,6 +1355,7 @@ export interface UsersSelect<T extends boolean = true> {
   username?: T;
   group?: T;
   avatar?: T;
+  default_avatar?: T;
   bio?: T;
   activity_score?: T;
   is_admin?: T;
