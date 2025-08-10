@@ -16,6 +16,7 @@ import { Tags } from './collections/Tags'
 import { Comments } from './collections/Comments'
 import { PermissionGroups } from './collections/PermissionGroups'
 import { InvitationCodes } from './collections/InvitationCodes'
+import { Announcements } from './collections/Announcements'
 import { Users } from './collections/Users'
 
 // Import custom endpoints
@@ -82,7 +83,7 @@ export default buildConfig({
     },
   }),
   collections: [
-    // Core choir management collections
+    // New choir management collections
     Articles,
     Tracks,
     TrackVersions,
@@ -90,8 +91,9 @@ export default buildConfig({
     UserCollections,
     Tags,
     Comments,
-      PermissionGroups,
+    PermissionGroups,
     InvitationCodes,
+    Announcements,
     Users,
     // Original template collections (to be removed later)
     Pages,

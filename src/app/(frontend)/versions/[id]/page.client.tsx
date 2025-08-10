@@ -11,8 +11,31 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import Link from 'next/link'
-import { ArrowLeft, Music, Heart, Download, Calendar, User, Tag, FileText, Eye } from 'lucide-react'
+import {
+  ArrowLeft,
+  Music,
+  Heart,
+  Download,
+  Calendar,
+  User,
+  Tag,
+  FileText,
+  Eye,
+  Upload,
+  Plus,
+  Loader2,
+} from 'lucide-react'
 import { getClientSideURL } from '@/utilities/getURL'
 import { CommentSection } from '@/app/(frontend)/components/CommentSection'
 
@@ -36,7 +59,8 @@ interface TrackVersion {
 
 interface Score {
   id: string
-  description: string
+  title: string
+  description?: string
   track_version: string | TrackVersion
   uploader: any
   alt: string
@@ -62,6 +86,17 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
   const [loading, setLoading] = useState(false)
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(version.likes?.length || 0)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [uploadTitle, setUploadTitle] = useState('')
+  const [uploadDescription, setUploadDescription] = useState('')
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  // 预览相关状态
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
+  const [previewScore, setPreviewScore] = useState<Score | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
 
   // 获取点赞状态
   const fetchLikeStatus = async () => {
@@ -145,6 +180,147 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  // 预览乐谱
+  const handlePreviewScore = async (score: Score) => {
+    setPreviewScore(score)
+    setShowPreviewDialog(true)
+    setPreviewLoading(true)
+
+    // 预加载PDF以确保能正常显示
+    try {
+      const response = await fetch(score.url)
+      if (response.ok) {
+        setPreviewLoading(false)
+      }
+    } catch (error) {
+      console.error('预览加载失败:', error)
+      setPreviewLoading(false)
+    }
+  }
+
+  // 下载乐谱
+  const handleDownloadScore = async (score: Score) => {
+    try {
+      // 获取当前用户信息
+      const userResponse = await fetch('/api/users/me', {
+        credentials: 'include',
+      })
+
+      let username = '用户'
+      if (userResponse.ok) {
+        const userData = await userResponse.json()
+        username = userData.user?.name || userData.user?.email || '用户'
+      }
+
+      // 构建文件名：【曲目】版本-乐谱标题.pdf
+      const trackName = typeof version.track === 'string' ? '曲目' : version.track.title
+      const versionName = version.title
+      const scoreTitle = score.title || score.filename.replace(/\.[^/.]+$/, '') // 使用乐谱标题，如果没有则使用文件名（去掉扩展名）
+      const fileName = `【${trackName}】${versionName}-${scoreTitle}.pdf`
+
+      // 下载文件
+      const response = await fetch(score.url)
+      if (!response.ok) {
+        throw new Error('下载失败')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('下载失败:', error)
+      alert('下载失败，请稍后重试')
+    }
+  }
+
+  // 处理文件选择
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // 验证文件类型
+      if (file.type !== 'application/pdf') {
+        alert('只支持 PDF 格式的文件')
+        return
+      }
+      // 验证文件大小 (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('文件大小不能超过 10MB')
+        return
+      }
+      setUploadFile(file)
+    }
+    // 重置 input 的 value
+    event.target.value = ''
+  }
+
+  // 处理乐谱上传
+  const handleUploadScore = async () => {
+    if (!uploadFile) {
+      alert('请选择文件')
+      return
+    }
+
+    if (!uploadTitle.trim()) {
+      alert('请输入乐谱标题')
+      return
+    }
+
+    setIsUploading(true)
+    try {
+      // 直接上传到 /api/scores，因为 Scores 是一个 upload 集合
+      const formData = new FormData()
+      formData.append('file', uploadFile)
+
+      const title = uploadTitle.trim()
+      const description = uploadDescription.trim() || title
+      formData.append('title', title)
+      formData.append('description', description)
+      formData.append('track_version', version.id)
+      formData.append('alt', title)
+
+      const scoreResponse = await fetch('/api/scores', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+
+      if (!scoreResponse.ok) {
+        const errorData = await scoreResponse.json()
+        throw new Error(errorData.message || '乐谱上传失败')
+      }
+
+      const newScore = await scoreResponse.json()
+
+      // 更新本地状态
+      setScores((prev) => [
+        ...prev,
+        {
+          ...newScore.doc,
+          id: String(newScore.doc.id),
+        },
+      ])
+
+      // 重置上传状态
+      setUploadFile(null)
+      setUploadTitle('')
+      setUploadDescription('')
+      setShowUploadDialog(false)
+
+      alert('乐谱上传成功！')
+    } catch (error) {
+      console.error('上传乐谱失败:', error)
+      alert(`上传失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   // 初始化时获取点赞状态
@@ -422,7 +598,16 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <h2 className="text-2xl font-bold mb-6">乐谱文件</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">乐谱文件</h2>
+                <Button
+                  onClick={() => setShowUploadDialog(true)}
+                  className="bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white border-0 rounded-xl py-2 px-4 font-medium transition-all duration-300"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  上传乐谱
+                </Button>
+              </div>
             </motion.div>
 
             {scores.length === 0 ? (
@@ -456,7 +641,7 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
                         <CardHeader className="pb-4">
                           <CardTitle className="text-lg font-semibold flex items-center gap-2">
                             <FileText className="w-5 h-5" />
-                            {score.filename || '乐谱文件'}
+                            {score.title || score.filename || '乐谱文件'}
                           </CardTitle>
                           {score.description && (
                             <CardDescription className="text-sm text-muted-foreground">
@@ -491,11 +676,15 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
 
                         <CardFooter className="pt-4 border-t border-white/20">
                           <div className="flex gap-2 w-full">
-                            <Button className="flex-1 bg-gradient-to-r from-green-600 to-blue-700 hover:from-green-700 hover:to-blue-800 text-white border-0 rounded-xl py-2 font-medium transition-all duration-300">
+                            <Button
+                              onClick={() => handlePreviewScore(score)}
+                              className="flex-1 bg-gradient-to-r from-green-600 to-blue-700 hover:from-green-700 hover:to-blue-800 text-white border-0 rounded-xl py-2 font-medium transition-all duration-300"
+                            >
                               <Eye className="w-4 h-4 mr-2" />
                               预览
                             </Button>
                             <Button
+                              onClick={() => handleDownloadScore(score)}
                               className="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white border-0 rounded-xl p-2 transition-all duration-300"
                               size="icon"
                             >
@@ -522,6 +711,142 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
           </motion.div>
         </div>
       </div>
+
+      {/* 乐谱上传对话框 */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>上传乐谱</DialogTitle>
+            <DialogDescription>为此版本上传 PDF 格式的乐谱文件</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="score-file">选择文件</Label>
+              <Input
+                id="score-file"
+                type="file"
+                accept=".pdf"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                className="mt-1"
+              />
+              {uploadFile && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  已选择: {uploadFile.name} ({(uploadFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="score-title">标题 *</Label>
+              <Input
+                id="score-title"
+                value={uploadTitle}
+                onChange={(e) => setUploadTitle(e.target.value)}
+                placeholder="输入乐谱标题，如：第一章、完整版等"
+                className="mt-1"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="score-description">详细描述 (可选)</Label>
+              <Input
+                id="score-description"
+                value={uploadDescription}
+                onChange={(e) => setUploadDescription(e.target.value)}
+                placeholder="为这个乐谱添加详细描述..."
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowUploadDialog(false)
+                setUploadFile(null)
+                setUploadTitle('')
+                setUploadDescription('')
+              }}
+            >
+              取消
+            </Button>
+            <Button onClick={handleUploadScore} disabled={!uploadFile || isUploading}>
+              {isUploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  上传中...
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  上传
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 乐谱预览对话框 */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-4">
+            <DialogTitle className="text-xl font-semibold">
+              预览乐谱: {previewScore?.filename || '乐谱文件'}
+            </DialogTitle>
+            {previewScore?.description && (
+              <DialogDescription className="text-sm text-muted-foreground">
+                {previewScore.description}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+
+          <div className="px-6 pb-6">
+            {previewLoading ? (
+              <div className="flex items-center justify-center h-96">
+                <Loader2 className="w-8 h-8 animate-spin" />
+                <span className="ml-2">加载中...</span>
+              </div>
+            ) : previewScore ? (
+              <div className="w-full h-96 border rounded-lg overflow-hidden bg-gray-50 relative">
+                <embed
+                  src={`${previewScore.url}#page=1&view=FitV&toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&zoom=page-height&pagemode=none`}
+                  type="application/pdf"
+                  className="w-full h-full"
+                  title="PDF预览 - 仅第一页"
+                  style={{ 
+                    border: 'none',
+                    pointerEvents: 'none'
+                  }}
+                />
+                <div
+                  className="absolute inset-0 bg-transparent"
+                  style={{ pointerEvents: 'none' }}
+                />
+              </div>
+            ) : null}
+
+            <div className="flex justify-between items-center mt-4 pt-4 border-t">
+              <div className="text-sm text-muted-foreground">
+                文件大小: {previewScore ? formatFileSize(previewScore.filesize) : ''} | 上传时间:{' '}
+                {previewScore ? formatDate(previewScore.createdAt) : ''}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => previewScore && handleDownloadScore(previewScore)}
+                  className="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  下载
+                </Button>
+                <Button onClick={() => setShowPreviewDialog(false)} variant="outline">
+                  关闭
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

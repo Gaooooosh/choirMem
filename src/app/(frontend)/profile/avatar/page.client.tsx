@@ -31,11 +31,11 @@ const defaultAvatarOptions = [
   { label: '大提琴', value: 'cello' },
 ] as const
 
-type DefaultAvatarType = typeof defaultAvatarOptions[number]['value']
+type DefaultAvatarType = (typeof defaultAvatarOptions)[number]['value']
 
 export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) => {
   const [selectedDefaultAvatar, setSelectedDefaultAvatar] = useState<DefaultAvatarType>(
-    (user.default_avatar as DefaultAvatarType) || 'music-note'
+    (user.default_avatar as DefaultAvatarType) || 'music-note',
   )
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -43,15 +43,14 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
   const [isSaving, setIsSaving] = useState(false)
   const [mounted, setMounted] = useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
-  
+
   const { theme } = useTheme()
   const { user: authUser, setUser } = useAuth()
   const router = useRouter()
   const currentTheme = theme || 'light'
 
-  const currentAvatarUrl = user.avatar && typeof user.avatar === 'object' 
-    ? getMediaUrl((user.avatar as Media).url) 
-    : null
+  const currentAvatarUrl =
+    user.avatar && typeof user.avatar === 'object' ? getMediaUrl((user.avatar as Media).url) : null
 
   useEffect(() => {
     setMounted(true)
@@ -60,17 +59,17 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
   const validateFile = (file: File): boolean => {
     const maxSize = 5 * 1024 * 1024 // 5MB
     const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml']
-    
+
     if (file.size > maxSize) {
       alert('文件大小不能超过 5MB')
       return false
     }
-    
+
     if (!allowedTypes.includes(file.type)) {
       alert('只支持 JPG、PNG 和 SVG 格式的图片')
       return false
     }
-    
+
     return true
   }
 
@@ -121,7 +120,7 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
     event.preventDefault()
     event.stopPropagation()
     console.log('File drop event triggered')
-    
+
     const files = event.dataTransfer.files
     if (files && files.length > 0) {
       const file = files[0]
@@ -156,24 +155,24 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
 
   const handleUploadAvatar = async () => {
     if (!uploadedFile) return
-    
+
     setIsUploading(true)
     try {
       const formData = new FormData()
       formData.append('file', uploadedFile)
-      
+
       const uploadResponse = await fetch('/api/media', {
         method: 'POST',
         body: formData,
         credentials: 'include',
       })
-      
+
       if (!uploadResponse.ok) {
         throw new Error('上传失败')
       }
-      
+
       const uploadedMedia = await uploadResponse.json()
-      
+
       const updateResponse = await fetch(`/api/users/${user.id}`, {
         method: 'PATCH',
         headers: {
@@ -185,17 +184,17 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
           default_avatar: null,
         }),
       })
-      
+
       if (!updateResponse.ok) {
         throw new Error('更新用户头像失败')
       }
-      
+
       const updatedUser = await updateResponse.json()
       setUser(updatedUser.doc)
-      
+
       // 清理上传状态
       clearUpload()
-      
+
       alert('头像上传成功！')
       router.refresh()
     } catch (error) {
@@ -220,14 +219,14 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
           avatar: null,
         }),
       })
-      
+
       if (!response.ok) {
         throw new Error('保存失败')
       }
-      
+
       const updatedUser = await response.json()
       setUser(updatedUser.doc)
-      
+
       alert('默认头像保存成功！')
       router.refresh()
     } catch (error) {
@@ -254,11 +253,13 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
     <div className="min-h-screen relative">
       {/* 背景层 */}
       <div className="fixed inset-0 -z-10">
-        <div className={`absolute inset-0 transition-all duration-1000 ${
-          currentTheme === 'dark'
-            ? 'bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20'
-            : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
-        }`} />
+        <div
+          className={`absolute inset-0 transition-all duration-1000 ${
+            currentTheme === 'dark'
+              ? 'bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20'
+              : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+          }`}
+        />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
       </div>
 
@@ -275,19 +276,21 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
                 <Camera className="h-5 w-5" />
                 头像设置
               </CardTitle>
-              <p className={`text-sm ${
-                currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-              }`}>
+              <p
+                className={`text-sm ${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
+              >
                 上传自定义头像或选择默认头像
               </p>
             </CardHeader>
-            
+
             <CardContent className="space-y-8">
               {/* 当前头像预览 */}
               <div className="text-center">
-                <h3 className={`text-xl font-semibold mb-4 ${
-                  currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                }`}>
+                <h3
+                  className={`text-xl font-semibold mb-4 ${
+                    currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                  }`}
+                >
                   当前头像
                 </h3>
                 <div className="flex justify-center">
@@ -308,12 +311,14 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
 
               {/* 上传自定义头像区域 */}
               <div className="space-y-4">
-                <h3 className={`text-lg font-semibold ${
-                  currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                }`}>
+                <h3
+                  className={`text-lg font-semibold ${
+                    currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                  }`}
+                >
                   上传自定义头像
                 </h3>
-                
+
                 {!previewUrl ? (
                   <div
                     onClick={handleUploadAreaClick}
@@ -327,17 +332,23 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
                         : 'border-gray-300 hover:border-gray-400 bg-gray-50'
                     }`}
                   >
-                    <Upload className={`mx-auto h-12 w-12 mb-4 ${
-                      currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    }`} />
-                    <p className={`text-lg font-medium mb-2 ${
-                      currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
-                    }`}>
+                    <Upload
+                      className={`mx-auto h-12 w-12 mb-4 ${
+                        currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      }`}
+                    />
+                    <p
+                      className={`text-lg font-medium mb-2 ${
+                        currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}
+                    >
                       点击上传或拖拽文件到此处
                     </p>
-                    <p className={`text-sm ${
-                      currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    }`}>
+                    <p
+                      className={`text-sm ${
+                        currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      }`}
+                    >
                       支持 JPG、PNG、SVG 格式，文件大小不超过 5MB
                     </p>
                   </div>
@@ -350,19 +361,11 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
                       </Avatar>
                     </div>
                     <div className="flex gap-2 justify-center">
-                      <Button
-                        onClick={clearUpload}
-                        variant="outline"
-                        size="sm"
-                      >
+                      <Button onClick={clearUpload} variant="outline" size="sm">
                         <X className="h-4 w-4 mr-2" />
                         清除
                       </Button>
-                      <Button
-                        onClick={handleUploadAvatar}
-                        disabled={isUploading}
-                        size="sm"
-                      >
+                      <Button onClick={handleUploadAvatar} disabled={isUploading} size="sm">
                         {isUploading ? (
                           <div className="flex items-center">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -378,7 +381,7 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
                     </div>
                   </div>
                 )}
-                
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -391,12 +394,14 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
 
               {/* 默认头像选择区域 */}
               <div className="space-y-4">
-                <h3 className={`text-lg font-semibold ${
-                  currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                }`}>
+                <h3
+                  className={`text-lg font-semibold ${
+                    currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                  }`}
+                >
                   选择默认头像
                 </h3>
-                
+
                 <div className="grid grid-cols-5 gap-4">
                   {defaultAvatarOptions.map((option) => (
                     <motion.div
@@ -416,15 +421,20 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
                     >
                       <div className="flex flex-col items-center space-y-2">
                         <DefaultAvatar type={option.value} size="lg" />
-                        <span className={`text-xs font-medium ${
-                          currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                        }`}>
+                        <span
+                          className={`text-xs font-medium ${
+                            currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                          }`}
+                        >
                           {option.label}
                         </span>
                       </div>
                       {selectedDefaultAvatar === option.value && (
                         <div className="absolute -top-1 -right-1">
-                          <Badge variant="default" className="h-5 w-5 rounded-full p-0 flex items-center justify-center">
+                          <Badge
+                            variant="default"
+                            className="h-5 w-5 rounded-full p-0 flex items-center justify-center"
+                          >
                             <Check className="h-3 w-3" />
                           </Badge>
                         </div>
@@ -432,7 +442,7 @@ export const AvatarConfigClient: React.FC<AvatarConfigClientProps> = ({ user }) 
                     </motion.div>
                   ))}
                 </div>
-                
+
                 <div className="flex justify-center">
                   <Button
                     onClick={handleSaveDefaultAvatar}

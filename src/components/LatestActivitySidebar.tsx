@@ -90,7 +90,7 @@ export function LatestActivitySidebar({ isOpen, onClose }: LatestActivitySidebar
         type: 'version',
         title: comment.track_version.title,
         trackTitle: comment.track_version.track?.title,
-        link: `/tracks/${comment.track_version.track?.id}/versions/${comment.track_version.id}`
+        link: `/versions/${comment.track_version.id}`
       }
     } else if (comment.track) {
       return {

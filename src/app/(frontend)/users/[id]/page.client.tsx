@@ -6,7 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { User, Music, FileText, Calendar, Award, MapPin, Star, Heart, Eye, Settings } from 'lucide-react'
+import {
+  User,
+  Music,
+  FileText,
+  Calendar,
+  Award,
+  MapPin,
+  Star,
+  Heart,
+  Eye,
+  Settings,
+} from 'lucide-react'
 import Link from 'next/link'
 import { formatDateTime } from '@/utilities/formatDateTime'
 import { useTheme } from '@/providers/Theme'
@@ -41,32 +52,40 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
     setMounted(true)
   }, [])
 
-  const avatarUrl = user.avatar && typeof user.avatar === 'object' 
-    ? getMediaUrl((user.avatar as Media).url)
-    : null
+  const avatarUrl =
+    user.avatar && typeof user.avatar === 'object' ? getMediaUrl((user.avatar as Media).url) : null
 
   const getUserInitials = (user: UserType) => {
     if (user.name) {
-      return user.name.split(' ').map(n => n[0]).join('').toUpperCase()
+      return user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
     }
     return user.username?.charAt(0).toUpperCase() || 'U'
   }
 
   const renderBioContent = (bio: any) => {
     if (typeof bio === 'string') {
-      return <p className={`${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{bio}</p>
+      return (
+        <p className={`${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{bio}</p>
+      )
     }
-    
+
     if (bio && Array.isArray(bio)) {
       return bio.map((block: any, index: number) => (
-        <p key={index} className={`mb-2 last:mb-0 ${
-          currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-        }`}>
+        <p
+          key={index}
+          className={`mb-2 last:mb-0 ${
+            currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          }`}
+        >
           {block.children?.map((child: any) => child.text).join('') || ''}
         </p>
       ))
     }
-    
+
     return null
   }
 
@@ -77,7 +96,7 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
         {/* 用户头像毛玻璃背景 */}
         {avatarUrl && (
           <div className="absolute inset-0">
-            <div 
+            <div
               className="absolute inset-0 bg-cover bg-center bg-no-repeat"
               style={{
                 backgroundImage: `url(${avatarUrl})`,
@@ -85,14 +104,14 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                 transform: 'scale(1.05)',
               }}
             />
-            <div className={`absolute inset-0 ${
-              currentTheme === 'dark'
-                ? 'bg-black/60'
-                : 'bg-white/40'
-            }`} />
+            <div
+              className={`absolute inset-0 ${
+                currentTheme === 'dark' ? 'bg-black/60' : 'bg-white/40'
+              }`}
+            />
           </div>
         )}
-        
+
         {/* 默认渐变背景（当没有头像时） */}
         {!avatarUrl && (
           <div
@@ -104,16 +123,16 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
           />
         )}
       </div>
-      
+
       {/* 动态弥散光晕层 */}
       {mounted && (
         <>
           {Array.from({ length: 4 }).map((_, i) => {
             const colors = [
               'from-blue-500/20 to-cyan-500/20',
-              'from-purple-500/20 to-pink-500/20', 
+              'from-purple-500/20 to-pink-500/20',
               'from-green-500/20 to-emerald-500/20',
-              'from-orange-500/20 to-red-500/20'
+              'from-orange-500/20 to-red-500/20',
             ]
             return (
               <motion.div
@@ -138,7 +157,7 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
           })}
         </>
       )}
-      
+
       <div className="container mx-auto px-4 py-8 max-w-6xl relative z-10">
         {/* 用户头部信息 - 重新设计突出头像 */}
         <motion.div
@@ -147,18 +166,18 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="mb-12"
         >
-          <div className={`relative rounded-3xl overflow-hidden backdrop-blur-xl border shadow-2xl ${
-            currentTheme === 'dark'
-              ? 'bg-white/5 border-white/10'
-              : 'bg-white/20 border-white/30'
-          }`}>
+          <div
+            className={`relative rounded-3xl overflow-hidden backdrop-blur-xl border shadow-2xl ${
+              currentTheme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-white/20 border-white/30'
+            }`}
+          >
             {/* 内部光晕效果 */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10" />
-            
+
             <div className="relative p-8 lg:p-12">
               <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12">
                 {/* 大头像区域 */}
-                <motion.div 
+                <motion.div
                   className="relative flex-shrink-0"
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.3 }}
@@ -166,26 +185,28 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                   <div className="relative">
                     {/* 头像光环效果 */}
                     <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 rounded-full blur-xl animate-pulse" />
-                    
+
                     {avatarUrl ? (
                       <Avatar className="w-48 h-48 lg:w-56 lg:h-56 border-4 border-white/30 shadow-2xl relative z-10">
-                        <AvatarImage 
-                          src={avatarUrl} 
+                        <AvatarImage
+                          src={avatarUrl}
                           alt={user.name || user.username}
                           className="object-cover"
                         />
-                        <AvatarFallback className={`text-6xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white`}>
+                        <AvatarFallback
+                          className={`text-6xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white`}
+                        >
                           {getUserInitials(user)}
                         </AvatarFallback>
                       </Avatar>
                     ) : (
-                      <DefaultAvatar 
-                         type={user.default_avatar || 'music-note'} 
-                         size="xl" 
-                         className="w-48 h-48 lg:w-56 lg:h-56 border-4 border-white/30 shadow-2xl relative z-10"
-                       />
+                      <DefaultAvatar
+                        type={user.default_avatar || 'music-note'}
+                        size="xl"
+                        className="w-48 h-48 lg:w-56 lg:h-56 border-4 border-white/30 shadow-2xl relative z-10"
+                      />
                     )}
-                    
+
                     {/* 管理员徽章 */}
                     {user.is_admin && (
                       <motion.div
@@ -200,7 +221,7 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                         </Badge>
                       </motion.div>
                     )}
-                    
+
                     {/* 头像配置按钮 - 只有查看自己的个人资料时才显示 */}
                     {isOwnProfile && (
                       <motion.div
@@ -224,97 +245,143 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
 
                 {/* 用户信息区域 */}
                 <div className="flex-1 text-center lg:text-left">
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.6 }}
                     className="mb-6"
                   >
-                    <h1 className={`text-4xl lg:text-5xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent`}>
+                    <h1
+                      className={`text-4xl lg:text-5xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent`}
+                    >
                       {user.name || user.username}
                     </h1>
                     {user.name && (
-                      <p className={`text-xl ${
-                        currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                      }`}>@{user.username}</p>
+                      <p
+                        className={`text-xl ${
+                          currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                        }`}
+                      >
+                        @{user.username}
+                      </p>
                     )}
                   </motion.div>
 
                   {/* 统计卡片 */}
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4, duration: 0.6 }}
                     className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
                   >
-                    <div className={`p-4 rounded-2xl backdrop-blur-sm border ${
-                      currentTheme === 'dark'
-                        ? 'bg-white/5 border-white/10'
-                        : 'bg-white/30 border-white/40'
-                    }`}>
+                    <div
+                      className={`p-4 rounded-2xl backdrop-blur-sm border ${
+                        currentTheme === 'dark'
+                          ? 'bg-white/5 border-white/10'
+                          : 'bg-white/30 border-white/40'
+                      }`}
+                    >
                       <div className="flex items-center gap-2 mb-1">
                         <FileText className="w-5 h-5 text-blue-500" />
-                        <span className={`text-2xl font-bold ${
-                          currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                        }`}>{articlesTotal}</span>
+                        <span
+                          className={`text-2xl font-bold ${
+                            currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                          }`}
+                        >
+                          {articlesTotal}
+                        </span>
                       </div>
-                      <p className={`text-sm ${
-                        currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                      }`}>篇文章</p>
+                      <p
+                        className={`text-sm ${
+                          currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}
+                      >
+                        篇文章
+                      </p>
                     </div>
-                    
-                    <div className={`p-4 rounded-2xl backdrop-blur-sm border ${
-                      currentTheme === 'dark'
-                        ? 'bg-white/5 border-white/10'
-                        : 'bg-white/30 border-white/40'
-                    }`}>
+
+                    <div
+                      className={`p-4 rounded-2xl backdrop-blur-sm border ${
+                        currentTheme === 'dark'
+                          ? 'bg-white/5 border-white/10'
+                          : 'bg-white/30 border-white/40'
+                      }`}
+                    >
                       <div className="flex items-center gap-2 mb-1">
                         <Music className="w-5 h-5 text-purple-500" />
-                        <span className={`text-2xl font-bold ${
-                          currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                        }`}>{tracksTotal}</span>
+                        <span
+                          className={`text-2xl font-bold ${
+                            currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                          }`}
+                        >
+                          {tracksTotal}
+                        </span>
                       </div>
-                      <p className={`text-sm ${
-                        currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                      }`}>个曲谱</p>
+                      <p
+                        className={`text-sm ${
+                          currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}
+                      >
+                        个曲谱
+                      </p>
                     </div>
-                    
-                    <div className={`p-4 rounded-2xl backdrop-blur-sm border ${
-                      currentTheme === 'dark'
-                        ? 'bg-white/5 border-white/10'
-                        : 'bg-white/30 border-white/40'
-                    }`}>
+
+                    <div
+                      className={`p-4 rounded-2xl backdrop-blur-sm border ${
+                        currentTheme === 'dark'
+                          ? 'bg-white/5 border-white/10'
+                          : 'bg-white/30 border-white/40'
+                      }`}
+                    >
                       <div className="flex items-center gap-2 mb-1">
                         <Star className="w-5 h-5 text-yellow-500" />
-                        <span className={`text-2xl font-bold ${
-                          currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                        }`}>{user.activity_score || 0}</span>
+                        <span
+                          className={`text-2xl font-bold ${
+                            currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                          }`}
+                        >
+                          {user.activity_score || 0}
+                        </span>
                       </div>
-                      <p className={`text-sm ${
-                        currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                      }`}>活跃度</p>
+                      <p
+                        className={`text-sm ${
+                          currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}
+                      >
+                        活跃度
+                      </p>
                     </div>
-                    
-                    <div className={`p-4 rounded-2xl backdrop-blur-sm border ${
-                      currentTheme === 'dark'
-                        ? 'bg-white/5 border-white/10'
-                        : 'bg-white/30 border-white/40'
-                    }`}>
+
+                    <div
+                      className={`p-4 rounded-2xl backdrop-blur-sm border ${
+                        currentTheme === 'dark'
+                          ? 'bg-white/5 border-white/10'
+                          : 'bg-white/30 border-white/40'
+                      }`}
+                    >
                       <div className="flex items-center gap-2 mb-1">
                         <Calendar className="w-5 h-5 text-green-500" />
-                        <span className={`text-lg font-bold ${
-                          currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                        }`}>{new Date(user.createdAt).getFullYear()}</span>
+                        <span
+                          className={`text-lg font-bold ${
+                            currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                          }`}
+                        >
+                          {new Date(user.createdAt).getFullYear()}
+                        </span>
                       </div>
-                      <p className={`text-sm ${
-                        currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                      }`}>加入年份</p>
+                      <p
+                        className={`text-sm ${
+                          currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}
+                      >
+                        加入年份
+                      </p>
                     </div>
                   </motion.div>
 
                   {/* 个人简介 */}
                   {user.bio && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.6, duration: 0.6 }}
@@ -324,9 +391,7 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                           : 'bg-white/30 border-white/40'
                       }`}
                     >
-                      <div className="prose prose-lg max-w-none">
-                        {renderBioContent(user.bio)}
-                      </div>
+                      <div className="prose prose-lg max-w-none">{renderBioContent(user.bio)}</div>
                     </motion.div>
                   )}
                 </div>
@@ -341,19 +406,21 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
         >
-          <div className={`relative rounded-3xl overflow-hidden backdrop-blur-xl border shadow-2xl ${
-            currentTheme === 'dark'
-              ? 'bg-white/5 border-white/10'
-              : 'bg-white/20 border-white/30'
-          }`}>
+          <div
+            className={`relative rounded-3xl overflow-hidden backdrop-blur-xl border shadow-2xl ${
+              currentTheme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-white/20 border-white/30'
+            }`}
+          >
             {/* 内部光晕效果 */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/3 to-pink-500/5" />
-            
+
             <div className="relative">
               {/* 标签页导航 */}
-              <div className={`border-b ${
-                currentTheme === 'dark' ? 'border-white/10' : 'border-white/20'
-              }`}>
+              <div
+                className={`border-b ${
+                  currentTheme === 'dark' ? 'border-white/10' : 'border-white/20'
+                }`}
+              >
                 <nav className="flex space-x-1 px-6 pt-6">
                   <motion.button
                     onClick={() => setActiveTab('overview')}
@@ -398,8 +465,8 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4" />
                       文章
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className={`ml-2 ${
                           activeTab === 'articles'
                             ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0'
@@ -436,8 +503,8 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                     <div className="flex items-center gap-2">
                       <Music className="w-4 h-4" />
                       曲谱
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className={`ml-2 ${
                           activeTab === 'tracks'
                             ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0'
@@ -473,16 +540,20 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                     >
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* 最新文章 */}
-                        <div className={`p-6 rounded-2xl backdrop-blur-sm border ${
-                          currentTheme === 'dark'
-                            ? 'bg-white/5 border-white/10'
-                            : 'bg-white/30 border-white/40'
-                        }`}>
+                        <div
+                          className={`p-6 rounded-2xl backdrop-blur-sm border ${
+                            currentTheme === 'dark'
+                              ? 'bg-white/5 border-white/10'
+                              : 'bg-white/30 border-white/40'
+                          }`}
+                        >
                           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
                           <div className="relative p-6">
-                            <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${
-                              currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                            }`}>
+                            <h3
+                              className={`text-lg font-semibold mb-4 flex items-center gap-2 ${
+                                currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                              }`}
+                            >
                               <FileText className="w-5 h-5 text-blue-500" />
                               最新文章
                             </h3>
@@ -498,28 +569,39 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                                         : 'border-white/40 hover:bg-white/50'
                                     }`}
                                   >
-                                    <h4 className={`font-medium mb-1 ${
-                                      currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                                    }`}>{article.title}</h4>
-                                    <p className={`text-xs ${
-                                      currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                                    }`}>
+                                    <h4
+                                      className={`font-medium mb-1 ${
+                                        currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                                      }`}
+                                    >
+                                      {article.title}
+                                    </h4>
+                                    <p
+                                      className={`text-xs ${
+                                        currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                                      }`}
+                                    >
                                       {formatDateTime(article.createdAt)}
                                     </p>
                                   </Link>
                                 ))}
                                 {articles.length > 3 && (
                                   <Button variant="ghost" className="w-full mt-3" asChild>
-                                    <Link href={`#articles`} onClick={() => setActiveTab('articles')}>
+                                    <Link
+                                      href={`#articles`}
+                                      onClick={() => setActiveTab('articles')}
+                                    >
                                       查看全部 {articlesTotal} 篇文章
                                     </Link>
                                   </Button>
                                 )}
                               </div>
                             ) : (
-                              <p className={`text-center py-4 ${
-                                currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                              }`}>
+                              <p
+                                className={`text-center py-4 ${
+                                  currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                                }`}
+                              >
                                 暂无发表的文章
                               </p>
                             )}
@@ -527,39 +609,52 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                         </div>
 
                         {/* 最新曲谱 */}
-                        <div className={`p-6 rounded-2xl backdrop-blur-sm border ${
-                          currentTheme === 'dark'
-                            ? 'bg-white/5 border-white/10'
-                            : 'bg-white/30 border-white/40'
-                        }`}>
+                        <div
+                          className={`p-6 rounded-2xl backdrop-blur-sm border ${
+                            currentTheme === 'dark'
+                              ? 'bg-white/5 border-white/10'
+                              : 'bg-white/30 border-white/40'
+                          }`}
+                        >
                           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5" />
                           <div className="relative p-6">
-                            <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${
-                              currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                            }`}>
+                            <h3
+                              className={`text-lg font-semibold mb-4 flex items-center gap-2 ${
+                                currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                              }`}
+                            >
                               <Music className="w-5 h-5 text-purple-500" />
                               最新曲谱
                             </h3>
                             {tracks.length > 0 ? (
                               <div className="space-y-3">
                                 {tracks.slice(0, 3).map((track) => {
-                                  const trackData = typeof track.track === 'object' ? track.track : null
+                                  const trackData =
+                                    typeof track.track === 'object' ? track.track : null
                                   return (
                                     <Link
                                       key={track.id}
-                                      href={`/tracks/${trackData?.id}/versions/${track.id}`}
+                                      href={`/versions/${track.id}`}
                                       className={`block p-3 rounded-xl border transition-all duration-200 hover:scale-[1.02] ${
                                         currentTheme === 'dark'
                                           ? 'border-white/10 hover:bg-white/10'
                                           : 'border-white/40 hover:bg-white/50'
                                       }`}
                                     >
-                                      <h4 className={`font-medium mb-1 ${
-                                        currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                                      }`}>{trackData?.title || '未知曲谱'}</h4>
-                                      <p className={`text-xs ${
-                                        currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                                      }`}>
+                                      <h4
+                                        className={`font-medium mb-1 ${
+                                          currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                                        }`}
+                                      >
+                                        {trackData?.title || '未知曲谱'}
+                                      </h4>
+                                      <p
+                                        className={`text-xs ${
+                                          currentTheme === 'dark'
+                                            ? 'text-gray-400'
+                                            : 'text-gray-600'
+                                        }`}
+                                      >
                                         {formatDateTime(track.createdAt)}
                                       </p>
                                     </Link>
@@ -574,9 +669,11 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                                 )}
                               </div>
                             ) : (
-                              <p className={`text-center py-4 ${
-                                currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                              }`}>
+                              <p
+                                className={`text-center py-4 ${
+                                  currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                                }`}
+                              >
                                 暂无上传的曲谱
                               </p>
                             )}
@@ -595,12 +692,20 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                       transition={{ duration: 0.3 }}
                     >
                       <div className="mb-6">
-                        <h2 className={`text-2xl font-bold ${
-                          currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                        }`}>发表的文章</h2>
-                        <p className={`text-sm mt-1 ${
-                          currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                        }`}>共 {articlesTotal} 篇文章</p>
+                        <h2
+                          className={`text-2xl font-bold ${
+                            currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                          }`}
+                        >
+                          发表的文章
+                        </h2>
+                        <p
+                          className={`text-sm mt-1 ${
+                            currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`}
+                        >
+                          共 {articlesTotal} 篇文章
+                        </p>
                       </div>
                       {articles.length > 0 ? (
                         <div className="space-y-4">
@@ -615,24 +720,29 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                               }`}
                             >
                               <div className="flex justify-between items-start mb-3">
-                                <h3 className={`font-semibold text-lg ${
-                                  currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                                }`}>
+                                <h3
+                                  className={`font-semibold text-lg ${
+                                    currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                                  }`}
+                                >
                                   {article.title}
                                 </h3>
-                                <Badge 
+                                <Badge
                                   variant={article.status === 'published' ? 'default' : 'secondary'}
-                                  className={article.status === 'published' 
-                                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0'
-                                    : undefined
+                                  className={
+                                    article.status === 'published'
+                                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0'
+                                      : undefined
                                   }
                                 >
                                   {article.status === 'published' ? '已发布' : '草稿'}
                                 </Badge>
                               </div>
-                              <p className={`text-sm ${
-                                currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                              }`}>
+                              <p
+                                className={`text-sm ${
+                                  currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                                }`}
+                              >
                                 发布于 {formatDateTime(article.createdAt)}
                               </p>
                             </Link>
@@ -640,14 +750,20 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                         </div>
                       ) : (
                         <div className="text-center py-12">
-                          <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center ${
-                            currentTheme === 'dark' ? 'bg-white/10' : 'bg-white/30'
-                          }`}>
+                          <div
+                            className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center ${
+                              currentTheme === 'dark' ? 'bg-white/10' : 'bg-white/30'
+                            }`}
+                          >
                             <FileText className="w-8 h-8 text-gray-400" />
                           </div>
-                          <p className={`${
-                            currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                          }`}>暂无发表的文章</p>
+                          <p
+                            className={`${
+                              currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                            }`}
+                          >
+                            暂无发表的文章
+                          </p>
                         </div>
                       )}
                     </motion.div>
@@ -662,12 +778,20 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                       transition={{ duration: 0.3 }}
                     >
                       <div className="mb-6">
-                        <h2 className={`text-2xl font-bold ${
-                          currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                        }`}>上传的曲谱</h2>
-                        <p className={`text-sm mt-1 ${
-                          currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                        }`}>共 {tracksTotal} 个曲谱版本</p>
+                        <h2
+                          className={`text-2xl font-bold ${
+                            currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                          }`}
+                        >
+                          上传的曲谱
+                        </h2>
+                        <p
+                          className={`text-sm mt-1 ${
+                            currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`}
+                        >
+                          共 {tracksTotal} 个曲谱版本
+                        </p>
                       </div>
                       {tracks.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -676,7 +800,7 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                             return (
                               <Link
                                 key={track.id}
-                                href={`/tracks/${trackData?.id}/versions/${track.id}`}
+                                href={`/versions/${track.id}`}
                                 className={`block p-6 rounded-2xl border transition-all duration-300 hover:scale-[1.02] ${
                                   currentTheme === 'dark'
                                     ? 'border-white/10 hover:bg-white/10 bg-white/5'
@@ -684,21 +808,25 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                                 }`}
                               >
                                 <div className="flex justify-between items-start mb-3">
-                                  <h3 className={`font-semibold text-lg ${
-                                    currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
-                                  }`}>
+                                  <h3
+                                    className={`font-semibold text-lg ${
+                                      currentTheme === 'dark' ? 'text-white' : 'text-gray-800'
+                                    }`}
+                                  >
                                     {trackData?.title || '未知曲谱'}
                                   </h3>
-                                  <Badge 
+                                  <Badge
                                     variant="default"
                                     className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0"
                                   >
                                     曲谱版本
                                   </Badge>
                                 </div>
-                                <p className={`text-sm ${
-                                  currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                                }`}>
+                                <p
+                                  className={`text-sm ${
+                                    currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                                  }`}
+                                >
                                   创建于 {formatDateTime(track.createdAt)}
                                 </p>
                               </Link>
@@ -707,14 +835,20 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                         </div>
                       ) : (
                         <div className="text-center py-12">
-                          <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center ${
-                            currentTheme === 'dark' ? 'bg-white/10' : 'bg-white/30'
-                          }`}>
+                          <div
+                            className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center ${
+                              currentTheme === 'dark' ? 'bg-white/10' : 'bg-white/30'
+                            }`}
+                          >
                             <Music className="w-8 h-8 text-gray-400" />
                           </div>
-                          <p className={`${
-                            currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                          }`}>暂无上传的曲谱</p>
+                          <p
+                            className={`${
+                              currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                            }`}
+                          >
+                            暂无上传的曲谱
+                          </p>
                         </div>
                       )}
                     </motion.div>

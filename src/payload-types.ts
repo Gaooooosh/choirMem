@@ -76,6 +76,7 @@ export interface Config {
     comments: Comment;
     'permission-groups': PermissionGroup;
     'invitation-codes': InvitationCode;
+    announcements: Announcement;
     users: User;
     pages: Page;
     posts: Post;
@@ -98,6 +99,7 @@ export interface Config {
     comments: CommentsSelect<false> | CommentsSelect<true>;
     'permission-groups': PermissionGroupsSelect<false> | PermissionGroupsSelect<true>;
     'invitation-codes': InvitationCodesSelect<false> | InvitationCodesSelect<true>;
+    announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -551,9 +553,13 @@ export interface Tag {
 export interface Score {
   id: number;
   /**
-   * 乐谱文件的描述和说明，如 "第一章"、"完整版" 等
+   * 乐谱文件的标题，如 "第一章"、"完整版" 等
    */
-  description: string;
+  title: string;
+  /**
+   * 乐谱文件的详细描述（可选）
+   */
+  description?: string | null;
   /**
    * 该乐谱所属的曲目版本
    */
@@ -674,6 +680,59 @@ export interface InvitationCode {
    * 剩余使用次数（使用后自动递减）
    */
   uses_left?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * 公告管理，管理员可以发布重要通知和消息。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "announcements".
+ */
+export interface Announcement {
+  id: number;
+  /**
+   * 公告的标题，将显示在首页
+   */
+  title: string;
+  /**
+   * 公告的详细内容
+   */
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * 公告的发布状态
+   */
+  status: 'draft' | 'published' | 'expired';
+  /**
+   * 公告的重要程度，影响显示样式
+   */
+  priority: 'normal' | 'important' | 'urgent';
+  /**
+   * 发布该公告的管理员
+   */
+  author: number | User;
+  /**
+   * 公告的过期时间，过期后将自动隐藏（可选）
+   */
+  expiresAt?: string | null;
+  /**
+   * 是否在首页显示此公告
+   */
+  showOnHomepage?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1146,6 +1205,10 @@ export interface PayloadLockedDocument {
         value: number | InvitationCode;
       } | null)
     | ({
+        relationTo: 'announcements';
+        value: number | Announcement;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -1266,6 +1329,7 @@ export interface TrackVersionsSelect<T extends boolean = true> {
  * via the `definition` "scores_select".
  */
 export interface ScoresSelect<T extends boolean = true> {
+  title?: T;
   description?: T;
   track_version?: T;
   uploader?: T;
@@ -1343,6 +1407,21 @@ export interface InvitationCodesSelect<T extends boolean = true> {
   group?: T;
   total_uses?: T;
   uses_left?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "announcements_select".
+ */
+export interface AnnouncementsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  status?: T;
+  priority?: T;
+  author?: T;
+  expiresAt?: T;
+  showOnHomepage?: T;
   updatedAt?: T;
   createdAt?: T;
 }

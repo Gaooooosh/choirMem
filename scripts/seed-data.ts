@@ -56,7 +56,7 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
+          format: '' as const,
           indent: 0,
           version: 1,
         },
@@ -82,7 +82,7 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
+          format: '' as const,
           indent: 0,
           version: 1,
         },
@@ -108,7 +108,7 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
+          format: '' as const,
           indent: 0,
           version: 1,
         },
@@ -134,7 +134,7 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
+          format: '' as const,
           indent: 0,
           version: 1,
         },
@@ -160,7 +160,7 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
+          format: '' as const,
           indent: 0,
           version: 1,
         },
@@ -171,16 +171,12 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
 
   const createdTracks = []
   for (const trackData of tracks) {
-    try {
-      const track = await payload.create({
-        collection: 'tracks',
-        data: trackData,
-      })
-      createdTracks.push(track)
-      console.log(`✅ 已创建曲目: ${trackData.title}`)
-    } catch (error) {
-      console.log(`⚠️  创建曲目 ${trackData.title} 时出错:`, error)
-    }
+    const track = await payload.create({
+      collection: 'tracks',
+      data: trackData,
+    })
+    createdTracks.push(track)
+    console.log(`✅ 已创建曲目: ${trackData.title}`)
   }
 
   // 3. Create Track Versions
@@ -206,8 +202,8 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
-          indent: 0,
+          format: '' as const,
+        indent: 0,
           version: 1,
         },
       },
@@ -234,8 +230,8 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
-          indent: 0,
+          format: '' as const,
+            indent: 0,
           version: 1,
         },
       },
@@ -263,7 +259,7 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
+          format: '' as const,
           indent: 0,
           version: 1,
         },
@@ -292,9 +288,9 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
-          indent: 0,
-          version: 1,
+          format: '' as const,
+            indent: 0,
+            version: 1,
         },
       },
       track: createdTracks[2]?.id,
@@ -321,7 +317,7 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
+          format: '' as const,
           indent: 0,
           version: 1,
         },
@@ -350,10 +346,10 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
             },
           ],
           direction: 'ltr' as const,
-          format: '',
-          indent: 0,
-          version: 1,
-        },
+          format: '' as const,
+            indent: 0,
+            version: 1,
+          },
       },
       track: createdTracks[4]?.id,
       creator: parseInt(adminUserId, 10),
@@ -406,7 +402,7 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
                 },
               ],
               direction: 'ltr' as const,
-              format: '',
+              format: '' as const,
               indent: 0,
               version: 1,
             },
@@ -549,8 +545,8 @@ export const seedData = async (payload: Payload, adminUserId: string) => {
                       },
                     ],
                     direction: 'ltr' as const,
-                    format: '',
-                    indent: 0,
+                    format: '' as const,
+              indent: 0,
                     version: 1,
                   },
                 },

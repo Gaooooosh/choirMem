@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Music, Users, Heart, Loader2 } from 'lucide-react'
 import { getClientSideURL } from '@/utilities/getURL'
+import { AnnouncementBanner } from '@/components/Announcements'
 
 interface Track {
   id: string
@@ -69,8 +70,8 @@ export const HomeClient: React.FC<HomeClientProps> = ({
   // 批量获取曲目统计数据 - 性能优化
   const fetchBatchTrackStats = async (tracks: Track[]): Promise<TrackWithStats[]> => {
     try {
-      const trackIds = tracks.map(track => track.id).filter(id => id != null && id !== '')
-      
+      const trackIds = tracks.map((track) => track.id).filter((id) => id != null && id !== '')
+
       // 批量获取所有版本数据，包含likes字段
       const versionsResponse = await fetch(
         `${payloadUrl}/api/track-versions?where[track][in]=${trackIds.join(',')}&limit=1000&depth=1`,
@@ -78,12 +79,11 @@ export const HomeClient: React.FC<HomeClientProps> = ({
       )
       const versionsData = await versionsResponse.json()
 
-
       // 按曲目ID分组统计
       const statsMap = new Map<string, { versionCount: number; totalLikes: number }>()
-      
+
       // 初始化所有曲目的统计数据
-      trackIds.forEach(id => {
+      trackIds.forEach((id) => {
         statsMap.set(id, { versionCount: 0, totalLikes: 0 })
       })
 
@@ -102,14 +102,14 @@ export const HomeClient: React.FC<HomeClientProps> = ({
         })
       }
 
-      return tracks.map(track => ({
+      return tracks.map((track) => ({
         ...track,
         versionCount: statsMap.get(track.id)?.versionCount || 0,
         totalLikes: statsMap.get(track.id)?.totalLikes || 0,
       }))
     } catch (error) {
       console.error('批量获取曲目统计数据失败:', error)
-      return tracks.map(track => ({
+      return tracks.map((track) => ({
         ...track,
         versionCount: 0,
         totalLikes: 0,
@@ -176,15 +176,15 @@ export const HomeClient: React.FC<HomeClientProps> = ({
 
   // 搜索过滤 - 防抖优化
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
-  
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm)
     }, 300)
-    
+
     return () => clearTimeout(timer)
   }, [searchTerm])
-  
+
   useEffect(() => {
     if (!debouncedSearchTerm.trim()) {
       setFilteredTracks(tracks)
@@ -233,82 +233,98 @@ export const HomeClient: React.FC<HomeClientProps> = ({
   }, [user, welcomeMessage])
 
   // 优化的TrackCard组件
-  const TrackCard = React.memo(({ track, index, currentTheme, getDescriptionText }: {
-    track: TrackWithStats
-    index: number
-    currentTheme: string
-    getDescriptionText: (description: any) => string
-  }) => (
-    <Link href={`/tracks/${track.slug || track.id}`}>
-      <motion.div
-        key={track.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3, delay: index * 0.02 }}
-        whileHover={{
-          y: -8,
-          transition: { duration: 0.2 },
-        }}
-        className="break-inside-avoid mb-6 cursor-pointer"
-      >
-        <div
-          className={`relative group backdrop-blur-3xl rounded-3xl border shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl ${
-            currentTheme === 'dark'
-              ? 'bg-gradient-to-br from-white/15 via-white/8 to-white/5 border-white/20'
-              : 'bg-gradient-to-br from-white/25 via-white/15 to-white/10 border-white/30'
-          }`}
-          style={{
-            boxShadow: currentTheme === 'dark'
-              ? '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-              : '0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4)'
+  const TrackCard = React.memo(
+    ({
+      track,
+      index,
+      currentTheme,
+      getDescriptionText,
+    }: {
+      track: TrackWithStats
+      index: number
+      currentTheme: string
+      getDescriptionText: (description: any) => string
+    }) => (
+      <Link href={`/tracks/${track.slug || track.id}`}>
+        <motion.div
+          key={track.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3, delay: index * 0.02 }}
+          whileHover={{
+            y: -8,
+            transition: { duration: 0.2 },
           }}
+          className="break-inside-avoid mb-6 cursor-pointer"
         >
-          {/* 简化装饰层 - 性能优化 */}
           <div
-            className={`absolute inset-0 rounded-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-300 ${
+            className={`relative group backdrop-blur-3xl rounded-3xl border shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl ${
               currentTheme === 'dark'
-                ? 'bg-gradient-to-br from-blue-500/5 to-purple-600/5'
-                : 'bg-gradient-to-br from-blue-400/8 to-purple-500/8'
+                ? 'bg-gradient-to-br from-white/15 via-white/8 to-white/5 border-white/20'
+                : 'bg-gradient-to-br from-white/25 via-white/15 to-white/10 border-white/30'
             }`}
-          />
-          <Card className="bg-transparent border-0 relative z-10">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className={`text-xl font-bold mb-2 line-clamp-2 ${
-                    currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {track.title}
-                  </h3>
-                  <p className={`text-sm line-clamp-3 mb-4 ${
-                    currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                  }`}>
-                    {getDescriptionText(track.description)}
-                  </p>
+            style={{
+              boxShadow:
+                currentTheme === 'dark'
+                  ? '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                  : '0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4)',
+            }}
+          >
+            {/* 简化装饰层 - 性能优化 */}
+            <div
+              className={`absolute inset-0 rounded-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-300 ${
+                currentTheme === 'dark'
+                  ? 'bg-gradient-to-br from-blue-500/5 to-purple-600/5'
+                  : 'bg-gradient-to-br from-blue-400/8 to-purple-500/8'
+              }`}
+            />
+            <Card className="bg-transparent border-0 relative z-10">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3
+                      className={`text-xl font-bold mb-2 line-clamp-2 ${
+                        currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}
+                    >
+                      {track.title}
+                    </h3>
+                    <p
+                      className={`text-sm line-clamp-3 mb-4 ${
+                        currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                      }`}
+                    >
+                      {getDescriptionText(track.description)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex items-center space-x-4 text-sm">
-                <div className={`flex items-center space-x-1 ${
-                  currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                }`}>
-                  <Music className="w-4 h-4" />
-                  <span>{track.versionCount || 0} 个版本</span>
+
+                <div className="flex items-center space-x-4 text-sm">
+                  <div
+                    className={`flex items-center space-x-1 ${
+                      currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
+                  >
+                    <Music className="w-4 h-4" />
+                    <span>{track.versionCount || 0} 个版本</span>
+                  </div>
+                  <div
+                    className={`flex items-center space-x-1 ${
+                      currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
+                  >
+                    <Heart className="w-4 h-4" />
+                    <span>{track.totalLikes || 0} 点赞</span>
+                  </div>
                 </div>
-                <div className={`flex items-center space-x-1 ${
-                  currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                }`}>
-                  <Heart className="w-4 h-4" />
-                  <span>{track.totalLikes || 0} 点赞</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </motion.div>
-    </Link>
-  ))
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+      </Link>
+    ),
+  )
 
   // 提取描述文本 - 使用useCallback优化
   const getDescriptionText = useCallback((description: any) => {
@@ -372,28 +388,30 @@ export const HomeClient: React.FC<HomeClientProps> = ({
         <motion.div
           className="absolute inset-0 opacity-50"
           style={{
-            background: currentTheme === 'dark'
-              ? 'linear-gradient(45deg, rgba(59, 130, 246, 0.25) 0%, rgba(147, 51, 234, 0.22) 25%, rgba(236, 72, 153, 0.2) 50%, rgba(34, 197, 94, 0.18) 75%, rgba(251, 146, 60, 0.2) 100%)'
-              : 'linear-gradient(45deg, rgba(59, 130, 246, 0.18) 0%, rgba(147, 51, 234, 0.16) 25%, rgba(236, 72, 153, 0.14) 50%, rgba(34, 197, 94, 0.12) 75%, rgba(251, 146, 60, 0.15) 100%)',
+            background:
+              currentTheme === 'dark'
+                ? 'linear-gradient(45deg, rgba(59, 130, 246, 0.25) 0%, rgba(147, 51, 234, 0.22) 25%, rgba(236, 72, 153, 0.2) 50%, rgba(34, 197, 94, 0.18) 75%, rgba(251, 146, 60, 0.2) 100%)'
+                : 'linear-gradient(45deg, rgba(59, 130, 246, 0.18) 0%, rgba(147, 51, 234, 0.16) 25%, rgba(236, 72, 153, 0.14) 50%, rgba(34, 197, 94, 0.12) 75%, rgba(251, 146, 60, 0.15) 100%)',
             willChange: 'background',
           }}
           animate={{
-            background: currentTheme === 'dark'
-              ? [
-                  'linear-gradient(45deg, rgba(59, 130, 246, 0.25) 0%, rgba(147, 51, 234, 0.22) 25%, rgba(236, 72, 153, 0.2) 50%, rgba(34, 197, 94, 0.18) 75%, rgba(251, 146, 60, 0.2) 100%)',
-                  'linear-gradient(225deg, rgba(251, 146, 60, 0.25) 0%, rgba(59, 130, 246, 0.22) 25%, rgba(147, 51, 234, 0.2) 50%, rgba(236, 72, 153, 0.18) 75%, rgba(34, 197, 94, 0.2) 100%)',
-                  'linear-gradient(45deg, rgba(59, 130, 246, 0.25) 0%, rgba(147, 51, 234, 0.22) 25%, rgba(236, 72, 153, 0.2) 50%, rgba(34, 197, 94, 0.18) 75%, rgba(251, 146, 60, 0.2) 100%)'
-                ]
-              : [
-                  'linear-gradient(45deg, rgba(59, 130, 246, 0.18) 0%, rgba(147, 51, 234, 0.16) 25%, rgba(236, 72, 153, 0.14) 50%, rgba(34, 197, 94, 0.12) 75%, rgba(251, 146, 60, 0.15) 100%)',
-                  'linear-gradient(225deg, rgba(251, 146, 60, 0.18) 0%, rgba(59, 130, 246, 0.16) 25%, rgba(147, 51, 234, 0.14) 50%, rgba(236, 72, 153, 0.12) 75%, rgba(34, 197, 94, 0.15) 100%)',
-                  'linear-gradient(45deg, rgba(59, 130, 246, 0.18) 0%, rgba(147, 51, 234, 0.16) 25%, rgba(236, 72, 153, 0.14) 50%, rgba(34, 197, 94, 0.12) 75%, rgba(251, 146, 60, 0.15) 100%)'
-                ]
+            background:
+              currentTheme === 'dark'
+                ? [
+                    'linear-gradient(45deg, rgba(59, 130, 246, 0.25) 0%, rgba(147, 51, 234, 0.22) 25%, rgba(236, 72, 153, 0.2) 50%, rgba(34, 197, 94, 0.18) 75%, rgba(251, 146, 60, 0.2) 100%)',
+                    'linear-gradient(225deg, rgba(251, 146, 60, 0.25) 0%, rgba(59, 130, 246, 0.22) 25%, rgba(147, 51, 234, 0.2) 50%, rgba(236, 72, 153, 0.18) 75%, rgba(34, 197, 94, 0.2) 100%)',
+                    'linear-gradient(45deg, rgba(59, 130, 246, 0.25) 0%, rgba(147, 51, 234, 0.22) 25%, rgba(236, 72, 153, 0.2) 50%, rgba(34, 197, 94, 0.18) 75%, rgba(251, 146, 60, 0.2) 100%)',
+                  ]
+                : [
+                    'linear-gradient(45deg, rgba(59, 130, 246, 0.18) 0%, rgba(147, 51, 234, 0.16) 25%, rgba(236, 72, 153, 0.14) 50%, rgba(34, 197, 94, 0.12) 75%, rgba(251, 146, 60, 0.15) 100%)',
+                    'linear-gradient(225deg, rgba(251, 146, 60, 0.18) 0%, rgba(59, 130, 246, 0.16) 25%, rgba(147, 51, 234, 0.14) 50%, rgba(236, 72, 153, 0.12) 75%, rgba(34, 197, 94, 0.15) 100%)',
+                    'linear-gradient(45deg, rgba(59, 130, 246, 0.18) 0%, rgba(147, 51, 234, 0.16) 25%, rgba(236, 72, 153, 0.14) 50%, rgba(34, 197, 94, 0.12) 75%, rgba(251, 146, 60, 0.15) 100%)',
+                  ],
           }}
           transition={{
             duration: 20,
             repeat: Infinity,
-            ease: 'easeInOut'
+            ease: 'easeInOut',
           }}
         />
 
@@ -402,28 +420,30 @@ export const HomeClient: React.FC<HomeClientProps> = ({
           <motion.div
             className="absolute inset-0 overflow-hidden opacity-40"
             style={{
-              background: currentTheme === 'dark'
-                ? 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)'
-                : 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
+              background:
+                currentTheme === 'dark'
+                  ? 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)'
+                  : 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
               willChange: 'background',
             }}
             animate={{
-              background: currentTheme === 'dark'
-                ? [
-                    'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)',
-                    'radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.18) 0%, transparent 50%)',
-                    'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)'
-                  ]
-                : [
-                    'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
-                    'radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.12) 0%, transparent 50%)',
-                    'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)'
-                  ]
+              background:
+                currentTheme === 'dark'
+                  ? [
+                      'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)',
+                      'radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.18) 0%, transparent 50%)',
+                      'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)',
+                    ]
+                  : [
+                      'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
+                      'radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.12) 0%, transparent 50%)',
+                      'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
+                    ],
             }}
             transition={{
               duration: 25,
               repeat: Infinity,
-              ease: 'easeInOut'
+              ease: 'easeInOut',
             }}
           />
         )}
@@ -433,30 +453,31 @@ export const HomeClient: React.FC<HomeClientProps> = ({
           <>
             {/* 增强多色弥散光晕层 - 增强显眼度 */}
             {Array.from({ length: 5 }).map((_, i) => {
-              const colors = currentTheme === 'dark' 
-                ? [
-                    'radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(147, 51, 234, 0.25) 50%, transparent 100%)', // 蓝紫
-                    'radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, rgba(168, 85, 247, 0.22) 50%, transparent 100%)', // 粉紫
-                    'radial-gradient(circle, rgba(34, 197, 94, 0.28) 0%, rgba(59, 130, 246, 0.2) 50%, transparent 100%)', // 绿蓝
-                    'radial-gradient(circle, rgba(251, 146, 60, 0.32) 0%, rgba(236, 72, 153, 0.24) 50%, transparent 100%)', // 橙粉
-                    'radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(34, 197, 94, 0.22) 50%, transparent 100%)'  // 紫绿
-                  ]
-                : [
-                    'radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, rgba(147, 51, 234, 0.18) 50%, transparent 100%)', // 蓝紫
-                    'radial-gradient(circle, rgba(236, 72, 153, 0.22) 0%, rgba(168, 85, 247, 0.16) 50%, transparent 100%)', // 粉紫
-                    'radial-gradient(circle, rgba(34, 197, 94, 0.2) 0%, rgba(59, 130, 246, 0.14) 50%, transparent 100%)', // 绿蓝
-                    'radial-gradient(circle, rgba(251, 146, 60, 0.24) 0%, rgba(236, 72, 153, 0.18) 50%, transparent 100%)', // 橙粉
-                    'radial-gradient(circle, rgba(168, 85, 247, 0.22) 0%, rgba(34, 197, 94, 0.16) 50%, transparent 100%)'  // 紫绿
-                  ];
-              
+              const colors =
+                currentTheme === 'dark'
+                  ? [
+                      'radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(147, 51, 234, 0.25) 50%, transparent 100%)', // 蓝紫
+                      'radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, rgba(168, 85, 247, 0.22) 50%, transparent 100%)', // 粉紫
+                      'radial-gradient(circle, rgba(34, 197, 94, 0.28) 0%, rgba(59, 130, 246, 0.2) 50%, transparent 100%)', // 绿蓝
+                      'radial-gradient(circle, rgba(251, 146, 60, 0.32) 0%, rgba(236, 72, 153, 0.24) 50%, transparent 100%)', // 橙粉
+                      'radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(34, 197, 94, 0.22) 50%, transparent 100%)', // 紫绿
+                    ]
+                  : [
+                      'radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, rgba(147, 51, 234, 0.18) 50%, transparent 100%)', // 蓝紫
+                      'radial-gradient(circle, rgba(236, 72, 153, 0.22) 0%, rgba(168, 85, 247, 0.16) 50%, transparent 100%)', // 粉紫
+                      'radial-gradient(circle, rgba(34, 197, 94, 0.2) 0%, rgba(59, 130, 246, 0.14) 50%, transparent 100%)', // 绿蓝
+                      'radial-gradient(circle, rgba(251, 146, 60, 0.24) 0%, rgba(236, 72, 153, 0.18) 50%, transparent 100%)', // 橙粉
+                      'radial-gradient(circle, rgba(168, 85, 247, 0.22) 0%, rgba(34, 197, 94, 0.16) 50%, transparent 100%)', // 紫绿
+                    ]
+
               const positions = [
                 { left: '15%', top: '20%', size: 400 },
                 { left: '75%', top: '15%', size: 350 },
                 { left: '10%', top: '70%', size: 300 },
                 { left: '80%', top: '65%', size: 380 },
-                { left: '45%', top: '45%', size: 320 }
-              ];
-              
+                { left: '45%', top: '45%', size: 320 },
+              ]
+
               return (
                 <motion.div
                   key={`diffuse-orb-${i}`}
@@ -479,22 +500,23 @@ export const HomeClient: React.FC<HomeClientProps> = ({
                     delay: i * 2.5,
                   }}
                 />
-              );
-             })}
+              )
+            })}
 
             {/* 多色流动层 - 增强显眼度 */}
             <motion.div
               className="absolute inset-0 blur-[25px] opacity-50"
               style={{
-                background: currentTheme === 'dark'
-                  ? `linear-gradient(120deg, 
+                background:
+                  currentTheme === 'dark'
+                    ? `linear-gradient(120deg, 
                       rgba(59, 130, 246, 0.3) 0%, 
                       rgba(236, 72, 153, 0.25) 20%,
                       rgba(34, 197, 94, 0.22) 40%,
                       rgba(251, 146, 60, 0.28) 60%,
                       rgba(168, 85, 247, 0.25) 80%,
                       rgba(59, 130, 246, 0.2) 100%)`
-                  : `linear-gradient(120deg, 
+                    : `linear-gradient(120deg, 
                       rgba(59, 130, 246, 0.22) 0%, 
                       rgba(236, 72, 153, 0.18) 20%,
                       rgba(34, 197, 94, 0.16) 40%,
@@ -531,204 +553,222 @@ export const HomeClient: React.FC<HomeClientProps> = ({
       {/* 可滚动内容区域 */}
       <div className="relative z-10 min-h-screen overflow-y-auto">
         <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* 页面标题和搜索 */}
-        <div className="text-center space-y-8 mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="relative"
-          >
-            <h1
-              className={`text-5xl font-bold bg-gradient-to-r bg-clip-text text-transparent mb-4 ${
-                currentTheme === 'dark'
-                  ? 'from-blue-400 via-purple-400 to-pink-400'
-                  : 'from-blue-600 via-purple-600 to-pink-600'
-              }`}
+          {/* 页面标题和搜索 */}
+          <div className="text-center space-y-8 mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="relative"
             >
-              {welcomeText}
-            </h1>
-            <p
-              className={`text-xl max-w-2xl mx-auto ${
-                currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-              }`}
-            >
-              在这里记录我们的北邮爱乐合唱团
-            </p>
-          </motion.div>
-
-          {/* 搜索框 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-lg mx-auto relative"
-          >
-            <Search
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
-                currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-400'
-              }`}
-            />
-            <div className="relative">
-              <div
-                className={`absolute inset-0 rounded-2xl ${
+              <h1
+                className={`text-5xl font-bold bg-gradient-to-r bg-clip-text text-transparent mb-4 ${
                   currentTheme === 'dark'
-                    ? 'bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5'
-                    : 'bg-gradient-to-br from-blue-400/10 via-transparent to-purple-400/10'
+                    ? 'from-blue-400 via-purple-400 to-pink-400'
+                    : 'from-blue-600 via-purple-600 to-pink-600'
                 }`}
-              />
-              <Input
-                type="text"
-                placeholder="搜索曲目..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-12 py-4 text-lg backdrop-blur-xl rounded-2xl transition-all duration-300 relative z-10 ${
-                  currentTheme === 'dark'
-                    ? 'bg-white/15 border-white/20 text-white placeholder:text-gray-400 focus:bg-white/25 focus:border-white/30'
-                    : 'bg-white/80 border-white/40 text-gray-900 placeholder:text-gray-500 focus:bg-white/90 focus:border-white/50'
-                }`}
-                style={{
-                  boxShadow:
-                    currentTheme === 'dark'
-                      ? '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-                      : '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
-                }}
-              />
-            </div>
-          </motion.div>
-        </div>
-
-        {/* 曲目瀑布流 */}
-        {loading ? (
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 max-w-5xl mx-auto">
-            {Array.from({ length: 12 }).map((_, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="break-inside-avoid mb-6"
               >
+                {welcomeText}
+              </h1>
+              <p
+                className={`text-xl max-w-2xl mx-auto ${
+                  currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                }`}
+              >
+                在这里记录我们的北邮爱乐合唱团
+              </p>
+            </motion.div>
+
+            {/* 公告横幅 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+            >
+              <AnnouncementBanner />
+            </motion.div>
+
+            {/* 搜索框 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="max-w-3xl mx-auto relative"
+            >
+              <Search
+                className={`absolute left-5 top-1/2 transform -translate-y-1/2 w-6 h-6 ${
+                  currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-400'
+                }`}
+              />
+              <div className="relative">
+                {/* 增强的背景渐变层 */}
                 <div
-                  className={`backdrop-blur-xl border rounded-2xl shadow-lg overflow-hidden ${
+                  className={`absolute inset-0 rounded-3xl ${
                     currentTheme === 'dark'
-                      ? 'bg-white/10 border-white/20'
-                      : 'bg-white/20 border-white/30'
+                      ? 'bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10'
+                      : 'bg-gradient-to-br from-blue-400/15 via-purple-400/10 to-pink-400/15'
                   }`}
+                />
+                {/* 立体感光影层 */}
+                <div
+                  className={`absolute inset-0 rounded-3xl ${
+                    currentTheme === 'dark'
+                      ? 'shadow-[0_8px_32px_rgba(0,0,0,0.3),0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]'
+                      : 'shadow-[0_8px_32px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.4)]'
+                  }`}
+                />
+                <Input
+                  type="text"
+                  placeholder="搜索曲目..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={`pl-14 py-5 text-lg backdrop-blur-xl rounded-3xl transition-all duration-300 relative z-10 border-2 ${
+                    currentTheme === 'dark'
+                      ? 'bg-white/10 border-white/15 text-white placeholder:text-gray-400 focus:bg-white/20 focus:border-white/25 hover:bg-white/15'
+                      : 'bg-white/85 border-white/30 text-gray-900 placeholder:text-gray-500 focus:bg-white/95 focus:border-white/40 hover:bg-white/90'
+                  }`}
+                  style={{
+                    boxShadow:
+                      currentTheme === 'dark'
+                        ? '0 20px 40px -8px rgba(0, 0, 0, 0.4), 0 8px 16px -4px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1), inset 0 -1px 2px rgba(0, 0, 0, 0.1)'
+                        : '0 20px 40px -8px rgba(0, 0, 0, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.08), inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -1px 2px rgba(0, 0, 0, 0.05)',
+                  }}
+                />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* 曲目瀑布流 */}
+          {loading ? (
+            <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 max-w-5xl mx-auto">
+              {Array.from({ length: 12 }).map((_, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="break-inside-avoid mb-6"
                 >
-                  <Card className="animate-pulse bg-transparent border-0">
-                    <CardContent className="p-6">
-                      <div
-                        className={`h-6 rounded w-3/4 mb-2 ${
-                          currentTheme === 'dark' ? 'bg-white/20' : 'bg-gray-300/50'
-                        }`}
-                      />
-                      <div
-                        className={`h-4 rounded w-full mb-2 ${
-                          currentTheme === 'dark' ? 'bg-white/15' : 'bg-gray-300/40'
-                        }`}
-                      />
-                      <div
-                        className={`h-4 rounded w-2/3 mb-4 ${
-                          currentTheme === 'dark' ? 'bg-white/15' : 'bg-gray-300/40'
-                        }`}
-                      />
-                      <div className="flex justify-between items-center">
-                        <div className="flex space-x-4">
+                  <div
+                    className={`backdrop-blur-xl border rounded-2xl shadow-lg overflow-hidden ${
+                      currentTheme === 'dark'
+                        ? 'bg-white/10 border-white/20'
+                        : 'bg-white/20 border-white/30'
+                    }`}
+                  >
+                    <Card className="animate-pulse bg-transparent border-0">
+                      <CardContent className="p-6">
+                        <div
+                          className={`h-6 rounded w-3/4 mb-2 ${
+                            currentTheme === 'dark' ? 'bg-white/20' : 'bg-gray-300/50'
+                          }`}
+                        />
+                        <div
+                          className={`h-4 rounded w-full mb-2 ${
+                            currentTheme === 'dark' ? 'bg-white/15' : 'bg-gray-300/40'
+                          }`}
+                        />
+                        <div
+                          className={`h-4 rounded w-2/3 mb-4 ${
+                            currentTheme === 'dark' ? 'bg-white/15' : 'bg-gray-300/40'
+                          }`}
+                        />
+                        <div className="flex justify-between items-center">
+                          <div className="flex space-x-4">
+                            <div
+                              className={`h-4 w-16 rounded ${
+                                currentTheme === 'dark' ? 'bg-white/15' : 'bg-gray-300/40'
+                              }`}
+                            />
+                            <div
+                              className={`h-4 w-16 rounded ${
+                                currentTheme === 'dark' ? 'bg-white/15' : 'bg-gray-300/40'
+                              }`}
+                            />
+                          </div>
                           <div
-                            className={`h-4 w-16 rounded ${
-                              currentTheme === 'dark' ? 'bg-white/15' : 'bg-gray-300/40'
-                            }`}
-                          />
-                          <div
-                            className={`h-4 w-16 rounded ${
+                            className={`h-8 w-20 rounded ${
                               currentTheme === 'dark' ? 'bg-white/15' : 'bg-gray-300/40'
                             }`}
                           />
                         </div>
-                        <div
-                          className={`h-8 w-20 rounded ${
-                            currentTheme === 'dark' ? 'bg-white/15' : 'bg-gray-300/40'
-                          }`}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : filteredTracks.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className={`text-center py-16 backdrop-blur-xl border rounded-2xl shadow-lg max-w-lg mx-auto ${
+                currentTheme === 'dark'
+                  ? 'bg-white/10 border-white/20'
+                  : 'bg-white/20 border-white/30'
+              }`}
+            >
+              <Music
+                className={`w-20 h-20 mx-auto mb-6 ${
+                  currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                }`}
+              />
+              <h2
+                className={`text-3xl font-bold mb-4 ${
+                  currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}
+              >
+                {searchTerm ? '未找到匹配的曲目' : '暂无曲目'}
+              </h2>
+              <p
+                className={`mb-8 text-lg ${
+                  currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                }`}
+              >
+                {searchTerm ? '尝试使用其他关键词搜索' : '目前还没有任何曲目，请稍后再来查看'}
+              </p>
+              {searchTerm && (
+                <Button onClick={() => setSearchTerm('')} variant="outline" size="lg">
+                  清除搜索
+                </Button>
+              )}
+            </motion.div>
+          ) : (
+            <>
+              <AnimatePresence>
+                <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 max-w-5xl mx-auto">
+                  {filteredTracks.map((track, index) => (
+                    <TrackCard
+                      key={track.id}
+                      track={track}
+                      index={index}
+                      currentTheme={currentTheme || 'dark'}
+                      getDescriptionText={getDescriptionText}
+                    />
+                  ))}
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        ) : filteredTracks.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className={`text-center py-16 backdrop-blur-xl border rounded-2xl shadow-lg max-w-lg mx-auto ${
-              currentTheme === 'dark'
-                ? 'bg-white/10 border-white/20'
-                : 'bg-white/20 border-white/30'
-            }`}
-          >
-            <Music
-              className={`w-20 h-20 mx-auto mb-6 ${
-                currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-              }`}
-            />
-            <h2
-              className={`text-3xl font-bold mb-4 ${
-                currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
-              }`}
-            >
-              {searchTerm ? '未找到匹配的曲目' : '暂无曲目'}
-            </h2>
-            <p
-              className={`mb-8 text-lg ${
-                currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-              }`}
-            >
-              {searchTerm ? '尝试使用其他关键词搜索' : '目前还没有任何曲目，请稍后再来查看'}
-            </p>
-            {searchTerm && (
-              <Button onClick={() => setSearchTerm('')} variant="outline" size="lg">
-                清除搜索
-              </Button>
-            )}
-          </motion.div>
-        ) : (
-          <>
-            <AnimatePresence>
-              <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 max-w-5xl mx-auto">
-                {filteredTracks.map((track, index) => (
-                  <TrackCard
-                     key={track.id}
-                     track={track}
-                     index={index}
-                     currentTheme={currentTheme || 'dark'}
-                     getDescriptionText={getDescriptionText}
-                   />
-                ))}
-              </div>
-            </AnimatePresence>
+              </AnimatePresence>
 
-            {/* 无限滚动触发器和加载指示器 */}
-            {hasMore && !searchTerm && (
-              <div ref={observerRef} className="text-center py-12">
-                {loadingMore && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className={`flex items-center justify-center gap-3 ${
-                      currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    }`}
-                  >
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    <span className="text-lg">加载更多曲目...</span>
-                  </motion.div>
-                )}
-              </div>
-            )}
-          </>
-        )}
+              {/* 无限滚动触发器和加载指示器 */}
+              {hasMore && !searchTerm && (
+                <div ref={observerRef} className="text-center py-12">
+                  {loadingMore && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className={`flex items-center justify-center gap-3 ${
+                        currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      }`}
+                    >
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                      <span className="text-lg">加载更多曲目...</span>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -24,18 +24,27 @@ export const Scores: CollectionConfig = {
     afterChange: [increaseActivityScore],
   },
   admin: {
-    useAsTitle: 'description',
-    defaultColumns: ['description', 'track_version', 'uploader', 'createdAt'],
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'track_version', 'uploader', 'createdAt'],
     description: '乐谱文件，通常是 PDF 格式。',
   },
   fields: [
     {
-      name: 'description',
+      name: 'title',
       type: 'text',
       required: true,
+      label: 'Score Title',
+      admin: {
+        description: '乐谱文件的标题，如 "第一章"、"完整版" 等',
+      },
+    },
+    {
+      name: 'description',
+      type: 'text',
+      required: false,
       label: 'Score Description',
       admin: {
-        description: '乐谱文件的描述和说明，如 "第一章"、"完整版" 等',
+        description: '乐谱文件的详细描述（可选）',
       },
     },
     {
