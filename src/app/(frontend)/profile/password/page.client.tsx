@@ -25,7 +25,7 @@ export function ChangePasswordClient() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
     // 清除消息
     if (message) setMessage(null)
   }
@@ -99,8 +99,8 @@ export function ChangePasswordClient() {
   return (
     <div className="container mx-auto max-w-md py-8">
       <div className="mb-6">
-        <Link 
-          href="/profile" 
+        <Link
+          href="/profile"
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -111,14 +111,16 @@ export function ChangePasswordClient() {
       <Card>
         <CardHeader>
           <CardTitle>修改密码</CardTitle>
-          <CardDescription>
-            为了您的账户安全，请定期更换密码
-          </CardDescription>
+          <CardDescription>为了您的账户安全，请定期更换密码</CardDescription>
         </CardHeader>
         <CardContent>
           {message && (
-            <Alert className={`mb-4 ${message.type === 'error' ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}>
-              <AlertDescription className={message.type === 'error' ? 'text-red-700' : 'text-green-700'}>
+            <Alert
+              className={`mb-4 ${message.type === 'error' ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}
+            >
+              <AlertDescription
+                className={message.type === 'error' ? 'text-red-700' : 'text-green-700'}
+              >
                 {message.text}
               </AlertDescription>
             </Alert>
@@ -176,11 +178,7 @@ export function ChangePasswordClient() {
                   onClick={() => setShowNewPassword(!showNewPassword)}
                   disabled={isLoading}
                 >
-                  {showNewPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
@@ -216,11 +214,7 @@ export function ChangePasswordClient() {
             </div>
 
             <div className="flex gap-3 pt-4">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1"
-              >
+              <Button type="submit" disabled={isLoading} className="flex-1">
                 {isLoading ? '修改中...' : '修改密码'}
               </Button>
               <Button
