@@ -17,6 +17,8 @@ import {
   Heart,
   Eye,
   Settings,
+  Lock,
+  Camera,
 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDateTime } from '@/utilities/formatDateTime'
@@ -222,20 +224,33 @@ export const UserProfileClient: React.FC<UserProfileClientProps> = ({
                       </motion.div>
                     )}
 
-                    {/* 头像配置按钮 - 只有查看自己的个人资料时才显示 */}
+                    {/* 设置按钮组 - 只有查看自己的个人资料时才显示 */}
                     {isOwnProfile && (
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.7, type: 'spring' }}
-                        className="absolute -top-2 -left-2 z-20"
+                        className="absolute -top-2 -left-2 z-20 flex gap-2"
                       >
+                        {/* 头像设置按钮 */}
                         <Link href="/profile/avatar">
                           <Button
                             size="sm"
                             className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 px-3 py-2 shadow-lg rounded-full"
+                            title="设置头像"
                           >
-                            <Settings className="w-4 h-4" />
+                            <Camera className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        
+                        {/* 修改密码按钮 */}
+                        <Link href="/profile/password">
+                          <Button
+                            size="sm"
+                            className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white border-0 px-3 py-2 shadow-lg rounded-full"
+                            title="修改密码"
+                          >
+                            <Lock className="w-4 h-4" />
                           </Button>
                         </Link>
                       </motion.div>

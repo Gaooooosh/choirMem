@@ -13,6 +13,9 @@ interface Props {
 
 export default async function TrackDetailPage({ params }: Props) {
   const { slug } = await params
+  // URL解码中文字符
+  const decodedSlug = decodeURIComponent(slug)
+
   const payload = await getPayload({
     config: configPromise,
   })
@@ -21,7 +24,7 @@ export default async function TrackDetailPage({ params }: Props) {
     collection: 'tracks',
     where: {
       slug: {
-        equals: slug,
+        equals: decodedSlug,
       },
     },
     depth: 2,

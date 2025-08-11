@@ -42,38 +42,79 @@ const resetDatabase = async () => {
 
     console.log('🔐 正在创建管理员权限组...')
 
-    // Create admin permission group
-    const adminGroup = await payload.create({
+    // Check if admin permission group already exists
+    const existingAdminGroup = await payload.find({
       collection: 'permission-groups',
-      data: {
-        name: 'Admin',
-        can_view_scores: true,
-        can_upload_scores: true,
-        can_upload_photos: true,
-        can_post_comments: true,
-        can_create_tracks: true,
-        can_manage_permission_groups: true,
+      where: {
+        name: {
+          equals: 'Admin',
+        },
       },
+      limit: 1,
+      overrideAccess: true,
     })
+
+    let adminGroup
+    if (existingAdminGroup.docs.length > 0) {
+      adminGroup = existingAdminGroup.docs[0]
+      console.log('管理员权限组已存在，复用现有权限组')
+    } else {
+      // Create admin permission group
+      adminGroup = await payload.create({
+        collection: 'permission-groups',
+        data: {
+          name: 'Admin',
+          can_view_scores: true,
+          can_upload_scores: true,
+          can_upload_photos: true,
+          can_post_comments: true,
+          can_create_tracks: true,
+          can_manage_permission_groups: true,
+          can_manage_system_settings: true,
+          can_manage_users: true,
+          can_manage_invitation_codes: true,
+        },
+      })
+      console.log('管理员权限组创建成功')
+    }
 
     console.log('👤 正在创建管理员用户...')
 
-    // Create admin user
-    const adminUser = await payload.create({
+    // Check if admin user already exists
+    const existingAdminUser = await payload.find({
       collection: 'users',
-      data: {
-        email: 'admin@example.com',
-        password: 'admin123',
-        name: '管理员',
-        username: 'admin',
-        group: adminGroup.id,
-        activity_score: 0,
-        is_admin: true,
+      where: {
+        username: {
+          equals: 'admin',
+        },
       },
+      limit: 1,
+      overrideAccess: true,
     })
 
+    let adminUser
+    if (existingAdminUser.docs.length > 0) {
+      adminUser = existingAdminUser.docs[0]
+      console.log('管理员用户已存在，复用现有用户')
+    } else {
+      // Create admin user
+      adminUser = await payload.create({
+        collection: 'users',
+        data: {
+          email: 'admin@example.com',
+          password: 'admin123',
+          name: '管理员',
+          username: 'admin',
+          group: adminGroup.id,
+          activity_score: 0,
+          is_admin: true,
+        },
+      })
+      console.log('管理员用户创建成功')
+    }
+
     // Create seed data
-    await seedData(payload, String(adminUser.id))
+    // await seedData(payload, String(adminUser.id))
 
     console.log('✅ 数据库重置完成!')
     console.log('📧 管理员邮箱: admin@example.com')

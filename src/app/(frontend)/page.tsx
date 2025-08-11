@@ -12,7 +12,7 @@ export default async function HomePage() {
   // 获取曲目数据作为首页内容
   const tracks = await payload.find({
     collection: 'tracks',
-    limit: 20, // 首次加载20个
+    limit: 100, // 加载更多曲目，确保显示所有内容
   })
 
   // 转换Payload Track类型到客户端Track类型

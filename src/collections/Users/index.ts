@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { hasPermission } from '../../access/hasPermission'
+import { canUpdateOwnProfile } from '../../access/canUpdateOwnProfile'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -14,7 +15,7 @@ export const Users: CollectionConfig = {
     create: hasPermission('can_manage_users'),
     delete: hasPermission('can_manage_users'),
     read: authenticated,
-    update: hasPermission('can_manage_users'),
+    update: canUpdateOwnProfile,
   },
   admin: {
     defaultColumns: ['name', 'email', 'username', 'group', 'activity_score'],

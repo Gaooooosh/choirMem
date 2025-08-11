@@ -21,3 +21,10 @@ node_modules/
 /playwright/.cache/
 
 *.db
+
+/数据迁移/
+/uploads/*
+/scores/
+*.log
+*.json
+*.yaml

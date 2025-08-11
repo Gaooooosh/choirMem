@@ -20,7 +20,18 @@
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test --config=playwright.config.ts",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
-    "reset-db": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/reset-db.ts"
+    "reset-db": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/reset-db.ts",
+    "set-admin": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/set-admin.ts",
+    "migration": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migration/migrate.ts",
+    "migration:report": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migration/migrate.ts report",
+    "migration:rollback": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migration/migrate.ts rollback",
+    "migrate:step": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migration/migrate-step.ts",
+    "migrate:users": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migration/migrate-step.ts users",
+    "migrate:tracks": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migration/migrate-step.ts tracks",
+    "migrate:media": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migration/migrate-step.ts media",
+    "migrate:content": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migration/migrate-step.ts content",
+    "migrate:system": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migration/migrate-step.ts system",
+    "migrate:all": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migration/migrate-step.ts all"
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.49.0",
@@ -44,6 +55,7 @@
     "@radix-ui/react-slider": "^1.3.5",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.2.14",
+    "@types/sqlite3": "^5.1.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cross-env": "^7.0.3",
@@ -61,6 +73,7 @@
     "react-dom": "19.1.0",
     "react-hook-form": "7.45.4",
     "sharp": "0.34.2",
+    "sqlite3": "^5.1.7",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"
   },
@@ -95,8 +108,9 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "sharp",
       "esbuild",
+      "sharp",
+      "sqlite3",
       "unrs-resolver"
     ]
   }

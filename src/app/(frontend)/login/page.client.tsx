@@ -41,7 +41,13 @@ export function LoginClient() {
 
       if (response.ok) {
         setUser(data.user)
-        router.push('/')
+        
+        // 检查是否需要强制更新个人信息
+        if (data.user.email && data.user.email.includes('@example.com')) {
+          router.push('/force-update-profile')
+        } else {
+          router.push('/')
+        }
       } else {
         setError(data.message || '登录失败，请检查邮箱和密码')
       }
