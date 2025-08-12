@@ -23,7 +23,7 @@ export class MediaMigrator {
 
   constructor(
     private oldDbPath: string = './数据迁移/app.db',
-    private oldFilesPath: string = './数据迁移/files',
+    private oldFilesPath: string = './数据迁移/temp_backup/uploads',
     private newFilesPath: string = './uploads',
     private mappingsPath: string = './id-mappings.json'
   ) {}
@@ -216,7 +216,7 @@ export class MediaMigrator {
 async function main() {
   const args = process.argv.slice(2)
   const oldDbPath = args[0] || './数据迁移/app.db'
-  const oldFilesPath = args[1] || './数据迁移/files'
+  const oldFilesPath = args[1] || './数据迁移/temp_backup/uploads'
   const newFilesPath = args[2] || './uploads'
   const mappingsPath = args[3] || './id-mappings.json'
 

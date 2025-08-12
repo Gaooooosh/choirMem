@@ -17,8 +17,11 @@ export class FileMigrator {
     this.oldDataPath = oldDataPath
     this.newUploadsPath = newUploadsPath
     
-    // 确保新的上传目录存在
+    // 确保新的上传目录及子目录存在
     ensureDirectoryExists(this.newUploadsPath)
+    ensureDirectoryExists(path.join(this.newUploadsPath, 'avatars'))
+    ensureDirectoryExists(path.join(this.newUploadsPath, 'scores'))
+    ensureDirectoryExists(path.join(this.newUploadsPath, 'media'))
   }
 
   // 迁移用户头像
@@ -31,7 +34,7 @@ export class FileMigrator {
       }
     }
 
-    const oldPath = path.join(this.oldDataPath, 'avatars', avatarFilename)
+    const oldPath = path.join(this.oldDataPath, avatarFilename)
     const newPath = path.join(this.newUploadsPath, 'avatars', avatarFilename)
 
     if (!fileExists(oldPath)) {
@@ -71,7 +74,7 @@ export class FileMigrator {
       }
     }
 
-    const oldPath = path.join(this.oldDataPath, 'scores', filename)
+    const oldPath = path.join(this.oldDataPath, filename)
     const newPath = path.join(this.newUploadsPath, 'scores', filename)
 
     if (!fileExists(oldPath)) {
@@ -120,7 +123,7 @@ export class FileMigrator {
       }
     }
 
-    const oldPath = path.join(this.oldDataPath, 'photos', filename)
+    const oldPath = path.join(this.oldDataPath, filename)
     const newPath = path.join(this.newUploadsPath, 'media', filename)
 
     if (!fileExists(oldPath)) {

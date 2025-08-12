@@ -108,11 +108,26 @@ export class DataTransformer {
       async (oldUser) => {
         return await withErrorHandling(async () => {
           // 迁移头像文件
-          let avatarPath: string | undefined
+          let avatarMediaId: string | undefined
           if (oldUser.avatar_filename && this.fileMigrator) {
             const avatarResult = this.fileMigrator.migrateUserAvatar(oldUser.avatar_filename)
             if (avatarResult.success && avatarResult.newPath) {
-              avatarPath = avatarResult.newPath
+              // 为头像创建media记录
+              const avatarMedia = await this.payload.create({
+                collection: 'media',
+                data: {
+                  alt: `${oldUser.username}的头像`,
+                  filename: oldUser.avatar_filename,
+                  mimeType: 'image/jpeg',
+                  filesize: 0,
+                  width: 0,
+                  height: 0,
+                  createdAt: new Date().toISOString(),
+                   updatedAt: new Date().toISOString(),
+                },
+                filePath: avatarResult.newPath,
+              })
+              avatarMediaId = avatarMedia.id.toString()
             }
           }
 
@@ -201,7 +216,7 @@ export class DataTransformer {
                 activity_score: oldUser.activity_score || 0,
                 // last_seen 和 has_seen_welcome 字段在新系统中不存在
                 group: parseInt(permissionGroupId),
-                avatar: avatarPath ? parseInt(avatarPath) : null,
+                avatar: avatarMediaId ? parseInt(avatarMediaId) : null,
               }
               
               Logger.info(`准备创建用户: ${oldUser.username}, 邮箱: ${email}, 权限组: ${permissionGroupId}`)
@@ -496,9 +511,9 @@ export class DataTransformer {
               description: convertToLexicalRichText(oldScore.description),
               track_version: parseInt(versionId),
               uploader: parseInt(uploaderId),
-              // 文件通过 filePath 上传，不需要 file 字段
               createdAt: formatTimestamp(oldScore.timestamp),
             },
+            filePath: fileResult.newPath,
           })
 
           this.idMapper.addMapping('scores', oldScore.id, newScore.id.toString())

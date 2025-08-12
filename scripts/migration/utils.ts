@@ -111,7 +111,8 @@ export function isImageFile(filename: string): boolean {
 
 // 检查是否为PDF文件
 export function isPdfFile(filename: string): boolean {
-  return getFileExtension(filename) === '.pdf'
+  const ext = getFileExtension(filename)
+  return ext === '.pdf' || filename.endsWith('_pdf')
 }
 
 // 生成slug

@@ -157,7 +157,7 @@ export class ContentMigrator {
       // 验证文章
       const oldArticleCount = await this.oldDataReader.getArticleCount()
       const newArticleCount = await this.payload.count({
-        collection: 'posts',
+        collection: 'articles',
         overrideAccess: true,
       })
       Logger.info(`文章: 旧系统 ${oldArticleCount} 篇，新系统 ${newArticleCount.totalDocs} 篇`)

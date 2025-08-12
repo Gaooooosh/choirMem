@@ -53,10 +53,10 @@ pnpm migrate:all
 pnpm migrate:users ./custom/path/to/old.db
 
 # 媒体迁移需要额外的文件路径参数
-pnpm migrate:media ./数据迁移/app.db ./数据迁移/files ./uploads
+pnpm migrate:media ./数据迁移/app.db ./数据迁移/temp_backup/uploads ./uploads
 
 # 完整参数示例
-pnpm migrate:step media ./数据迁移/app.db ./数据迁移/files ./uploads ./custom-mappings.json
+pnpm migrate:step media ./数据迁移/app.db ./数据迁移/temp_backup/uploads ./uploads ./custom-mappings.json
 ```
 
 ## 迁移步骤详解

@@ -28,3 +28,9 @@ node_modules/
 *.log
 *.json
 *.yaml
+.npmrc
+.prettierrc
+.prettierrc.json
+eslint.config.js
+CLAUDE.md
+test.*

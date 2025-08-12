@@ -60,14 +60,14 @@ function printUsage() {
   
   console.log('参数:')
   console.log('  [旧数据库路径]   默认: ./数据迁移/app.db')
-  console.log('  [旧文件路径]     默认: ./数据迁移/files (仅媒体迁移需要)')
+  console.log('  [旧文件路径]     默认: ./数据迁移/temp_backup/uploads (仅媒体迁移需要)')
   console.log('  [新文件路径]     默认: ./uploads (仅媒体迁移需要)')
   console.log('  [映射文件路径]   默认: ./id-mappings.json\n')
   
   console.log('示例:')
   console.log('  pnpm migrate:step users')
   console.log('  pnpm migrate:step tracks ./数据迁移/app.db')
-  console.log('  pnpm migrate:step media ./数据迁移/app.db ./数据迁移/files ./uploads')
+  console.log('  pnpm migrate:step media ./数据迁移/app.db ./数据迁移/temp_backup/uploads ./uploads')
   console.log('  pnpm migrate:step all  # 按顺序执行所有步骤\n')
 }
 
@@ -97,7 +97,7 @@ async function runMigrationStep(stepName: string, args: string[]) {
     if (stepName === 'media') {
       // 媒体迁移需要额外的文件路径参数
       const oldDbPath = args[0] || './数据迁移/app.db'
-      const oldFilesPath = args[1] || './数据迁移/files'
+      const oldFilesPath = args[1] || './数据迁移/temp_backup/uploads'
       const newFilesPath = args[2] || './uploads'
       const mappingsPath = args[3] || './id-mappings.json'
       migrator = new step.migrator(oldDbPath, oldFilesPath, newFilesPath, mappingsPath)
