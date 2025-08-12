@@ -5,7 +5,7 @@ import config from '@payload-config'
 export async function POST(request: NextRequest) {
   try {
     const payload = await getPayload({ config })
-    const { currentPassword, newEmail, newPassword } = await request.json()
+    const { name, bio } = await request.json()
 
     // 获取当前用户
     const token = request.cookies.get('payload-token')?.value
@@ -19,41 +19,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '用户未找到' }, { status: 404 })
     }
 
-    // 验证当前密码 - 使用Payload的登录验证
-    try {
-      await payload.login({
-        collection: 'users',
-        data: {
-          email: user.email,
-          password: currentPassword
-        }
-      })
-    } catch (error) {
-      return NextResponse.json({ error: '当前密码不正确' }, { status: 400 })
-    }
-
-    // 检查新邮箱是否已被使用
-    const existingUser = await payload.find({
-      collection: 'users',
-      where: {
-        and: [
-          { email: { equals: newEmail } },
-          { id: { not_equals: user.id } }
-        ]
-      }
-    })
-
-    if (existingUser.docs.length > 0) {
-      return NextResponse.json({ error: '该邮箱已被其他用户使用' }, { status: 400 })
-    }
-
-    // 更新用户信息 - Payload会自动处理密码加密
+    // 更新用户信息
     const updatedUser = await payload.update({
       collection: 'users',
       id: user.id,
       data: {
-        email: newEmail,
-        password: newPassword
+        name: name || '',
+        bio: bio || ''
       }
     })
 
@@ -63,7 +35,8 @@ export async function POST(request: NextRequest) {
         id: updatedUser.id,
         email: updatedUser.email,
         username: updatedUser.username,
-        name: updatedUser.name
+        name: updatedUser.name,
+        bio: updatedUser.bio
       }
     })
 

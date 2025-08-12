@@ -34,6 +34,8 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
     setMounted(true)
   }, [])
 
+
+
   const handleLogout = async () => {
     try {
       await fetch('/api/users/logout', {

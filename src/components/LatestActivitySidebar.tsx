@@ -49,7 +49,6 @@ export function LatestActivitySidebar({ isOpen, onClose }: LatestActivitySidebar
       
       if (response.ok) {
         const data = await response.json()
-        console.log('评论数据:', data)
         setComments(data.docs || [])
       } else {
         console.error('API 响应错误:', response.status, response.statusText)
@@ -70,6 +69,7 @@ export function LatestActivitySidebar({ isOpen, onClose }: LatestActivitySidebar
       fetchAllComments()
     }
   }, [isOpen])
+
 
   // 获取用户显示名称
   const getUserDisplayName = (author: Comment['author']) => {
@@ -122,14 +122,14 @@ export function LatestActivitySidebar({ isOpen, onClose }: LatestActivitySidebar
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-96 bg-white/70 dark:bg-gray-900/70 backdrop-blur-[40px] backdrop-saturate-[250%] backdrop-contrast-[175%] backdrop-brightness-110 border-l border-white/40 dark:border-gray-700/50 z-50 shadow-2xl"
-          >
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-screen w-96 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 z-50 shadow-2xl flex flex-col"
+            >
             {/* 头部 */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200/20 dark:border-gray-700/20 bg-black/10 dark:bg-black/20 backdrop-blur-2xl backdrop-saturate-200 backdrop-contrast-150 backdrop-brightness-110">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200/20 dark:border-gray-700/20 bg-black/10 dark:bg-black/20 backdrop-blur-2xl backdrop-saturate-200 backdrop-contrast-150 backdrop-brightness-110 flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm">
                   <MessageCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -149,12 +149,7 @@ export function LatestActivitySidebar({ isOpen, onClose }: LatestActivitySidebar
             </div>
 
             {/* 内容区域 */}
-            <div className="flex-1 overflow-y-auto relative">
-              {/* 毛玻璃背景层 */}
-              <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/10 to-white/5 dark:from-gray-800/30 dark:via-gray-800/20 dark:to-gray-800/10 backdrop-blur-xl backdrop-saturate-200 backdrop-contrast-125"></div>
-              
-              {/* 内容层 */}
-              <div className="relative z-10 p-6">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 bg-white dark:bg-gray-900">
               {isLoading ? (
                 <div className="space-y-4">
                   {[...Array(5)].map((_, i) => (
@@ -187,7 +182,7 @@ export function LatestActivitySidebar({ isOpen, onClose }: LatestActivitySidebar
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="p-4 rounded-xl bg-white/40 dark:bg-gray-800/40 backdrop-blur-md backdrop-saturate-150 border border-white/40 dark:border-gray-700/40 hover:bg-white/60 dark:hover:bg-gray-800/60 transition-all duration-200"
+                        className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
                       >
                         <div className="flex items-start gap-3">
                           <Link href={`/users/${comment.author.id}`} onClick={onClose}>
@@ -240,10 +235,9 @@ export function LatestActivitySidebar({ isOpen, onClose }: LatestActivitySidebar
                       </motion.div>
                     )
                   })}
-                </div>
-              )}
+                 </div>
+               )}
               </div>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

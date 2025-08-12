@@ -252,6 +252,10 @@ export interface User {
    * 标识用户是否为系统管理员
    */
   is_admin?: boolean | null;
+  /**
+   * 标识用户是否需要重置密码（用于迁移用户）
+   */
+  needs_password_reset?: boolean | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1438,6 +1442,7 @@ export interface UsersSelect<T extends boolean = true> {
   bio?: T;
   activity_score?: T;
   is_admin?: T;
+  needs_password_reset?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

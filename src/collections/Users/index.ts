@@ -107,6 +107,15 @@ export const Users: CollectionConfig = {
       },
       defaultValue: false,
     },
+    {
+      name: 'needs_password_reset',
+      type: 'checkbox',
+      label: 'Needs Password Reset',
+      admin: {
+        description: '标识用户是否需要重置密码（用于迁移用户）',
+      },
+      defaultValue: false,
+    },
   ],
   timestamps: true,
 }

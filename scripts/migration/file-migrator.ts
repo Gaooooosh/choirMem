@@ -1,6 +1,13 @@
 import fs from 'fs'
 import path from 'path'
-import { copyFile, ensureDirectoryExists, fileExists, isImageFile, isPdfFile, Logger } from './utils'
+import {
+  copyFile,
+  ensureDirectoryExists,
+  fileExists,
+  isImageFile,
+  isPdfFile,
+  Logger,
+} from './utils'
 
 export interface FileMigrationResult {
   success: boolean
@@ -16,7 +23,7 @@ export class FileMigrator {
   constructor(oldDataPath: string, newUploadsPath: string) {
     this.oldDataPath = oldDataPath
     this.newUploadsPath = newUploadsPath
-    
+
     // 确保新的上传目录及子目录存在
     ensureDirectoryExists(this.newUploadsPath)
     ensureDirectoryExists(path.join(this.newUploadsPath, 'avatars'))
@@ -30,7 +37,7 @@ export class FileMigrator {
       return {
         success: false,
         originalPath: '',
-        error: 'Empty avatar filename'
+        error: 'Empty avatar filename',
       }
     }
 
@@ -42,7 +49,7 @@ export class FileMigrator {
       return {
         success: false,
         originalPath: oldPath,
-        error: 'File not found'
+        error: 'File not found',
       }
     }
 
@@ -52,14 +59,14 @@ export class FileMigrator {
       return {
         success: true,
         originalPath: oldPath,
-        newPath
+        newPath,
       }
     } catch (error) {
       Logger.error(`Failed to migrate avatar: ${avatarFilename}`, error)
       return {
         success: false,
         originalPath: oldPath,
-        error: (error as Error).message
+        error: (error as Error).message,
       }
     }
   }
@@ -70,7 +77,7 @@ export class FileMigrator {
       return {
         success: false,
         originalPath: '',
-        error: 'Empty score filename'
+        error: 'Empty score filename',
       }
     }
 
@@ -82,7 +89,7 @@ export class FileMigrator {
       return {
         success: false,
         originalPath: oldPath,
-        error: 'File not found'
+        error: 'File not found',
       }
     }
 
@@ -91,7 +98,7 @@ export class FileMigrator {
       return {
         success: false,
         originalPath: oldPath,
-        error: 'Not a PDF file'
+        error: 'Not a PDF file',
       }
     }
 
@@ -101,14 +108,14 @@ export class FileMigrator {
       return {
         success: true,
         originalPath: oldPath,
-        newPath
+        newPath,
       }
     } catch (error) {
       Logger.error(`Failed to migrate score: ${filename}`, error)
       return {
         success: false,
         originalPath: oldPath,
-        error: (error as Error).message
+        error: (error as Error).message,
       }
     }
   }
@@ -119,7 +126,7 @@ export class FileMigrator {
       return {
         success: false,
         originalPath: '',
-        error: 'Empty photo filename'
+        error: 'Empty photo filename',
       }
     }
 
@@ -131,7 +138,7 @@ export class FileMigrator {
       return {
         success: false,
         originalPath: oldPath,
-        error: 'File not found'
+        error: 'File not found',
       }
     }
 
@@ -140,7 +147,7 @@ export class FileMigrator {
       return {
         success: false,
         originalPath: oldPath,
-        error: 'Not an image file'
+        error: 'Not an image file',
       }
     }
 
@@ -150,14 +157,14 @@ export class FileMigrator {
       return {
         success: true,
         originalPath: oldPath,
-        newPath
+        newPath,
       }
     } catch (error) {
       Logger.error(`Failed to migrate photo: ${filename}`, error)
       return {
         success: false,
         originalPath: oldPath,
-        error: (error as Error).message
+        error: (error as Error).message,
       }
     }
   }
@@ -165,14 +172,14 @@ export class FileMigrator {
   // 批量迁移文件
   async migrateBatch(
     files: Array<{ filename: string; type: 'avatar' | 'score' | 'photo' }>,
-    onProgress?: (processed: number, total: number) => void
+    onProgress?: (processed: number, total: number) => void,
   ): Promise<FileMigrationResult[]> {
     const results: FileMigrationResult[] = []
-    
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
       let result: FileMigrationResult
-      
+
       switch (file.type) {
         case 'avatar':
           result = this.migrateUserAvatar(file.filename)
@@ -187,17 +194,17 @@ export class FileMigrator {
           result = {
             success: false,
             originalPath: file.filename,
-            error: `Unknown file type: ${file.type}`
+            error: `Unknown file type: ${file.type}`,
           }
       }
-      
+
       results.push(result)
-      
+
       if (onProgress) {
         onProgress(i + 1, files.length)
       }
     }
-    
+
     return results
   }
 
@@ -207,9 +214,9 @@ export class FileMigrator {
       total: results.length,
       success: 0,
       failed: 0,
-      errors: [] as string[]
+      errors: [] as string[],
     }
-    
+
     for (const result of results) {
       if (result.success) {
         stats.success++
@@ -220,7 +227,7 @@ export class FileMigrator {
         }
       }
     }
-    
+
     return stats
   }
 
@@ -229,11 +236,11 @@ export class FileMigrator {
     if (!fileExists(originalPath) || !fileExists(newPath)) {
       return false
     }
-    
+
     try {
       const originalStats = fs.statSync(originalPath)
       const newStats = fs.statSync(newPath)
-      
+
       // 比较文件大小
       return originalStats.size === newStats.size
     } catch {
@@ -243,8 +250,8 @@ export class FileMigrator {
 
   // 清理失败的迁移文件
   cleanupFailedMigrations(results: FileMigrationResult[]) {
-    const failedResults = results.filter(r => !r.success && r.newPath)
-    
+    const failedResults = results.filter((r) => !r.success && r.newPath)
+
     for (const result of failedResults) {
       try {
         if (result.newPath && fileExists(result.newPath)) {
@@ -262,16 +269,16 @@ export class FileMigrator {
     return {
       oldDataPath: this.oldDataPath,
       newUploadsPath: this.newUploadsPath,
-      uploadsDirectoryExists: fileExists(this.newUploadsPath)
+      uploadsDirectoryExists: fileExists(this.newUploadsPath),
     }
   }
 
   // 清理临时文件和资源
-   async cleanup(): Promise<void> {
-     try {
-       Logger.info('文件迁移器清理完成')
-     } catch (error) {
-       Logger.warn('文件迁移器清理时出现警告:', error)
-     }
-   }
+  async cleanup(): Promise<void> {
+    try {
+      Logger.info('文件迁移器清理完成')
+    } catch (error) {
+      Logger.warn('文件迁移器清理时出现警告:', error)
+    }
+  }
 }

@@ -84,7 +84,11 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
   const getCreatorName = (creator: any) => {
     if (!creator) return '未知用户'
     if (typeof creator === 'string') return creator
-    return creator.name || creator.email || '未知用户'
+    // 检查name字段是否存在且不为空字符串
+    if (creator.name && creator.name.trim() !== '') {
+      return creator.name
+    }
+    return creator.email || '匿名用户'
   }
 
   // 获取标签名称
@@ -161,17 +165,17 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
             'radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, rgba(168, 85, 247, 0.2) 50%, transparent 100%)', // 粉紫
             'radial-gradient(circle, rgba(34, 197, 94, 0.28) 0%, rgba(59, 130, 246, 0.18) 50%, transparent 100%)', // 绿蓝
             'radial-gradient(circle, rgba(251, 146, 60, 0.32) 0%, rgba(236, 72, 153, 0.22) 50%, transparent 100%)', // 橙粉
-            'radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(34, 197, 94, 0.2) 50%, transparent 100%)'  // 紫绿
-          ];
-          
+            'radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(34, 197, 94, 0.2) 50%, transparent 100%)', // 紫绿
+          ]
+
           const positions = [
             { left: '10%', top: '20%', size: 450 },
             { left: '70%', top: '10%', size: 400 },
             { left: '15%', top: '65%', size: 380 },
             { left: '75%', top: '70%', size: 420 },
-            { left: '40%', top: '40%', size: 350 }
-          ];
-          
+            { left: '40%', top: '40%', size: 350 },
+          ]
+
           return (
             <motion.div
               key={`diffuse-orb-${i}`}
@@ -194,8 +198,8 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
                 delay: i * 3,
               }}
             />
-          );
-         })}
+          )
+        })}
 
         {/* 增强多色流动层 */}
         <motion.div

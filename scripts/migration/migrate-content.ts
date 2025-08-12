@@ -21,7 +21,7 @@ export class ContentMigrator {
 
   constructor(
     private oldDbPath: string = './数据迁移/app.db',
-    private mappingsPath: string = './id-mappings.json'
+    private mappingsPath: string = './id-mappings.json',
   ) {}
 
   /**
@@ -40,14 +40,14 @@ export class ContentMigrator {
       // 初始化其他组件
       this.oldDataReader = new OldDataReader(this.oldDbPath)
       this.idMapper = new IdMapper()
-      
+
       // 加载现有的ID映射（如果存在）
       if (fs.existsSync(this.mappingsPath)) {
         const mappings = JSON.parse(fs.readFileSync(this.mappingsPath, 'utf-8'))
         this.idMapper.importMappings(mappings)
         Logger.info('已加载现有ID映射')
       }
-      
+
       this.dataTransformer = new DataTransformer(this.idMapper, null as any, this.payload)
 
       Logger.info('内容迁移组件初始化完成')
@@ -106,7 +106,7 @@ export class ContentMigrator {
     try {
       // 初始化
       await this.initializePayload()
-      
+
       // 验证前提条件
       if (!(await this.validatePreconditions())) {
         throw new Error('前提条件验证失败')
@@ -124,13 +124,12 @@ export class ContentMigrator {
 
       // 保存ID映射
       await this.saveIdMappings()
-      
+
       // 验证迁移结果
       await this.validateMigration()
 
       const duration = (Date.now() - startTime) / 1000
       Logger.info(`内容迁移完成，总耗时: ${duration.toFixed(2)}秒`)
-
     } catch (error) {
       Logger.error('内容迁移失败:', error)
       throw error
@@ -165,7 +164,6 @@ export class ContentMigrator {
       // 验证ID映射
       const stats = this.idMapper.getStats()
       Logger.info(`ID映射: 评论 ${stats.comments} 条，文章 ${stats.articles} 篇`)
-
     } catch (error) {
       Logger.error('验证失败:', error)
       throw error
@@ -208,7 +206,7 @@ async function main() {
   const mappingsPath = args[1] || './id-mappings.json'
 
   const migrator = new ContentMigrator(oldDbPath, mappingsPath)
-  
+
   try {
     await migrator.migrate()
     Logger.info('内容迁移成功完成！')

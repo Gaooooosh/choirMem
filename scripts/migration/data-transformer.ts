@@ -123,7 +123,7 @@ export class DataTransformer {
                   width: 0,
                   height: 0,
                   createdAt: new Date().toISOString(),
-                   updatedAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
                 },
                 filePath: avatarResult.newPath,
               })
@@ -140,7 +140,7 @@ export class DataTransformer {
           // 生成唯一的邮箱地址
           let email = oldUser.email || generatePlaceholderEmail(oldUser.username)
           let emailCounter = 1
-          
+
           // 如果生成的邮箱是默认的 user@example.com，则使用用户ID来确保唯一性
           if (!oldUser.email && email === 'user@example.com') {
             email = `user${oldUser.id}@example.com`
@@ -212,15 +212,18 @@ export class DataTransformer {
                 username: oldUser.username,
                 email: email,
                 password: 'temp-password-needs-reset', // 临时密码，需要重置
+                needs_password_reset: true, // 标识需要重置密码
                 bio: convertToLexicalRichText(oldUser.bio || oldUser.about_me),
                 activity_score: oldUser.activity_score || 0,
                 // last_seen 和 has_seen_welcome 字段在新系统中不存在
                 group: parseInt(permissionGroupId),
                 avatar: avatarMediaId ? parseInt(avatarMediaId) : null,
               }
-              
-              Logger.info(`准备创建用户: ${oldUser.username}, 邮箱: ${email}, 权限组: ${permissionGroupId}`)
-              
+
+              Logger.info(
+                `准备创建用户: ${oldUser.username}, 邮箱: ${email}, 权限组: ${permissionGroupId}`,
+              )
+
               newUser = await this.payload.create({
                 collection: 'users',
                 data: userData,
@@ -232,7 +235,7 @@ export class DataTransformer {
                 error: createError.message,
                 email: email,
                 permissionGroupId: permissionGroupId,
-                oldUserId: oldUser.id
+                oldUserId: oldUser.id,
               })
               throw createError
             }

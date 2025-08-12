@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
 
     const { currentPassword, newPassword } = await request.json()
 
-    if (!currentPassword || !newPassword) {
+    if (!newPassword) {
       return NextResponse.json(
-        { error: '当前密码和新密码都不能为空' },
+        { error: '新密码不能为空' },
         { status: 400 }
       )
     }
@@ -46,29 +46,49 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 验证当前密码
-    try {
-      await payload.login({
-        collection: 'users',
-        data: {
-          email: user.email,
-          password: currentPassword,
-        },
-      })
-    } catch (error) {
-      return NextResponse.json(
-        { error: '当前密码不正确' },
-        { status: 400 }
-      )
+    // 检查用户是否需要重置密码
+    const needsPasswordReset = user.needs_password_reset === true
+    
+    // 如果不是临时密码用户，需要验证当前密码
+    if (!needsPasswordReset) {
+      if (!currentPassword) {
+        return NextResponse.json(
+          { error: '请输入当前密码' },
+          { status: 400 }
+        )
+      }
+      
+      // 验证当前密码
+      try {
+        await payload.login({
+          collection: 'users',
+          data: {
+            email: user.email,
+            password: currentPassword,
+          },
+        })
+      } catch (error) {
+        return NextResponse.json(
+          { error: '当前密码不正确' },
+          { status: 400 }
+        )
+      }
     }
 
     // 更新密码
+    const updateData: any = {
+      password: newPassword,
+    }
+    
+    // 如果用户之前需要重置密码，现在标记为已完成
+    if (needsPasswordReset) {
+      updateData.needs_password_reset = false
+    }
+    
     await payload.update({
       collection: 'users',
       id: user.id,
-      data: {
-        password: newPassword,
-      },
+      data: updateData,
     })
 
     return NextResponse.json({

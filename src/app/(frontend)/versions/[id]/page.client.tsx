@@ -153,7 +153,11 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
   const getCreatorName = (creator: any) => {
     if (!creator) return '未知用户'
     if (typeof creator === 'string') return creator
-    return creator.name || creator.email || '未知用户'
+    // 检查name字段是否存在且不为空字符串
+    if (creator.name && creator.name.trim() !== '') {
+      return creator.name
+    }
+    return creator.email || '匿名用户'
   }
 
   // 获取标签名称
@@ -643,24 +647,11 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
                             <FileText className="w-5 h-5" />
                             {score.title || score.filename || '乐谱文件'}
                           </CardTitle>
-                          {score.description && (
-                            <CardDescription className="text-sm text-muted-foreground">
-                              {score.description}
-                            </CardDescription>
-                          )}
                         </CardHeader>
 
                         <CardContent className="space-y-3">
                           {/* 文件信息 */}
                           <div className="space-y-2 text-sm text-muted-foreground">
-                            <div className="flex justify-between">
-                              <span>文件大小:</span>
-                              <span>{formatFileSize(score.filesize)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>文件类型:</span>
-                              <span>{score.mimeType}</span>
-                            </div>
                             <div className="flex justify-between">
                               <span>上传时间:</span>
                               <span>{formatDate(score.createdAt)}</span>
@@ -814,9 +805,9 @@ export const VersionDetailClient: React.FC<VersionDetailClientProps> = ({
                   type="application/pdf"
                   className="w-full h-full"
                   title="PDF预览 - 仅第一页"
-                  style={{ 
+                  style={{
                     border: 'none',
-                    pointerEvents: 'none'
+                    pointerEvents: 'none',
                   }}
                 />
                 <div
