@@ -7,18 +7,19 @@ import { getMeUser } from '@/utilities/getMeUser'
 import { ArticleEditClient } from './page.client'
 
 interface ArticleEditPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function generateMetadata({ params }: ArticleEditPageProps): Promise<Metadata> {
   const payload = await getPayload({ config: configPromise })
+  const { id } = await params
 
   try {
     const article = await payload.findByID({
       collection: 'articles',
-      id: params.id,
+      id: id,
       depth: 2,
     })
 
@@ -71,9 +72,15 @@ export default async function ArticleEditPage({ params }: { params: Promise<{ id
       redirect('/articles/' + resolvedParams.id)
     }
 
-    // 确保文章状态有默认值并处理cover_image类型
+    // Transform the article data to match the client interface
+    const contentType = ((article as any).content_type || 'richtext') as 'richtext' | 'markdown'
+    const content = article.content
+    
     const articleWithStatus = {
-      ...article,
+      id: article.id,
+      title: article.title,
+      content: content || '', // Ensure content is never null
+      contentType: contentType,
       status: article.status || 'draft' as 'draft' | 'published',
       cover_image: typeof article.cover_image === 'object' && article.cover_image && 'url' in article.cover_image 
         ? {
@@ -83,7 +90,16 @@ export default async function ArticleEditPage({ params }: { params: Promise<{ id
           }
         : typeof article.cover_image === 'number' 
           ? article.cover_image 
-          : null
+          : null,
+      createdAt: article.createdAt,
+      updatedAt: article.updatedAt,
+      author: typeof article.author === 'number' 
+        ? { id: article.author, email: '', username: '' }
+        : {
+            id: article.author.id,
+            email: article.author.email,
+            username: article.author.username || article.author.name || ''
+          }
     }
 
     return <ArticleEditClient user={userResult.user} article={articleWithStatus} />

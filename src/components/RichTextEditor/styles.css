@@ -1,0 +1,182 @@
+/* Rich Text Editor Styles */
+.rich-text-editor {
+  @apply w-full;
+}
+
+.editor-container {
+  @apply relative;
+}
+
+.editor-inner {
+  @apply relative;
+}
+
+.editor-input {
+  @apply w-full font-serif text-base leading-relaxed;
+  font-family: 'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', serif;
+}
+
+.editor-placeholder {
+  @apply text-gray-400 select-none pointer-events-none;
+}
+
+/* Text formatting */
+.editor-text-bold {
+  @apply font-bold;
+}
+
+.editor-text-italic {
+  @apply italic;
+}
+
+.editor-text-underline {
+  @apply underline;
+}
+
+.editor-text-strikethrough {
+  @apply line-through;
+}
+
+.editor-text-underlineStrikethrough {
+  @apply underline line-through;
+}
+
+.editor-text-code {
+  @apply bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm font-mono;
+}
+
+/* Headings */
+.editor-heading-h1 {
+  @apply text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white;
+  font-family: 'Noto Sans SC', 'Source Han Sans SC', 'Source Han Sans CN', sans-serif;
+}
+
+.editor-heading-h2 {
+  @apply text-2xl font-bold mt-6 mb-3 text-gray-900 dark:text-white;
+  font-family: 'Noto Sans SC', 'Source Han Sans SC', 'Source Han Sans CN', sans-serif;
+}
+
+.editor-heading-h3 {
+  @apply text-xl font-bold mt-5 mb-2 text-gray-900 dark:text-white;
+  font-family: 'Noto Sans SC', 'Source Han Sans SC', 'Source Han Sans CN', sans-serif;
+}
+
+.editor-heading-h4 {
+  @apply text-lg font-bold mt-4 mb-2 text-gray-900 dark:text-white;
+  font-family: 'Noto Sans SC', 'Source Han Sans SC', 'Source Han Sans CN', sans-serif;
+}
+
+.editor-heading-h5 {
+  @apply text-base font-bold mt-3 mb-1 text-gray-900 dark:text-white;
+  font-family: 'Noto Sans SC', 'Source Han Sans SC', 'Source Han Sans CN', sans-serif;
+}
+
+.editor-heading-h6 {
+  @apply text-sm font-bold mt-2 mb-1 text-gray-900 dark:text-white;
+  font-family: 'Noto Sans SC', 'Source Han Sans SC', 'Source Han Sans CN', sans-serif;
+}
+
+/* Paragraphs */
+.editor-paragraph {
+  @apply mb-4 text-gray-800 dark:text-gray-200 leading-relaxed;
+}
+
+/* Lists */
+.editor-list-ol {
+  @apply list-decimal list-inside mb-4 space-y-1;
+}
+
+.editor-list-ul {
+  @apply list-disc list-inside mb-4 space-y-1;
+}
+
+.editor-listitem {
+  @apply text-gray-800 dark:text-gray-200;
+}
+
+.editor-nested-listitem {
+  @apply ml-4;
+}
+
+/* Quote */
+.editor-quote {
+  @apply border-l-4 border-blue-500 pl-4 py-2 mb-4 bg-blue-50 dark:bg-blue-900/20 italic text-gray-700 dark:text-gray-300;
+}
+
+/* Code blocks */
+.editor-code {
+  @apply bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4 overflow-x-auto;
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+}
+
+/* Links */
+.editor-link {
+  @apply text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline transition-colors;
+}
+
+/* Toolbar */
+.toolbar {
+  @apply sticky top-0 z-10;
+}
+
+/* Code highlighting tokens */
+.editor-tokenComment {
+  @apply text-gray-500;
+}
+
+.editor-tokenPunctuation {
+  @apply text-gray-600;
+}
+
+.editor-tokenProperty {
+  @apply text-blue-600;
+}
+
+.editor-tokenSelector {
+  @apply text-green-600;
+}
+
+.editor-tokenOperator {
+  @apply text-red-600;
+}
+
+.editor-tokenAttr {
+  @apply text-purple-600;
+}
+
+.editor-tokenVariable {
+  @apply text-orange-600;
+}
+
+.editor-tokenFunction {
+  @apply text-yellow-600;
+}
+
+/* Dark mode adjustments for code highlighting */
+.dark .editor-tokenComment {
+  @apply text-gray-400;
+}
+
+.dark .editor-tokenProperty {
+  @apply text-blue-400;
+}
+
+.dark .editor-tokenSelector {
+  @apply text-green-400;
+}
+
+.dark .editor-tokenOperator {
+  @apply text-red-400;
+}
+
+.dark .editor-tokenAttr {
+  @apply text-purple-400;
+}
+
+.dark .editor-tokenVariable {
+  @apply text-orange-400;
+}
+
+.dark .editor-tokenFunction {
+  @apply text-yellow-400;
+}

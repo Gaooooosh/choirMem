@@ -4,11 +4,11 @@ import config from '@payload-config'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const payload = await getPayload({ config })
-    const { id } = params
+    const { id } = await params
 
     const result = await payload.findByID({
       collection: 'articles',
@@ -28,11 +28,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const payload = await getPayload({ config })
-    const { id } = params
+    const { id } = await params
     const data = await request.json()
 
     const result = await payload.update({
@@ -53,11 +53,45 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const payload = await getPayload({ config })
-    const { id } = params
+    const { id } = await params
+
+    // 获取当前用户
+    const { user } = await payload.auth({ headers: request.headers })
+    
+    if (!user) {
+      return NextResponse.json(
+        { message: '未授权访问' },
+        { status: 401 }
+      )
+    }
+
+    // 获取文章信息以检查权限
+    const article = await payload.findByID({
+      collection: 'articles',
+      id,
+    })
+
+    if (!article) {
+      return NextResponse.json(
+        { message: '文章不存在' },
+        { status: 404 }
+      )
+    }
+
+    // 检查权限：只有文章作者或管理员可以删除
+    const isAuthor = user.id === (typeof article.author === 'object' ? article.author.id : article.author)
+    const isAdmin = user.is_admin || false
+    
+    if (!isAuthor && !isAdmin) {
+      return NextResponse.json(
+        { message: '权限不足，只有文章作者或管理员可以删除文章' },
+        { status: 403 }
+      )
+    }
 
     await payload.delete({
       collection: 'articles',

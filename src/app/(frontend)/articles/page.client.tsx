@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useAuth } from '@/providers/Auth'
 import { useTheme } from '@/providers/Theme'
 import { formatDateTime } from '@/utilities/formatDateTime'
+import HTMLRenderer from '@/components/HTMLRenderer'
+import { MarkdownRenderer } from '@/components/MarkdownRenderer'
 
 interface Article {
   id: number
@@ -21,11 +23,12 @@ interface Article {
     email: string
   }
   content: any
+  contentType: 'richtext' | 'markdown'
   status: 'draft' | 'published'
   cover_image?: {
     id: number
-    url?: string
-    alt?: string
+    url?: string | null
+    alt?: string | null
   }
   createdAt: string
   updatedAt: string
@@ -66,22 +69,89 @@ export const ArticlesClient: React.FC<ArticlesClientProps> = ({ articles }) => {
         .includes(searchTerm.toLowerCase()),
   )
 
-  const getExcerpt = (content: any) => {
-    if (!content || !content.root || !content.root.children) return ''
+  const getExcerpt = (content: any, contentType: 'richtext' | 'markdown') => {
+    if (!content) return ''
+    
+    if (contentType === 'markdown') {
+      // For markdown content, return a limited markdown snippet
+      const textContent = typeof content === 'string' ? content : JSON.stringify(content)
+      // Get first 150 characters while preserving some markdown
+      const limitedContent = textContent.length > 150 ? textContent.substring(0, 150) + '...' : textContent
+      return limitedContent
+    }
+    
+    // For richtext content
+    if (typeof content === 'string') {
+      // Handle HTML string content - preserve some basic HTML but limit length
+      const htmlContent = content
+        .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
+        .replace(/&amp;/g, '&') // Replace HTML entities
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .trim()
+      
+      // Create a safe excerpt by keeping basic HTML tags but limiting content
+      if (htmlContent.length > 200) {
+        const truncated = htmlContent.substring(0, 200)
+        // Try to close any open tags to prevent broken HTML
+        const lastOpenTag = truncated.lastIndexOf('<')
+        const lastCloseTag = truncated.lastIndexOf('>')
+        
+        if (lastOpenTag > lastCloseTag) {
+          // There's an unclosed tag, truncate before it
+          return htmlContent.substring(0, lastOpenTag) + '...'
+        }
+        return truncated + '...'
+      }
+      return htmlContent
+    }
+    
+    // For Lexical richtext content (object format) - convert to HTML excerpt
+    if (!content.root || !content.root.children) return ''
 
-    const textContent = content.root.children
-      .map((child: any) => {
-        if (child.children) {
-          return child.children
-            .filter((c: any) => c.text)
-            .map((c: any) => c.text)
-            .join('')
+    const convertNodesToHtml = (nodes: any[]): string => {
+      return nodes.map(node => {
+        if (node.type === 'paragraph') {
+          const content = node.children ? convertNodesToHtml(node.children) : ''
+          return `<p>${content}</p>`
+        }
+        if (node.type === 'text') {
+          let text = node.text || ''
+          // Apply basic formatting
+          if (node.format & 1) text = `<strong>${text}</strong>` // bold
+          if (node.format & 2) text = `<em>${text}</em>` // italic
+          return text
+        }
+        if (node.type === 'heading') {
+          const content = node.children ? convertNodesToHtml(node.children) : ''
+          const tag = node.tag || 'h1'
+          return `<${tag}>${content}</${tag}>`
+        }
+        // For other types, just extract text content
+        if (node.children) {
+          return convertNodesToHtml(node.children)
         }
         return ''
-      })
-      .join(' ')
+      }).join('')
+    }
 
-    return textContent.length > 150 ? textContent.substring(0, 150) + '...' : textContent
+    const htmlContent = convertNodesToHtml(content.root.children)
+    
+    // Limit the HTML content length
+    if (htmlContent.length > 200) {
+      const truncated = htmlContent.substring(0, 200)
+      const lastOpenTag = truncated.lastIndexOf('<')
+      const lastCloseTag = truncated.lastIndexOf('>')
+      
+      if (lastOpenTag > lastCloseTag) {
+        return htmlContent.substring(0, lastOpenTag) + '...'
+      }
+      return truncated + '...'
+    }
+    
+    return htmlContent
   }
 
   return (
@@ -319,72 +389,106 @@ export const ArticlesClient: React.FC<ArticlesClientProps> = ({ articles }) => {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="max-w-4xl mx-auto"
                 >
-                  <div className={`backdrop-blur-xl border rounded-2xl shadow-lg overflow-hidden transition-all duration-300 group hover:scale-[1.02] ${
-                    currentTheme === 'dark'
-                      ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30'
-                      : 'bg-white/30 border-white/40 hover:bg-white/40 hover:border-white/50'
-                  }`}>
-                    <Card className="bg-transparent border-0 shadow-none">
+                  <div 
+                    className={`relative backdrop-blur-xl border rounded-2xl shadow-lg overflow-hidden transition-all duration-300 group hover:scale-[1.02] ${
+                      currentTheme === 'dark'
+                        ? 'border-white/20 hover:border-white/30'
+                        : 'border-white/40 hover:border-white/50'
+                    }`}
+                    style={{
+                      backgroundImage: article.cover_image?.url ? `url(${article.cover_image.url})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat'
+                    }}
+                  >
+                    {/* 背景遮罩层 */}
+                    <div className={`absolute inset-0 backdrop-blur-sm ${
+                      article.cover_image?.url 
+                        ? 'bg-black/40' 
+                        : currentTheme === 'dark'
+                          ? 'bg-white/10'
+                          : 'bg-white/30'
+                    }`} />
+                    
+                    {/* 内容层 */}
+                    <Card className="relative bg-transparent border-0 shadow-none">
                       <CardHeader className="pb-4">
-                        <div className="flex items-start justify-between gap-6">
-                          <div className="flex-1 space-y-4">
-                            <Link href={`/articles/${article.id}`}>
-                              <h2 className={`text-2xl font-bold transition-colors duration-300 group-hover:scale-[1.02] ${
-                                currentTheme === 'dark'
+                        <div className="space-y-4">
+                          <Link href={`/articles/${article.id}`}>
+                            <h2 className={`text-2xl font-bold transition-colors duration-300 group-hover:scale-[1.02] ${
+                              article.cover_image?.url
+                                ? 'text-white group-hover:text-blue-200 drop-shadow-lg'
+                                : currentTheme === 'dark'
                                   ? 'text-white group-hover:text-blue-300'
                                   : 'text-gray-900 group-hover:text-blue-600'
-                              }`}>
-                                {article.title}
-                              </h2>
-                            </Link>
-
-                            <div className={`flex items-center gap-6 text-sm ${
-                              currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                             }`}>
-                              <div className="flex items-center gap-2">
-                                <User className="w-4 h-4" />
-                                <span className="font-medium">{article.author.username || article.author.email}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4" />
-                                <span>{formatDateTime(article.createdAt)}</span>
-                              </div>
+                              {article.title}
+                            </h2>
+                          </Link>
+
+                          <div className={`flex items-center gap-6 text-sm ${
+                            article.cover_image?.url
+                              ? 'text-white/90 drop-shadow'
+                              : currentTheme === 'dark' 
+                                ? 'text-gray-400' 
+                                : 'text-gray-600'
+                          }`}>
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4" />
+                              <span className="font-medium">{article.author.username || article.author.email}</span>
                             </div>
-
-
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              <span>{formatDateTime(article.createdAt)}</span>
+                            </div>
                           </div>
-
-                          {article.cover_image?.url && (
-                            <motion.div 
-                              whileHover={{ scale: 1.05 }}
-                              className={`w-32 h-32 rounded-xl overflow-hidden shadow-lg ${
-                                currentTheme === 'dark' ? 'bg-white/10' : 'bg-white/20'
-                              }`}
-                            >
-                              <img
-                                src={article.cover_image.url}
-                                alt={article.cover_image.alt || article.title}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                              />
-                            </motion.div>
-                          )}
                         </div>
                       </CardHeader>
 
                       <CardContent className="pt-0 space-y-4">
-                        <p className={`leading-relaxed text-base ${
-                          currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                        {/* 使用组件渲染摘要内容 */}
+                        <div className={`leading-relaxed text-base ${
+                          article.cover_image?.url
+                            ? 'text-white/90 drop-shadow'
+                            : currentTheme === 'dark' 
+                              ? 'text-gray-300' 
+                              : 'text-gray-700'
                         }`}>
-                          {getExcerpt(article.content)}
-                        </p>
+                          {article.contentType === 'markdown' ? (
+                            <MarkdownRenderer 
+                              content={getExcerpt(article.content, article.contentType)}
+                              className={`excerpt-content ${
+                                article.cover_image?.url
+                                  ? 'prose-invert'
+                                  : currentTheme === 'dark' 
+                                    ? 'prose-invert' 
+                                    : 'prose-gray'
+                              }`}
+                            />
+                          ) : (
+                            <HTMLRenderer 
+                              content={getExcerpt(article.content, article.contentType)}
+                              className={`excerpt-content ${
+                                article.cover_image?.url
+                                  ? 'prose-invert'
+                                  : currentTheme === 'dark' 
+                                    ? 'prose-invert' 
+                                    : 'prose-gray'
+                              }`}
+                            />
+                          )}
+                        </div>
 
                         <div className="pt-2">
                           <Link
                             href={`/articles/${article.id}`}
                             className={`inline-flex items-center gap-2 font-semibold transition-all duration-300 hover:gap-3 ${
-                              currentTheme === 'dark'
-                                ? 'text-blue-400 hover:text-blue-300'
-                                : 'text-blue-600 hover:text-blue-500'
+                              article.cover_image?.url
+                                ? 'text-blue-200 hover:text-blue-100 drop-shadow'
+                                : currentTheme === 'dark'
+                                  ? 'text-blue-400 hover:text-blue-300'
+                                  : 'text-blue-600 hover:text-blue-500'
                             }`}
                           >
                             阅读全文

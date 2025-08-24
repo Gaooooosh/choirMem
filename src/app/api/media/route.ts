@@ -1,13 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
   try {
     const payload = await getPayload({ config })
-    
-    // 获取当前用户
-    const { user } = await payload.auth({ headers: request.headers })
+    const cookieStore = await cookies()
+    const token = cookieStore.get('payload-token')?.value
+
+    if (!token) {
+      return NextResponse.json(
+        { message: '用户未认证' },
+        { status: 401 }
+      )
+    }
+
+    // 验证 token 并获取用户信息
+    const { user } = await payload.auth({ 
+      headers: new Headers({ 
+        'Authorization': `JWT ${token}` 
+      }) 
+    })
     if (!user) {
       return NextResponse.json(
         { message: '用户未认证' },

@@ -37,10 +37,38 @@ export const Articles: CollectionConfig = {
       label: 'Author',
     },
     {
+      name: 'content_type',
+      type: 'select',
+      options: [
+        {
+          label: 'Rich Text',
+          value: 'richtext',
+        },
+        {
+          label: 'Markdown',
+          value: 'markdown',
+        },
+      ],
+      defaultValue: 'richtext',
+      label: 'Content Type',
+    },
+    {
       name: 'content',
-      type: 'richText',
+      type: 'textarea',
       required: true,
       label: 'Content',
+      admin: {
+        condition: (data) => data.content_type === 'markdown',
+      },
+    },
+    {
+      name: 'rich_content',
+      type: 'richText',
+      required: false,
+      label: 'Rich Content',
+      admin: {
+        condition: (data) => data.content_type === 'richtext',
+      },
     },
     {
       name: 'status',

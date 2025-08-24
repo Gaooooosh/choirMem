@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import RichTextEditor from '@/components/RichTextEditor'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
@@ -310,15 +310,11 @@ export const ArticleEditorClient: React.FC<ArticleEditorClientProps> = ({ user }
                   <Label htmlFor="content" className={isDark ? "text-white" : "text-gray-700"}>
                     文章内容
                   </Label>
-                  <Textarea
-                    id="content"
+                  <RichTextEditor
                     value={formData.content}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
+                    onChange={(value) => setFormData((prev) => ({ ...prev, content: value }))}
                     placeholder="在这里写下你的文章内容..."
-                    className={`min-h-[300px] resize-none ${
-                      isDark ? 'bg-white/10 border-white/20 text-white placeholder:text-white/50' : 'bg-white/50 border-gray-300 text-gray-900 placeholder:text-gray-500'
-                    }`}
-                    required
+                    autoFocus
                   />
                 </div>
 

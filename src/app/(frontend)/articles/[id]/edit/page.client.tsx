@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import RichTextEditor from '@/components/RichTextEditor'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -51,13 +51,14 @@ export const ArticleEditClient: React.FC<ArticleEditClientProps> = ({ user, arti
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     title: article.title,
-    content: extractTextFromContent(article.content),
+    content: article.content, // 直接使用富文本内容
     status: article.status as 'draft' | 'published',
     cover_image: null as File | null,
   })
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(
     (typeof article.cover_image === 'object' && article.cover_image?.url) || null
   )
+  const [shouldRemoveCover, setShouldRemoveCover] = useState(false)
 
   const isDark = theme === 'dark'
 
@@ -65,29 +66,80 @@ export const ArticleEditClient: React.FC<ArticleEditClientProps> = ({ user, arti
     setHeaderTheme(theme || 'light')
   }, [theme, setHeaderTheme])
 
-  // 从富文本内容中提取纯文本
-  function extractTextFromContent(content: any): string {
-    if (!content || !content.root || !content.root.children) {
-      return ''
-    }
+  // 使用useMemo优化HTML转换，避免每次渲染都重新计算
+  const htmlContent = useMemo(() => {
+    return convertRichTextToHtml(formData.content)
+  }, [formData.content])
 
-    function extractText(node: any): string {
+  // 将富文本内容转换为HTML字符串用于RichTextEditor
+  function convertRichTextToHtml(content: any): string {
+    if (!content) return ''
+    
+    // 如果已经是字符串（HTML），直接返回
+    if (typeof content === 'string') {
+      return content
+    }
+    
+    // 如果是富文本对象，转换为HTML
+    if (content.root && content.root.children) {
+      return convertNodesToHtml(content.root.children)
+    }
+    
+    return ''
+  }
+
+  // 递归转换节点为HTML
+  function convertNodesToHtml(nodes: any[]): string {
+    return nodes.map(node => {
+      if (node.type === 'paragraph') {
+        const content = node.children ? convertNodesToHtml(node.children) : ''
+        return `<p>${content}</p>`
+      }
       if (node.type === 'text') {
-        return node.text || ''
+        let text = node.text || ''
+        // 处理文本格式
+        if (node.format & 1) text = `<strong>${text}</strong>` // bold
+        if (node.format & 2) text = `<em>${text}</em>` // italic
+        if (node.format & 8) text = `<u>${text}</u>` // underline
+        return text
       }
-      if (node.children && Array.isArray(node.children)) {
-        return node.children.map(extractText).join('')
+      if (node.type === 'heading') {
+        const content = node.children ? convertNodesToHtml(node.children) : ''
+        const tag = node.tag || 'h1'
+        return `<${tag}>${content}</${tag}>`
+      }
+      if (node.type === 'list') {
+        const content = node.children ? convertNodesToHtml(node.children) : ''
+        const tag = node.listType === 'number' ? 'ol' : 'ul'
+        return `<${tag}>${content}</${tag}>`
+      }
+      if (node.type === 'listitem') {
+        const content = node.children ? convertNodesToHtml(node.children) : ''
+        return `<li>${content}</li>`
+      }
+      if (node.type === 'image') {
+        return `<img src="${node.src}" alt="${node.altText || ''}" />`
+      }
+      if (node.type === 'video') {
+        return `<video src="${node.src}" controls></video>`
+      }
+      if (node.type === 'code') {
+        const content = node.children ? convertNodesToHtml(node.children) : ''
+        return `<pre><code class="language-${node.language || ''}">${content}</code></pre>`
+      }
+      // 默认处理其他节点
+      if (node.children) {
+        return convertNodesToHtml(node.children)
       }
       return ''
-    }
-
-    return content.root.children.map(extractText).join('\n')
+    }).join('')
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       setFormData(prev => ({ ...prev, cover_image: file }))
+      setShouldRemoveCover(false) // 重置删除状态
       const reader = new FileReader()
       reader.onload = () => {
         setCoverImagePreview(reader.result as string)
@@ -98,9 +150,8 @@ export const ArticleEditClient: React.FC<ArticleEditClientProps> = ({ user, arti
 
   const removeImage = () => {
     setFormData(prev => ({ ...prev, cover_image: null }))
-    setCoverImagePreview(
-      (typeof article.cover_image === 'object' && article.cover_image?.url) || null
-    )
+    setCoverImagePreview(null)
+    setShouldRemoveCover(true)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -128,46 +179,28 @@ export const ArticleEditClient: React.FC<ArticleEditClientProps> = ({ user, arti
         }
       }
 
-      // 构建富文本内容
-      const richTextContent = {
-        root: {
-          type: 'root',
-          format: '',
-          indent: 0,
-          version: 1,
-          children: [
-            {
-              type: 'paragraph',
-              format: '',
-              indent: 0,
-              version: 1,
-              children: [
-                {
-                  type: 'text',
-                  format: 0,
-                  style: '',
-                  mode: 'normal',
-                  text: formData.content,
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-            },
-          ],
-          direction: 'ltr',
-        },
+      // 将富文本内容转换为HTML字符串保存
+      let contentToSave = formData.content
+      
+      // 如果formData.content是HTML字符串，直接使用
+      if (typeof formData.content === 'string') {
+        contentToSave = formData.content
+      } else {
+        // 如果是富文本对象，转换为HTML字符串
+        contentToSave = convertRichTextToHtml(formData.content)
       }
 
       // 更新文章
       const articleData = {
         title: formData.title,
-        content: richTextContent,
+        content: contentToSave, // 保存为HTML字符串
+        contentType: 'richtext', // 明确标记为富文本类型
         status: formData.status,
-        ...(coverImageId && { cover_image: coverImageId }),
+        ...(shouldRemoveCover ? { cover_image: null } : coverImageId && { cover_image: coverImageId }),
       }
 
       const response = await fetch(`/api/articles/${article.id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -311,18 +344,11 @@ export const ArticleEditClient: React.FC<ArticleEditClientProps> = ({ user, arti
                 <Label htmlFor="content" className={isDark ? 'text-white' : 'text-gray-700'}>
                   文章内容
                 </Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  placeholder="请输入文章内容"
-                  required
-                  rows={12}
-                  className={`backdrop-blur-xl border transition-all duration-300 resize-none ${
-                    isDark
-                      ? 'bg-white/10 border-white/20 text-white placeholder:text-gray-400'
-                      : 'bg-white/50 border-white/40 text-gray-900 placeholder:text-gray-500'
-                  }`}
+                <RichTextEditor
+                  value={htmlContent}
+                  onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
+                  placeholder="开始编写文章内容..."
+                  autoFocus
                 />
               </div>
 

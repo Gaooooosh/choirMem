@@ -167,7 +167,9 @@ export interface Article {
   id: number;
   title: string;
   author: number | User;
-  content: {
+  content_type?: ('richtext' | 'markdown') | null;
+  content?: string | null;
+  rich_content?: {
     root: {
       type: string;
       children: {
@@ -181,7 +183,7 @@ export interface Article {
       version: number;
     };
     [k: string]: unknown;
-  };
+  } | null;
   status?: ('draft' | 'published') | null;
   cover_image?: (number | null) | Media;
   tags?: (number | Tag)[] | null;
@@ -1289,7 +1291,9 @@ export interface PayloadMigration {
 export interface ArticlesSelect<T extends boolean = true> {
   title?: T;
   author?: T;
+  content_type?: T;
   content?: T;
+  rich_content?: T;
   status?: T;
   cover_image?: T;
   tags?: T;
