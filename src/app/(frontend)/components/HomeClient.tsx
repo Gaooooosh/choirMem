@@ -257,6 +257,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({
             transition: { duration: 0.2 },
           }}
           className="break-inside-avoid mb-6 cursor-pointer"
+          suppressHydrationWarning
         >
           <div
             className={`relative group backdrop-blur-3xl rounded-3xl border shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl ${
@@ -416,43 +417,41 @@ export const HomeClient: React.FC<HomeClientProps> = ({
         />
 
         {/* 波浪动画层 - 增强显眼度 */}
-        {mounted && (
-          <motion.div
-            className="absolute inset-0 overflow-hidden opacity-40"
-            style={{
-              background:
-                currentTheme === 'dark'
-                  ? 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)'
-                  : 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
-              willChange: 'background',
-            }}
-            animate={{
-              background:
-                currentTheme === 'dark'
-                  ? [
-                      'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)',
-                      'radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.18) 0%, transparent 50%)',
-                      'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)',
-                    ]
-                  : [
-                      'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
-                      'radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.12) 0%, transparent 50%)',
-                      'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
-                    ],
-            }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        )}
+        <motion.div
+          className="absolute inset-0 overflow-hidden opacity-40"
+          style={{
+            background:
+              currentTheme === 'dark'
+                ? 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)'
+                : 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
+            willChange: 'background',
+          }}
+          animate={{
+            background:
+              currentTheme === 'dark'
+                ? [
+                    'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)',
+                    'radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.18) 0%, transparent 50%)',
+                    'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.18) 0%, transparent 50%)',
+                  ]
+                : [
+                    'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
+                    'radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.12) 0%, transparent 50%)',
+                    'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.12) 0%, transparent 50%)',
+                  ],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          suppressHydrationWarning
+        />
 
         {/* 简化背景系统 - 性能优化 */}
-        {mounted && (
-          <>
-            {/* 增强多色弥散光晕层 - 增强显眼度 */}
-            {Array.from({ length: 5 }).map((_, i) => {
+        <div suppressHydrationWarning>
+          {/* 增强多色弥散光晕层 - 增强显眼度 */}
+          {Array.from({ length: 5 }).map((_, i) => {
               const colors =
                 currentTheme === 'dark'
                   ? [
@@ -503,51 +502,50 @@ export const HomeClient: React.FC<HomeClientProps> = ({
               )
             })}
 
-            {/* 多色流动层 - 增强显眼度 */}
-            <motion.div
-              className="absolute inset-0 blur-[25px] opacity-50"
-              style={{
-                background:
-                  currentTheme === 'dark'
-                    ? `linear-gradient(120deg, 
-                      rgba(59, 130, 246, 0.3) 0%, 
-                      rgba(236, 72, 153, 0.25) 20%,
-                      rgba(34, 197, 94, 0.22) 40%,
-                      rgba(251, 146, 60, 0.28) 60%,
-                      rgba(168, 85, 247, 0.25) 80%,
-                      rgba(59, 130, 246, 0.2) 100%)`
-                    : `linear-gradient(120deg, 
-                      rgba(59, 130, 246, 0.22) 0%, 
-                      rgba(236, 72, 153, 0.18) 20%,
-                      rgba(34, 197, 94, 0.16) 40%,
-                      rgba(251, 146, 60, 0.2) 60%,
-                      rgba(168, 85, 247, 0.18) 80%,
-                      rgba(59, 130, 246, 0.14) 100%)`,
-                willChange: 'transform',
-              }}
-              animate={{
-                rotate: [0, 360],
-              }}
-              transition={{
-                duration: 60,
-                repeat: Infinity,
-                ease: 'linear',
-              }}
-            />
+          {/* 多色流动层 - 增强显眼度 */}
+          <motion.div
+            className="absolute inset-0 blur-[25px] opacity-50"
+            style={{
+              background:
+                currentTheme === 'dark'
+                  ? `linear-gradient(120deg, 
+                    rgba(59, 130, 246, 0.3) 0%, 
+                    rgba(236, 72, 153, 0.25) 20%,
+                    rgba(34, 197, 94, 0.22) 40%,
+                    rgba(251, 146, 60, 0.28) 60%,
+                    rgba(168, 85, 247, 0.25) 80%,
+                    rgba(59, 130, 246, 0.2) 100%)`
+                  : `linear-gradient(120deg, 
+                    rgba(59, 130, 246, 0.22) 0%, 
+                    rgba(236, 72, 153, 0.18) 20%,
+                    rgba(34, 197, 94, 0.16) 40%,
+                    rgba(251, 146, 60, 0.2) 60%,
+                    rgba(168, 85, 247, 0.18) 80%,
+                    rgba(59, 130, 246, 0.14) 100%)`,
+              willChange: 'transform',
+            }}
+            animate={{
+              rotate: [0, 360],
+            }}
+            transition={{
+              duration: 60,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+          />
 
-            {/* 静态边缘渐变 */}
-            <div
-              className="absolute inset-0 opacity-30"
-              style={{
-                background:
-                  currentTheme === 'dark'
-                    ? `radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.2) 100%)`
-                    : `radial-gradient(ellipse at center, transparent 40%, rgba(255, 255, 255, 0.2) 100%)`,
-                willChange: 'opacity, transform',
-              }}
-            />
-          </>
-        )}
+          {/* 静态边缘渐变 */}
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              background:
+                currentTheme === 'dark'
+                  ? `radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.2) 100%)`
+                  : `radial-gradient(ellipse at center, transparent 40%, rgba(255, 255, 255, 0.2) 100%)`,
+              willChange: 'opacity, transform',
+            }}
+          />
+        </div>
       </div>
 
       {/* 可滚动内容区域 */}
@@ -560,6 +558,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="relative"
+              suppressHydrationWarning
             >
               <h1
                 className={`text-5xl font-bold bg-gradient-to-r bg-clip-text text-transparent mb-4 ${
@@ -567,6 +566,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({
                     ? 'from-blue-400 via-purple-400 to-pink-400'
                     : 'from-blue-600 via-purple-600 to-pink-600'
                 }`}
+                suppressHydrationWarning
               >
                 {welcomeText}
               </h1>
@@ -574,6 +574,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({
                 className={`text-xl max-w-2xl mx-auto ${
                   currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'
                 }`}
+                suppressHydrationWarning
               >
                 在这里记录我们的北邮爱乐合唱团
               </p>
@@ -584,6 +585,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.15 }}
+              suppressHydrationWarning
             >
               <AnnouncementBanner />
             </motion.div>
@@ -594,6 +596,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="max-w-3xl mx-auto relative"
+              suppressHydrationWarning
             >
               <Search
                 className={`absolute left-5 top-1/2 transform -translate-y-1/2 w-6 h-6 ${
@@ -648,6 +651,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="break-inside-avoid mb-6"
+                  suppressHydrationWarning
                 >
                   <div
                     className={`backdrop-blur-xl border rounded-2xl shadow-lg overflow-hidden ${
@@ -708,6 +712,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({
                   ? 'bg-white/10 border-white/20'
                   : 'bg-white/20 border-white/30'
               }`}
+              suppressHydrationWarning
             >
               <Music
                 className={`w-20 h-20 mx-auto mb-6 ${
@@ -737,7 +742,7 @@ export const HomeClient: React.FC<HomeClientProps> = ({
           ) : (
             <>
               <AnimatePresence>
-                <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 max-w-5xl mx-auto">
+                <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 max-w-5xl mx-auto" suppressHydrationWarning>
                   {filteredTracks.map((track, index) => (
                     <TrackCard
                       key={track.id}

@@ -1,5 +1,4 @@
-/* Import Payload CMS Lexical Extension styles */
-@import 'payloadcms-lexical-ext/client/client.css';
+/* Payload CMS Lexical Extension styles - removed due to build issues */
 
 @tailwind base;
 @tailwind components;

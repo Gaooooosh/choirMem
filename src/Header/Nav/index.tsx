@@ -8,7 +8,7 @@ import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import Link from 'next/link'
-import { Sun, Moon, User, LogOut, Settings, MessageCircle } from 'lucide-react'
+import { Sun, Moon, User, LogOut, Settings, MessageCircle, BarChart3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/providers/Auth'
 import { useTheme } from '@/providers/Theme'
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { LatestActivitySidebar } from '@/components/LatestActivitySidebar'
+import { NotificationCenter } from '@/app/(frontend)/components/NotificationCenter'
 
 export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
   const navItems = data?.navItems || []
@@ -63,6 +64,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            suppressHydrationWarning
           >
             <CMSLink
                 {...link}
@@ -81,6 +83,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        suppressHydrationWarning
       >
         <Button
           variant="ghost"
@@ -102,6 +105,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        suppressHydrationWarning
       >
         <Button
           variant="ghost"
@@ -124,6 +128,18 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
         </Button>
       </motion.div>
 
+      {/* 通知中心 */}
+      {user && (
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+          suppressHydrationWarning
+        >
+          <NotificationCenter />
+        </motion.div>
+      )}
+
       {/* 用户认证区域 */}
       {user ? (
         /* 已登录用户 - 显示用户头像和下拉菜单 */
@@ -133,6 +149,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+              suppressHydrationWarning
             >
               <Button
                 variant="ghost"
@@ -177,6 +194,12 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
                 个人资料
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/statistics" className="flex items-center">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                编辑统计
+              </Link>
+            </DropdownMenuItem>
             {user.is_admin && (
               <>
                 <DropdownMenuItem asChild>
@@ -204,6 +227,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            suppressHydrationWarning
           >
             <Button
               variant="ghost"
@@ -222,6 +246,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            suppressHydrationWarning
           >
             <Button
               size="sm"

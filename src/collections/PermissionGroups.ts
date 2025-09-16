@@ -114,5 +114,14 @@ export const PermissionGroups: CollectionConfig = {
         description: '允许管理邀请码',
       },
     },
+    {
+      name: 'can_moderate_edits',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Can Moderate Edits',
+      admin: {
+        description: '允许审核wiki编辑内容',
+      },
+    },
   ],
 }

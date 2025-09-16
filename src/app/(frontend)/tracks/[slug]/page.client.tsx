@@ -15,6 +15,7 @@ import Link from 'next/link'
 import { ArrowLeft, Music, Users, Heart, Download, Calendar, User, Tag } from 'lucide-react'
 import { getClientSideURL } from '@/utilities/getURL'
 import { CommentSection } from '@/app/(frontend)/components/CommentSection'
+import { WikiEditor } from '@/app/(frontend)/components/WikiEditor'
 
 interface Track {
   id: string
@@ -22,6 +23,7 @@ interface Track {
   description: any
   slug: string
   createdAt: string
+  wiki_enabled?: boolean
 }
 
 interface TrackVersion {
@@ -34,6 +36,7 @@ interface TrackVersion {
   likes: any[]
   ratings: any[]
   createdAt: string
+  wiki_enabled?: boolean
 }
 
 interface TrackDetailClientProps {
@@ -260,22 +263,43 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
             transition={{ duration: 0.6 }}
             className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 dark:from-gray-900/20 dark:to-gray-900/10 border border-white/20 dark:border-gray-700/30 rounded-3xl shadow-2xl shadow-black/10 p-8"
           >
-            <div className="text-center space-y-4">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {track.title}
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                {getDescriptionText(track.description)}
-              </p>
-              <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>创建于 {formatDate(track.createdAt)}</span>
+            <div className="space-y-6">
+              <div className="text-center space-y-4">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  {track.title}
+                </h1>
+                <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>创建于 {formatDate(track.createdAt)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Music className="w-4 h-4" />
+                    <span>{versions.length} 个版本</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Music className="w-4 h-4" />
-                  <span>{versions.length} 个版本</span>
-                </div>
+              </div>
+              
+              {/* 曲目描述 - 支持Wiki编辑 */}
+              <div className="max-w-4xl mx-auto">
+                {track.wiki_enabled ? (
+                  <WikiEditor
+                    collection="tracks"
+                    documentId={track.id}
+                    fieldName="description"
+                    initialContent={track.description}
+                    title="曲目简介"
+                    onContentChange={(newContent) => {
+                      // 可以在这里处理内容更新
+                    }}
+                  />
+                ) : (
+                  <div className="text-center">
+                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                      {getDescriptionText(track.description)}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -320,9 +344,24 @@ export const TrackDetailClient: React.FC<TrackDetailClientProps> = ({ track, ini
                       <Card className="h-full bg-transparent border-0">
                         <CardHeader className="pb-4">
                           <CardTitle className="text-xl font-semibold">{version.title}</CardTitle>
-                          <CardDescription className="text-sm text-muted-foreground">
-                            {getDescriptionText(version.notes)}
-                          </CardDescription>
+                          {version.wiki_enabled ? (
+                            <div className="mt-4">
+                              <WikiEditor
+                                collection="track-versions"
+                                documentId={version.id}
+                                fieldName="notes"
+                                initialContent={version.notes}
+                                title="版本备注"
+                                onContentChange={(newContent) => {
+                                  // 可以在这里处理内容更新
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <CardDescription className="text-sm text-muted-foreground">
+                              {getDescriptionText(version.notes)}
+                            </CardDescription>
+                          )}
                         </CardHeader>
 
                         <CardContent className="space-y-4">

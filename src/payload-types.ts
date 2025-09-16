@@ -78,6 +78,9 @@ export interface Config {
     'invitation-codes': InvitationCode;
     announcements: Announcement;
     users: User;
+    'edit-history': EditHistory;
+    'pending-edits': PendingEdit;
+    'edit-locks': EditLock;
     pages: Page;
     posts: Post;
     media: Media;
@@ -101,6 +104,9 @@ export interface Config {
     'invitation-codes': InvitationCodesSelect<false> | InvitationCodesSelect<true>;
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'edit-history': EditHistorySelect<false> | EditHistorySelect<true>;
+    'pending-edits': PendingEditsSelect<false> | PendingEditsSelect<true>;
+    'edit-locks': EditLocksSelect<false> | EditLocksSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -324,6 +330,10 @@ export interface PermissionGroup {
    * 允许管理邀请码
    */
   can_manage_invitation_codes?: boolean | null;
+  /**
+   * 允许审核wiki编辑内容
+   */
+  can_moderate_edits?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -495,6 +505,34 @@ export interface TrackVersion {
         id?: string | null;
       }[]
     | null;
+  /**
+   * 是否启用wiki式协作编辑版本说明
+   */
+  wiki_enabled?: boolean | null;
+  /**
+   * 最后编辑此版本说明的用户
+   */
+  last_editor?: (number | null) | User;
+  /**
+   * 当前编辑版本号
+   */
+  edit_version?: number | null;
+  /**
+   * 是否锁定编辑（防止编辑冲突）
+   */
+  is_locked?: boolean | null;
+  /**
+   * 当前锁定编辑的用户
+   */
+  locked_by?: (number | null) | User;
+  /**
+   * 编辑锁定时间
+   */
+  locked_at?: string | null;
+  /**
+   * 编辑是否需要审核
+   */
+  requires_approval?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -532,6 +570,34 @@ export interface Track {
    * 用于 URL 中的唯一标识符，如果留空将根据标题自动生成
    */
   slug: string;
+  /**
+   * 是否启用wiki式协作编辑
+   */
+  wiki_enabled?: boolean | null;
+  /**
+   * 最后编辑此曲目描述的用户
+   */
+  last_editor?: (number | null) | User;
+  /**
+   * 当前编辑版本号
+   */
+  edit_version?: number | null;
+  /**
+   * 是否锁定编辑（防止编辑冲突）
+   */
+  is_locked?: boolean | null;
+  /**
+   * 当前锁定编辑的用户
+   */
+  locked_by?: (number | null) | User;
+  /**
+   * 编辑锁定时间
+   */
+  locked_at?: string | null;
+  /**
+   * 编辑是否需要审核
+   */
+  requires_approval?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -739,6 +805,212 @@ export interface Announcement {
    * 是否在首页显示此公告
    */
   showOnHomepage?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * 编辑历史记录，跟踪所有wiki式编辑的版本历史。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "edit-history".
+ */
+export interface EditHistory {
+  id: number;
+  /**
+   * 编辑摘要，简要描述本次编辑的内容
+   */
+  summary: string;
+  /**
+   * 执行此次编辑的用户
+   */
+  editor: number | User;
+  /**
+   * 编辑目标的类型
+   */
+  target_type: 'track_description' | 'track_version_notes';
+  /**
+   * 编辑目标的ID（曲目ID或版本ID）
+   */
+  target_id: number;
+  /**
+   * 编辑操作类型
+   */
+  action: 'create' | 'update' | 'revert';
+  /**
+   * 编辑前的内容（JSON格式存储富文本）
+   */
+  content_before?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * 编辑后的内容（JSON格式存储富文本）
+   */
+  content_after:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * 内容差异对比（可选，用于快速查看变更）
+   */
+  diff?: string | null;
+  /**
+   * 编辑者的IP地址
+   */
+  ip_address?: string | null;
+  /**
+   * 编辑者的浏览器信息
+   */
+  user_agent?: string | null;
+  /**
+   * If this is a rollback operation, the ID of the version being rolled back to
+   */
+  rollback_to_version?: string | null;
+  /**
+   * 编辑是否已通过审核
+   */
+  is_approved?: boolean | null;
+  /**
+   * 审核通过此编辑的用户
+   */
+  approved_by?: (number | null) | User;
+  /**
+   * 审核通过的时间
+   */
+  approved_at?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pending-edits".
+ */
+export interface PendingEdit {
+  id: number;
+  /**
+   * 编辑摘要，简要描述此次编辑的内容
+   */
+  summary: string;
+  /**
+   * 提交此编辑的用户
+   */
+  editor: number | User;
+  /**
+   * 编辑目标的类型
+   */
+  target_type: 'track_description' | 'track_version_notes';
+  /**
+   * 编辑目标的ID（曲目ID或版本ID）
+   */
+  target_id: string;
+  /**
+   * 被编辑的字段名称（如description或notes）
+   */
+  field_name: string;
+  /**
+   * 编辑前的原始内容
+   */
+  original_content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * 编辑后的新内容
+   */
+  new_content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * 内容差异（自动生成）
+   */
+  diff?: string | null;
+  /**
+   * 审核状态
+   */
+  status: 'pending' | 'approved' | 'rejected' | 'auto_approved';
+  /**
+   * 审核此编辑的用户
+   */
+  reviewer?: (number | null) | User;
+  /**
+   * 审核意见或拒绝原因
+   */
+  review_comment?: string | null;
+  /**
+   * 审核时间
+   */
+  reviewed_at?: string | null;
+  /**
+   * 编辑者的IP地址
+   */
+  ip_address?: string | null;
+  /**
+   * 编辑者的浏览器信息
+   */
+  user_agent?: string | null;
+  /**
+   * 自动批准的原因（如信任用户、小幅修改等）
+   */
+  auto_approved_reason?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "edit-locks".
+ */
+export interface EditLock {
+  id: number;
+  /**
+   * 被锁定文档所属的集合
+   */
+  collection: string;
+  /**
+   * 被锁定文档的ID
+   */
+  document_id: string;
+  /**
+   * 锁定此文档的用户
+   */
+  user: number | User;
+  /**
+   * 锁定过期的时间
+   */
+  expires_at: string;
+  created_at?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1219,6 +1491,18 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'edit-history';
+        value: number | EditHistory;
+      } | null)
+    | ({
+        relationTo: 'pending-edits';
+        value: number | PendingEdit;
+      } | null)
+    | ({
+        relationTo: 'edit-locks';
+        value: number | EditLock;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: number | Page;
       } | null)
@@ -1308,6 +1592,13 @@ export interface TracksSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   slug?: T;
+  wiki_enabled?: T;
+  last_editor?: T;
+  edit_version?: T;
+  is_locked?: T;
+  locked_by?: T;
+  locked_at?: T;
+  requires_approval?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1329,6 +1620,13 @@ export interface TrackVersionsSelect<T extends boolean = true> {
         difficulty?: T;
         id?: T;
       };
+  wiki_enabled?: T;
+  last_editor?: T;
+  edit_version?: T;
+  is_locked?: T;
+  locked_by?: T;
+  locked_at?: T;
+  requires_approval?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1403,6 +1701,7 @@ export interface PermissionGroupsSelect<T extends boolean = true> {
   can_manage_system_settings?: T;
   can_manage_users?: T;
   can_manage_invitation_codes?: T;
+  can_moderate_edits?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1463,6 +1762,64 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "edit-history_select".
+ */
+export interface EditHistorySelect<T extends boolean = true> {
+  summary?: T;
+  editor?: T;
+  target_type?: T;
+  target_id?: T;
+  action?: T;
+  content_before?: T;
+  content_after?: T;
+  diff?: T;
+  ip_address?: T;
+  user_agent?: T;
+  rollback_to_version?: T;
+  is_approved?: T;
+  approved_by?: T;
+  approved_at?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pending-edits_select".
+ */
+export interface PendingEditsSelect<T extends boolean = true> {
+  summary?: T;
+  editor?: T;
+  target_type?: T;
+  target_id?: T;
+  field_name?: T;
+  original_content?: T;
+  new_content?: T;
+  diff?: T;
+  status?: T;
+  reviewer?: T;
+  review_comment?: T;
+  reviewed_at?: T;
+  ip_address?: T;
+  user_agent?: T;
+  auto_approved_reason?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "edit-locks_select".
+ */
+export interface EditLocksSelect<T extends boolean = true> {
+  collection?: T;
+  document_id?: T;
+  user?: T;
+  expires_at?: T;
+  created_at?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

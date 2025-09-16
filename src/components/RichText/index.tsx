@@ -10,7 +10,7 @@ import {
   LinkJSXConverter,
   RichText as ConvertRichText,
 } from '@payloadcms/richtext-lexical/react'
-import { JSXConverters } from 'payloadcms-lexical-ext'
+// Removed JSXConverters import due to Node.js module conflicts
 
 import { CodeBlock, CodeBlockProps } from '@/blocks/Code/Component'
 import { SerializedImageNode } from '@/components/RichTextEditor/ImageNode'
@@ -43,7 +43,7 @@ const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
 const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => {
   const converters = {
     ...defaultConverters,
-    ...JSXConverters,
+    // Removed JSXConverters spread due to Node.js module conflicts
     ...LinkJSXConverter({ internalDocToHref }),
   } as any
 

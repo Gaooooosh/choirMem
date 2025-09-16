@@ -42,7 +42,7 @@ export const Tracks: CollectionConfig = {
   access: {
     create: hasPermission('can_create_tracks'),
     read: anyone,
-    update: authenticated,
+    update: anyone, // Wiki式编辑，所有用户都可以编辑
     delete: authenticated,
   },
   admin: {
@@ -130,6 +130,82 @@ export const Tracks: CollectionConfig = {
       admin: {
         position: 'sidebar',
         description: '用于 URL 中的唯一标识符，如果留空将根据标题自动生成',
+      },
+    },
+    {
+      name: 'wiki_enabled',
+      type: 'checkbox',
+      defaultValue: true,
+      label: 'Wiki Editing Enabled',
+      admin: {
+        position: 'sidebar',
+        description: '是否启用wiki式协作编辑',
+      },
+    },
+    {
+      name: 'last_editor',
+      type: 'relationship',
+      relationTo: 'users',
+      hasMany: false,
+      label: 'Last Editor',
+      admin: {
+        position: 'sidebar',
+        description: '最后编辑此曲目描述的用户',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'edit_version',
+      type: 'number',
+      defaultValue: 1,
+      label: 'Edit Version',
+      admin: {
+        position: 'sidebar',
+        description: '当前编辑版本号',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'is_locked',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Is Locked',
+      admin: {
+        position: 'sidebar',
+        description: '是否锁定编辑（防止编辑冲突）',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'locked_by',
+      type: 'relationship',
+      relationTo: 'users',
+      hasMany: false,
+      label: 'Locked By',
+      admin: {
+        position: 'sidebar',
+        description: '当前锁定编辑的用户',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'locked_at',
+      type: 'date',
+      label: 'Locked At',
+      admin: {
+        position: 'sidebar',
+        description: '编辑锁定时间',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'requires_approval',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Requires Approval',
+      admin: {
+        position: 'sidebar',
+        description: '编辑是否需要审核',
       },
     },
   ],

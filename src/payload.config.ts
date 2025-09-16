@@ -18,9 +18,13 @@ import { PermissionGroups } from './collections/PermissionGroups'
 import { InvitationCodes } from './collections/InvitationCodes'
 import { Announcements } from './collections/Announcements'
 import { Users } from './collections/Users'
+import { EditHistory } from './collections/EditHistory'
+import { PendingEdits } from './collections/PendingEdits'
+import { EditLocks } from './collections/EditLocks'
 
 // Import custom endpoints
 import { register } from './endpoints/auth/register'
+import { wikiEndpoints } from './endpoints/wiki'
 
 // Import global settings
 import { SystemSettings } from './globals/SystemSettings'
@@ -95,11 +99,14 @@ export default buildConfig({
     InvitationCodes,
     Announcements,
     Users,
+    EditHistory,
+    PendingEdits,
+    EditLocks,
     // Original template collections (to be removed later)
     Pages,
     Posts,
     Media,
-  ],
+   ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [
     SystemSettings,
@@ -122,6 +129,7 @@ export default buildConfig({
       method: 'post',
       handler: register,
     },
+    ...wikiEndpoints,
   ],
   jobs: {
     access: {
