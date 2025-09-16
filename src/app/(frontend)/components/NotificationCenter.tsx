@@ -236,8 +236,16 @@ export const NotificationCenter: React.FC = () => {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative">
-          <Bell className="w-4 h-4" />
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="relative p-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/30 hover:bg-white/15 hover:border-white/40 transition-all duration-300"
+          style={{
+            backdropFilter: 'blur(20px) saturate(1.3) contrast(1.2)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+          }}
+        >
+          <Bell className="w-5 h-5 text-white/70 hover:text-blue-300 transition-colors duration-300" />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"

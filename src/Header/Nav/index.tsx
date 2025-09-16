@@ -8,7 +8,7 @@ import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import Link from 'next/link'
-import { Sun, Moon, User, LogOut, Settings, MessageCircle, BarChart3 } from 'lucide-react'
+import { Sun, Moon, User, LogOut, Settings, MessageCircle, BarChart3, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/providers/Auth'
 import { useTheme } from '@/providers/Theme'
@@ -77,6 +77,30 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
           </motion.div>
         )
       })}
+
+      {/* 署名文章按钮 */}
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        suppressHydrationWarning
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="relative p-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/30 hover:bg-white/15 hover:border-white/40 transition-all duration-300"
+          style={{
+            backdropFilter: 'blur(20px) saturate(1.3) contrast(1.2)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+          }}
+        >
+          <Link href="/articles">
+            <FileText className="w-5 h-5 text-white/70 hover:text-blue-300 transition-colors duration-300" />
+            <span className="sr-only">署名文章</span>
+          </Link>
+        </Button>
+      </motion.div>
 
       {/* 最新动态按钮 */}
       <motion.div
