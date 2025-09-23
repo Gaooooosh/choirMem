@@ -44,19 +44,33 @@ export const sendNotification = async (req: PayloadRequest): Promise<any> => {
     
     // 创建通知
     const notification = await payload.create({
-      collection: 'edit-notifications',
+      collection: 'announcements',
       data: {
         title: notificationData.title,
-        message: notificationData.message,
-        type: notificationData.type,
-        recipient: typeof notificationData.recipient === 'string' ? parseInt(notificationData.recipient) : notificationData.recipient,
-        sender: typeof notificationData.sender === 'string' ? parseInt(notificationData.sender) : (notificationData.sender || user.id),
-        related_collection: notificationData.related_collection,
-        related_document_id: notificationData.related_document_id,
-        related_field: notificationData.related_field,
-        action_url: notificationData.action_url,
-        metadata: notificationData.metadata,
-        read: false,
+        content: {
+          root: {
+            type: 'root',
+            children: [{
+              type: 'paragraph',
+              children: [{
+                type: 'text',
+                text: notificationData.message,
+                version: 1
+              }],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1
+            }],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1
+          }
+        }, // 使用正确的richText格式
+        status: 'published',
+        priority: notificationData.type === 'system' ? 'urgent' : 'normal',
+        author: typeof notificationData.sender === 'string' ? parseInt(notificationData.sender) : (notificationData.sender || user.id),
       },
       req,
     })
@@ -115,19 +129,33 @@ export const sendBulkNotifications = async (req: PayloadRequest): Promise<any> =
       
       try {
         const notification = await payload.create({
-          collection: 'edit-notifications',
+          collection: 'announcements',
           data: {
             title: notificationData.title,
-            message: notificationData.message,
-            type: notificationData.type,
-            recipient: typeof notificationData.recipient === 'string' ? parseInt(notificationData.recipient) : notificationData.recipient,
-            sender: typeof notificationData.sender === 'string' ? parseInt(notificationData.sender) : (notificationData.sender || user.id),
-            related_collection: notificationData.related_collection,
-            related_document_id: notificationData.related_document_id,
-            related_field: notificationData.related_field,
-            action_url: notificationData.action_url,
-            metadata: notificationData.metadata,
-            read: false,
+            content: {
+              root: {
+                type: 'root',
+                children: [{
+                  type: 'paragraph',
+                  children: [{
+                    type: 'text',
+                    text: notificationData.message,
+                    version: 1
+                  }],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  version: 1
+                }],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1
+              }
+            },
+            status: 'published',
+            priority: notificationData.type === 'system' ? 'urgent' : 'normal',
+            author: typeof notificationData.sender === 'string' ? parseInt(notificationData.sender) : (notificationData.sender || user.id),
           },
           req,
         })

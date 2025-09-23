@@ -127,9 +127,9 @@ export interface OldAnnouncement {
 }
 
 export class OldDataReader {
-  private db: sqlite3.Database
-  private all: (sql: string, params?: any[]) => Promise<any[]>
-  private get: (sql: string, params?: any[]) => Promise<any>
+  private db!: sqlite3.Database
+  private all!: (sql: string, params?: any[]) => Promise<any[]>
+  private get!: (sql: string, params?: any[]) => Promise<any>
   private connectionPromise: Promise<void>
 
   constructor(dbPath: string) {

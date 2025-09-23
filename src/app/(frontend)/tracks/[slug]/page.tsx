@@ -6,9 +6,9 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export default async function TrackDetailPage({ params }: Props) {

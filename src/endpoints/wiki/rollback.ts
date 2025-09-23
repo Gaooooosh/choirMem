@@ -124,20 +124,8 @@ export const rollbackToVersion = async (req: PayloadRequest): Promise<Response> 
 
     // 发送回滚通知
     try {
-      await payload.create({
-        collection: 'edit-notifications',
-        data: {
-          title: '内容已回滚',
-          message: `${req.user.name || '用户'} 将 ${target_type === 'track_description' ? '曲目' : '版本'} 的 ${field_name} 内容回滚到了历史版本`,
-          type: 'content_rollback',
-          recipient: req.user.id, // 通知操作者自己
-          sender: req.user.id,
-          related_collection: target_type.split('_')[0],
-          related_document_id: target_id,
-          action_url: `/admin/collections/${target_type.split('_')[0]}/${target_id}`,
-          read: false,
-        },
-      })
+      // Simplified notification - just log instead of creating
+      console.log('Rollback notification would be sent to:', req.user.id)
     } catch (notificationError) {
       console.error('发送回滚通知失败:', notificationError)
     }

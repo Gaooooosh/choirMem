@@ -67,7 +67,7 @@ export const UserCollections: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      ({ data, _operation }) => {
+      ({ data }) => {
         // Auto-generate slug from name if not provided
         if (data.name && !data.slug) {
           data.slug = data.name

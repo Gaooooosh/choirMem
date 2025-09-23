@@ -23,14 +23,26 @@ node_modules/
 *.db
 
 /数据迁移/
+/.kiro/
+/.trae/
+/.vscode/
+/docs/
 /uploads/*
 /scores/
+/data/
+/logs/
+/public/
+/production/
 *.log
 *.json
 *.yaml
 .npmrc
 .prettierrc
 .prettierrc.json
+.prettierignore
+.npmrc
+eslint.config.mjs
 eslint.config.js
 CLAUDE.md
 test.*
+.mcp.json

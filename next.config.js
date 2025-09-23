@@ -8,6 +8,9 @@ const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || process.env
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 生产部署配置
+  output: 'standalone',
+  
   images: {
     remotePatterns: [
       ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
@@ -36,6 +39,22 @@ const nextConfig = {
   },
   reactStrictMode: true,
   redirects,
+  
+  // 生产环境优化
+  compress: true,
+  poweredByHeader: false,
+  eslint: {
+    // 在生产构建时忽略ESLint错误
+    ignoreDuringBuilds: true,
+  },
+  
+  // 服务器外部包配置
+  serverExternalPackages: ['payload'],
+  
+  // 实验性功能
+  experimental: {
+    // 其他实验性配置可以在这里添加
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

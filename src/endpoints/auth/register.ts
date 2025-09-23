@@ -3,69 +3,67 @@ import type { User } from '@/payload-types'
 
 import { APIError } from 'payload'
 
-export const register: PayloadHandler = async ({ req, res }) => {
-  const { payload } = req
-  
-  // 获取请求体中的数据
-  const { email, password, username, invitationCode } = await req.json()
-  console.log('请求体数据:', { email, password, username, invitationCode })
-  
-  // 验证必需字段
-  if (!email || !password || !username || !invitationCode) {
-    throw new APIError('缺少必需字段', 400)
-  }
-  
+export const register: PayloadHandler = async (req) => {
   try {
+    const { payload } = req
+    
+    // 获取请求体中的数据
+    const body = await req.json?.()
+    const { email, password, username, invitationCode } = body || {}
+    console.log('请求体数据:', { email, password, username, invitationCode })
+    
+    // 验证必需字段
+    if (!email || !password || !username || !invitationCode) {
+      return new Response(JSON.stringify({ error: '缺少必需字段' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+    
     console.log('开始查找邀请码')
-    // 查找邀请码并原子性地减少使用次数
-    // 使用 update 操作来同时检查和更新邀请码，避免竞态条件
-    const invitationCodeUpdate = await payload.update({
+    // 查找邀请码
+    const codes = await payload.find({
       collection: 'invitation-codes',
       where: {
-        and: [
-          {
-            code: {
-              equals: invitationCode,
-            },
-          },
-          {
-            or: [
-              {
-                uses_left: {
-                  greater_than: 0,
-                },
-              },
-              {
-                total_uses: {
-                  equals: 0,
-                },
-              },
-            ],
-          },
-        ],
-      },
-      data: {
-        // 只有当 uses_left > 0 时才减少，对于无限制邀请码(total_uses=0)不修改
-        uses_left: {
-          decrement: 1,
+        code: {
+          equals: invitationCode,
         },
       },
-      // 只更新一个文档
       limit: 1,
     })
     
-    console.log('邀请码更新结果:', invitationCodeUpdate)
-    
-    // 检查邀请码是否有效
-    if (!invitationCodeUpdate || invitationCodeUpdate.docs.length === 0) {
-      throw new APIError('无效的邀请码或邀请码已用完', 400)
+    if (codes.docs.length === 0) {
+      return new Response(JSON.stringify({ error: '无效的邀请码' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      })
     }
     
-    const code = invitationCodeUpdate.docs[0]
-    console.log('找到的邀请码:', code)
+    const code = codes.docs[0]
+    console.log('找到邀请码:', code)
     
-    // 创建用户
+    // 检查邀请码是否还有剩余使用次数
+    if ((code.total_uses || 0) > 0 && (code.uses_left || 0) <= 0) {
+      return new Response(JSON.stringify({ error: '邀请码已用完' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+    
+    // 减少邀请码的剩余使用次数（如果不是无限制的）
+    if ((code.total_uses || 0) > 0) {
+      console.log('更新邀请码使用次数')
+      await payload.update({
+        collection: 'invitation-codes',
+        id: code.id,
+        data: {
+          uses_left: Math.max(0, (code.uses_left || 0) - 1),
+        },
+      })
+    }
+    
     console.log('开始创建用户')
+    // 创建用户
     const user = await payload.create({
       collection: 'users',
       data: {
@@ -80,29 +78,42 @@ export const register: PayloadHandler = async ({ req, res }) => {
     // 返回创建的用户信息（不包含敏感信息）
     const { password: _, ...userWithoutPassword } = user
     
-    res.status(200).json({
+    return new Response(JSON.stringify({
       user: userWithoutPassword,
       message: '用户注册成功',
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
     })
+    
   } catch (error: any) {
     console.error('注册过程中发生错误:', error)
-    if (error instanceof APIError) {
-      throw error
-    }
     
     // 检查是否是重复键错误（邮箱或用户名已存在）
     if (error.code === 'SQLITE_CONSTRAINT_UNIQUE' || error.code === 11000) {
       // 尝试确定是哪个字段重复
       if (error.message && error.message.includes('email')) {
-        throw new APIError('邮箱已存在', 400)
+        return new Response(JSON.stringify({ error: '邮箱已存在' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        })
       } else if (error.message && error.message.includes('username')) {
-        throw new APIError('用户名已存在', 400)
+        return new Response(JSON.stringify({ error: '用户名已存在' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        })
       } else {
-        throw new APIError('邮箱或用户名已存在', 400)
+        return new Response(JSON.stringify({ error: '邮箱或用户名已存在' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        })
       }
     }
     
     // 返回更详细的错误信息
-    throw new APIError(`注册失败: ${error.message}`, 500)
+    return new Response(JSON.stringify({ error: `注册失败: ${error.message}` }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
   }
 }

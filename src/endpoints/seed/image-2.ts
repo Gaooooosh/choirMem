@@ -1,6 +1,7 @@
 import type { Media } from '@/payload-types'
 
-export const image2: Omit<Media, 'createdAt' | 'id' | 'updatedAt'> = {
+export const image2: Partial<Media> = {
+  uploader: 1, // Default uploader ID
   alt: 'Curving abstract shapes with an orange and blue gradient',
   caption: {
     root: {

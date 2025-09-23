@@ -158,15 +158,7 @@ export const checkLockStatus = async (req: PayloadRequest): Promise<any> => {
           { expires_at: { greater_than: new Date() } }
         ]
       },
-      populate: {
-        users: {
-          select: {
-            id: true,
-            email: true,
-            name: true
-          }
-        }
-      }
+      depth: 1
     })
 
     if (existingLock.docs.length > 0) {

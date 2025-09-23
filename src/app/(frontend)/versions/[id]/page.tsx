@@ -6,9 +6,9 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function VersionDetailPage({ params }: Props) {

@@ -75,7 +75,7 @@ export const InvitationCodes: CollectionConfig = {
           ({ value, originalDoc, data }) => {
             // 在创建时，如果 total_uses > 0，则 uses_left 应该等于 total_uses
             // 如果 total_uses = 0，则为无限制邀请码
-            if (!originalDoc && data.total_uses > 0) {
+            if (!originalDoc && data && data.total_uses > 0) {
               return data.total_uses;
             }
             return value;
