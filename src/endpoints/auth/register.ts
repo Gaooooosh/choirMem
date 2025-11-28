@@ -1,7 +1,8 @@
 import type { PayloadHandler } from 'payload'
 import type { User } from '@/payload-types'
-
 import { APIError } from 'payload'
+import crypto from 'crypto'
+import { getServerSideURL } from '@/utilities/getURL'
 
 export const register: PayloadHandler = async (req) => {
   try {
@@ -64,6 +65,8 @@ export const register: PayloadHandler = async (req) => {
     
     console.log('开始创建用户')
     // 创建用户
+    const token = crypto.randomBytes(24).toString('hex')
+    const exp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     const user = await payload.create({
       collection: 'users',
       data: {
@@ -71,6 +74,9 @@ export const register: PayloadHandler = async (req) => {
         password,
         username,
         group: code.group, // 将用户分配到邀请码指定的权限组
+        email_verified: false,
+        email_verification_token: token,
+        email_verification_expiration: exp,
       },
     }) as User
     console.log('用户创建结果:', user)
@@ -78,13 +84,20 @@ export const register: PayloadHandler = async (req) => {
     // 返回创建的用户信息（不包含敏感信息）
     const { password: _, ...userWithoutPassword } = user
     
-    return new Response(JSON.stringify({
-      user: userWithoutPassword,
-      message: '用户注册成功',
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    try {
+      const base = getServerSideURL()
+      const link = `${base}/email/confirm?t=${token}&uid=${user.id}`
+      await payload.sendEmail?.({
+        to: email,
+        subject: '验证你的邮箱',
+        html: `<p>欢迎加入 ChoirMem！</p><p>请点击链接验证你的邮箱：</p><p><a href="${link}">${link}</a></p>`,
+      })
+      await payload.update({ collection: 'users', id: user.id, data: { email_verification_last_sent: new Date().toISOString() } as any })
+    } catch (e) {
+      console.error('发送验证邮件失败:', e)
+    }
+
+    return new Response(JSON.stringify({ user: userWithoutPassword, message: '用户注册成功，请验证邮箱' }), { status: 200, headers: { 'Content-Type': 'application/json' } })
     
   } catch (error: any) {
     console.error('注册过程中发生错误:', error)

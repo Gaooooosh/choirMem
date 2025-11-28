@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-11-25T07:36:06.001Z",
+  "oldDataStats": {
+    "users": 52,
+    "permissionGroups": 5,
+    "tracks": 95,
+    "trackVersions": 98,
+    "scores": 105,
+    "photos": 15,
+    "tags": 20,
+    "comments": 37,
+    "articles": 7,
+    "ratings": 38,
+    "likes": 44,
+    "versionTags": 34,
+    "invitationCodes": 7,
+    "systemSettings": 2,
+    "announcements": 1
+  },
+  "estimatedMigrationTime": "约 3 分钟"
+}

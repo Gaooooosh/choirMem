@@ -8,7 +8,12 @@ export async function POST(request: NextRequest) {
     const { name, bio } = await request.json()
 
     // 获取当前用户
-    const token = request.cookies.get('payload-token')?.value
+    const csrfHeader = request.headers.get('x-csrf-token')
+    const csrfCookie = request.cookies.get('csrf-token')?.value
+    if (!csrfHeader || !csrfCookie || csrfHeader !== csrfCookie) {
+      return NextResponse.json({ error: '无效的CSRF令牌' }, { status: 403 })
+    }
+    const token = request.cookies.get('payload-token')?.value || request.headers.get('cookie')?.split(';').find((c)=>c.trim().startsWith('payload-token='))?.split('=')[1]
     if (!token) {
       return NextResponse.json({ error: '未授权访问' }, { status: 401 })
     }

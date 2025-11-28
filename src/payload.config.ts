@@ -15,6 +15,7 @@ import { UserCollections } from './collections/UserCollections'
 import { Tags } from './collections/Tags'
 import { Comments } from './collections/Comments'
 import { PermissionGroups } from './collections/PermissionGroups'
+import { PermissionChangeLogs } from './collections/PermissionChangeLogs'
 import { InvitationCodes } from './collections/InvitationCodes'
 import { Announcements } from './collections/Announcements'
 import { Users } from './collections/Users'
@@ -38,6 +39,8 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+import sqlite3 from 'sqlite3'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -83,8 +86,9 @@ export default buildConfig({
   editor: defaultLexical,
   db: sqliteAdapter({
     client: {
-      url: process.env.DATABASE_URI || '',
+      url: process.env.DATABASE_URI || 'file:./data/data.db',
     },
+    push: true,
   }),
   collections: [
     // New choir management collections
@@ -96,6 +100,7 @@ export default buildConfig({
     Tags,
     Comments,
     PermissionGroups,
+    PermissionChangeLogs,
     InvitationCodes,
     Announcements,
     Users,
@@ -118,7 +123,28 @@ export default buildConfig({
     ...plugins,
     // storage-adapter-placeholder
   ],
-  secret: process.env.PAYLOAD_SECRET,
+  email: process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
+    ? nodemailerAdapter({
+        transportOptions: {
+          host: process.env.SMTP_HOST,
+          port: Number(process.env.SMTP_PORT || 465),
+          secure: String(process.env.SMTP_SECURE || 'true') === 'true',
+          auth: {
+            user: process.env.SMTP_USER as string,
+            pass: process.env.SMTP_PASS as string,
+          },
+        },
+        defaultFromAddress: (() => {
+          const from = process.env.SMTP_FROM || ''
+          const user = process.env.SMTP_USER || ''
+          const fromDomain = from.split('@')[1]
+          const userDomain = user.split('@')[1]
+          return from && fromDomain === userDomain ? from : user
+        })(),
+        defaultFromName: 'ChoirMem',
+      })
+    : undefined,
+  secret: process.env.PAYLOAD_SECRET || 'dev-secret',
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -145,5 +171,23 @@ export default buildConfig({
       },
     },
     tasks: [],
+  },
+  onInit: async () => {
+    try {
+      const uri = process.env.DATABASE_URI || 'file:./data/data.db'
+      const dbPath = uri.startsWith('file:') ? uri.slice(5) : uri
+      const db = new sqlite3.Database(dbPath)
+      const rows: any[] = await new Promise<any[]>((resolve, reject) => {
+        db.all('PRAGMA table_info(users)', (err, r) => (err ? reject(err) : resolve(r as any[])))
+      })
+      const names = new Set(rows.map((r: any) => r.name))
+      const alters: string[] = []
+      if (!names.has('email_verification_last_sent')) alters.push('ALTER TABLE "users" ADD COLUMN "email_verification_last_sent" TEXT')
+      if (!names.has('pending_email_verification_last_sent')) alters.push('ALTER TABLE "users" ADD COLUMN "pending_email_verification_last_sent" TEXT')
+      for (const sql of alters) {
+        await new Promise((resolve, reject) => db.run(sql, (err) => (err ? reject(err) : resolve(null))))
+      }
+      await new Promise((resolve) => db.close(() => resolve(null)))
+    } catch {}
   },
 })

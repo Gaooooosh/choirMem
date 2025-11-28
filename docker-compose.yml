@@ -1,0 +1,32 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["node", "server.js"]
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: --no-deprecation
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_SERVER_URL: https://test.aiyueaijia.com
+      NEXT_PUBLIC_PAYLOAD_URL: https://test.aiyueaijia.com
+      PAYLOAD_SECRET: changeme
+      DATABASE_URI: file:./data/data.db
+      CRON_SECRET: changeme
+      PREVIEW_SECRET: changeme
+      SMTP_HOST: smtp.126.com
+      SMTP_PORT: 465
+      SMTP_SECURE: "true"
+      SMTP_USER: aiyueaijia1987@126.com
+      SMTP_PASS: HPeGhXAnk26iLgaL
+      SMTP_FROM: aiyueaijia1987@126.com
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./public/media:/app/public/media
+      - ./scores:/app/scores
+    restart: unless-stopped
+volumes:
+  choirmem-data:

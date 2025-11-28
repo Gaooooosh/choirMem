@@ -75,6 +75,7 @@ export interface Config {
     tags: Tag;
     comments: Comment;
     'permission-groups': PermissionGroup;
+    'permission-change-logs': PermissionChangeLog;
     'invitation-codes': InvitationCode;
     announcements: Announcement;
     users: User;
@@ -101,6 +102,7 @@ export interface Config {
     tags: TagsSelect<false> | TagsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
     'permission-groups': PermissionGroupsSelect<false> | PermissionGroupsSelect<true>;
+    'permission-change-logs': PermissionChangeLogsSelect<false> | PermissionChangeLogsSelect<true>;
     'invitation-codes': InvitationCodesSelect<false> | InvitationCodesSelect<true>;
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -264,6 +266,16 @@ export interface User {
    * 标识用户是否需要重置密码（用于迁移用户）
    */
   needs_password_reset?: boolean | null;
+  mfa_enabled?: boolean | null;
+  mfa_secret?: string | null;
+  login_attempts?: number | null;
+  locked_until?: string | null;
+  email_verified?: boolean | null;
+  email_verification_token?: string | null;
+  email_verification_expiration?: string | null;
+  pending_email?: string | null;
+  pending_email_verification_token?: string | null;
+  pending_email_verification_expiration?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -272,6 +284,9 @@ export interface User {
   salt?: string | null;
   hash?: string | null;
   loginAttempts?: number | null;
+  /**
+   * 兼容旧字段名，未来清理
+   */
   lockUntil?: string | null;
   sessions?:
     | {
@@ -725,6 +740,28 @@ export interface Comment {
    * 评论所属的版本（与曲目二选一）
    */
   track_version?: (number | null) | TrackVersion;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "permission-change-logs".
+ */
+export interface PermissionChangeLog {
+  id: number;
+  action: string;
+  user?: (number | null) | User;
+  group?: (number | null) | PermissionGroup;
+  details?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  timestamp: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1479,6 +1516,10 @@ export interface PayloadLockedDocument {
         value: number | PermissionGroup;
       } | null)
     | ({
+        relationTo: 'permission-change-logs';
+        value: number | PermissionChangeLog;
+      } | null)
+    | ({
         relationTo: 'invitation-codes';
         value: number | InvitationCode;
       } | null)
@@ -1707,6 +1748,19 @@ export interface PermissionGroupsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "permission-change-logs_select".
+ */
+export interface PermissionChangeLogsSelect<T extends boolean = true> {
+  action?: T;
+  user?: T;
+  group?: T;
+  details?: T;
+  timestamp?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "invitation-codes_select".
  */
 export interface InvitationCodesSelect<T extends boolean = true> {
@@ -1746,6 +1800,16 @@ export interface UsersSelect<T extends boolean = true> {
   activity_score?: T;
   is_admin?: T;
   needs_password_reset?: T;
+  mfa_enabled?: T;
+  mfa_secret?: T;
+  login_attempts?: T;
+  locked_until?: T;
+  email_verified?: T;
+  email_verification_token?: T;
+  email_verification_expiration?: T;
+  pending_email?: T;
+  pending_email_verification_token?: T;
+  pending_email_verification_expiration?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

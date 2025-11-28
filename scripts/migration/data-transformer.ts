@@ -665,7 +665,8 @@ export class DataTransformer {
             collection: 'articles',
             data: {
               title: oldArticle.title,
-              content: convertToLexicalRichText(oldArticle.body),
+              content_type: 'richtext',
+              rich_content: convertToLexicalRichText(oldArticle.body),
               author: parseInt(authorId),
               createdAt: formatTimestamp(oldArticle.timestamp),
             },

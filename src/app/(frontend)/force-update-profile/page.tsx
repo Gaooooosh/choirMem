@@ -16,12 +16,11 @@ export default async function ForceUpdateProfilePage() {
     redirect('/login')
   }
 
-  // 检查用户是否需要强制更新信息
-  // 如果用户邮箱包含 @example.com 或者其他临时邮箱标识，则需要更新
+  const needsPasswordReset = user.needs_password_reset === true
   const needsUpdate = user.email?.includes('@example.com') || false
-  
-  if (!needsUpdate) {
-    redirect('/')
+
+  if (needsPasswordReset || needsUpdate) {
+    redirect('/migration-help')
   }
 
   return <ForceUpdateProfileClient user={user} />

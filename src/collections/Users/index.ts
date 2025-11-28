@@ -1,4 +1,6 @@
 import type { CollectionConfig } from 'payload'
+import crypto from 'crypto'
+import { getServerSideURL } from '../../utilities/getURL'
 
 import { authenticated } from '../../access/authenticated'
 import { hasPermission } from '../../access/hasPermission'
@@ -116,6 +118,127 @@ export const Users: CollectionConfig = {
       },
       defaultValue: false,
     },
+    {
+      name: 'mfa_enabled',
+      type: 'checkbox',
+      label: 'MFA Enabled',
+      defaultValue: false,
+    },
+    {
+      name: 'mfa_secret',
+      type: 'text',
+      label: 'MFA Secret',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'login_attempts',
+      type: 'number',
+      label: 'Login Attempts',
+      defaultValue: 0,
+    },
+    {
+      name: 'locked_until',
+      type: 'date',
+      label: 'Locked Until',
+    },
+    {
+      name: 'lockUntil',
+      type: 'date',
+      label: 'Lock Until (alias)',
+      admin: { description: '兼容旧字段名，未来清理' },
+    },
+    {
+      name: 'email_verified',
+      type: 'checkbox',
+      label: 'Email Verified',
+      defaultValue: false,
+    },
+    {
+      name: 'email_verification_token',
+      type: 'text',
+      label: 'Email Verification Token',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'email_verification_expiration',
+      type: 'date',
+      label: 'Email Verification Expiration',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'pending_email',
+      type: 'text',
+      label: 'Pending Email',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'pending_email_verification_token',
+      type: 'text',
+      label: 'Pending Email Verification Token',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'pending_email_verification_expiration',
+      type: 'date',
+      label: 'Pending Email Verification Expiration',
+      admin: { readOnly: true },
+    },
+    { name: 'email_verification_last_sent', type: 'date', label: 'Email Verification Last Sent' },
+    { name: 'pending_email_verification_last_sent', type: 'date', label: 'Pending Email Verification Last Sent' },
   ],
   timestamps: true,
+  hooks: {
+    beforeChange: [
+      async ({ data, originalDoc, operation }) => {
+        if (operation !== 'update') return
+        const nextEmail = (data as any)?.email
+        const prevEmail = (originalDoc as any)?.email
+        if (nextEmail && prevEmail && nextEmail !== prevEmail) {
+          const token = crypto.randomBytes(24).toString('hex')
+          const exp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+          ;(data as any).pending_email = nextEmail
+          ;(data as any).pending_email_verification_token = token
+          ;(data as any).pending_email_verification_expiration = exp
+          ;(data as any).email = prevEmail
+        }
+      },
+    ],
+    afterChange: [
+      async ({ doc, previousDoc, req, operation }) => {
+        if (operation === 'update') {
+          const prevGroupId = typeof previousDoc?.group === 'object' ? previousDoc.group?.id : previousDoc?.group
+          const currGroupId = typeof doc?.group === 'object' ? doc.group?.id : doc?.group
+          if (prevGroupId !== currGroupId) {
+            await req.payload.create({
+              collection: 'permission-change-logs',
+              data: {
+                action: 'user_group_changed',
+                user: doc.id,
+                group: currGroupId || null,
+                details: { from: prevGroupId || null, to: currGroupId || null },
+                timestamp: new Date().toISOString(),
+              },
+            })
+          }
+          const changed = (doc as any)?.pending_email && (doc as any)?.pending_email_verification_token
+          if (changed) {
+            try {
+              const urlBase = getServerSideURL()
+              const link = `${urlBase}/email/confirm?t=${(doc as any).pending_email_verification_token}&uid=${doc.id}`
+              await req.payload.sendEmail?.({
+                to: String((doc as any).pending_email),
+                subject: '验证你的新邮箱',
+                html: `<p>请点击链接验证你的邮箱：</p><p><a href="${link}">${link}</a></p>`,
+              })
+              await req.payload.update({
+                collection: 'users',
+                id: (doc as any).id,
+                data: { pending_email_verification_last_sent: new Date().toISOString() } as any,
+              })
+            } catch (e) {}
+          }
+        }
+      },
+    ],
+  },
 }

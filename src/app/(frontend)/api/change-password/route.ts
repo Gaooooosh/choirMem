@@ -6,8 +6,13 @@ import { cookies } from 'next/headers'
 export async function POST(request: NextRequest) {
   try {
     const payload = await getPayload({ config })
+    const csrfHeader = request.headers.get('x-csrf-token')
+    const csrfCookie = request.cookies.get('csrf-token')?.value
+    if (!csrfHeader || !csrfCookie || csrfHeader !== csrfCookie) {
+      return NextResponse.json({ error: '无效的CSRF令牌' }, { status: 403 })
+    }
     const cookieStore = await cookies()
-    const token = cookieStore.get('payload-token')?.value
+    const token = cookieStore.get('payload-token')?.value || request.headers.get('cookie')?.split(';').find((c)=>c.trim().startsWith('payload-token='))?.split('=')[1]
 
     if (!token) {
       return NextResponse.json(
@@ -47,7 +52,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查用户是否需要重置密码
-    const needsPasswordReset = user.needs_password_reset === true
+    const needsPasswordReset = (user as any).needs_password_reset === true
+    const emailVerified = (user as any).email_verified === true
+    if (needsPasswordReset && !emailVerified) {
+      return NextResponse.json(
+        { error: '请先完成邮箱验证后再设置新密码' },
+        { status: 403 }
+      )
+    }
     
     // 如果不是临时密码用户，需要验证当前密码
     if (!needsPasswordReset) {

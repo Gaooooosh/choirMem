@@ -4,27 +4,31 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { HomeClient } from './components/HomeClient'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
-  const payload = await getPayload({
-    config: configPromise,
-  })
+  try {
+    const payload = await getPayload({
+      config: configPromise,
+    })
 
-  // 获取曲目数据作为首页内容
-  const tracks = await payload.find({
-    collection: 'tracks',
-    limit: 100, // 加载更多曲目，确保显示所有内容
-  })
+    const tracks = await payload.find({
+      collection: 'tracks',
+      limit: 100,
+    })
 
-  // 转换Payload Track类型到客户端Track类型
-  const clientTracks = tracks.docs.map((track) => ({
-    id: track.id.toString(),
-    title: track.title,
-    description: track.description,
-    slug: track.slug,
-    createdAt: track.createdAt,
-  }))
+    const clientTracks = tracks.docs.map((track) => ({
+      id: track.id.toString(),
+      title: track.title,
+      description: track.description,
+      slug: track.slug,
+      createdAt: track.createdAt,
+    }))
 
-  return <HomeClient initialTracks={clientTracks} hasMore={tracks.hasNextPage} />
+    return <HomeClient initialTracks={clientTracks} hasMore={tracks.hasNextPage} />
+  } catch {
+    return <HomeClient initialTracks={[]} hasMore={false} />
+  }
 }
 
 export async function generateMetadata(): Promise<Metadata> {

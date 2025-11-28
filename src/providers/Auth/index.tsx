@@ -46,6 +46,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     checkAuth()
+    const interval = setInterval(checkAuth, 60000)
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') checkAuth()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [])
 
   return (

@@ -4,6 +4,8 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { unstable_cache } from 'next/cache'
 
+export const dynamic = 'force-dynamic'
+
 type Global = keyof Config['globals']
 
 async function getGlobal(slug: Global, depth = 0) {

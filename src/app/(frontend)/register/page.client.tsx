@@ -40,6 +40,12 @@ export function RegisterClient() {
       return false
     }
     
+    const emailOk = /^(?:[a-zA-Z0-9_\-.+])+@(?:[a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}$/.test(formData.email)
+    if (!emailOk) {
+      setError('邮箱格式不正确')
+      return false
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('两次输入的密码不一致')
       return false
@@ -81,13 +87,22 @@ export function RegisterClient() {
 
       if (response.ok) {
         setSuccess(true)
-        // 注册成功后自动登录
-        setTimeout(() => {
-          setUser(data.user)
-          router.push('/')
-        }, 2000)
       } else {
-        setError(data.message || '注册失败，请检查输入信息')
+        let msg = String(data.error || data.message || '')
+        if (response.status === 400) {
+          if (msg.includes('缺少必需字段')) msg = '请填写邮箱、密码、用户名和邀请码'
+          else if (msg.includes('无效的邀请码')) msg = '邀请码无效，请联系管理员获取有效邀请码'
+          else if (msg.includes('邀请码已用完')) msg = '邀请码已用完，请联系管理员更换邀请码'
+          else if (msg.includes('邮箱已存在')) msg = '该邮箱已注册，请尝试登录或找回密码'
+          else if (msg.includes('用户名已存在')) msg = '该用户名已被使用，请更换后重试'
+          else if (msg.includes('邮箱或用户名已存在')) msg = '邮箱或用户名已存在，请更换后重试'
+          else msg = msg || '输入信息无效，请检查后重试'
+        } else if (response.status === 500) {
+          msg = '服务器错误，请稍后重试'
+        } else {
+          msg = msg || '网络或系统错误，请稍后重试'
+        }
+        setError(msg)
       }
     } catch (error) {
       console.error('Register error:', error)
@@ -115,11 +130,28 @@ export function RegisterClient() {
             >
               <CheckCircle className="w-8 h-8 text-white" />
             </motion.div>
-            <h2 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">注册成功！</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">欢迎加入合唱团记忆系统</p>
-            <div className="flex items-center justify-center">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              <span className="text-sm text-gray-500">正在跳转到首页...</span>
+            <h2 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">注册提交成功</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">我们已向 {formData.email} 发送验证邮件，请完成邮箱验证后再登录。</p>
+            <div className="flex items-center justify-center gap-3">
+              <Button
+                variant="default"
+                onClick={async () => {
+                  try {
+                    const csrfRes = await fetch('/api/csrf', { credentials: 'include', cache: 'no-store' })
+                    const cct = csrfRes.headers.get('content-type') || ''
+                    const { token: csrfToken } = cct.includes('application/json') ? await csrfRes.json() : { token: await csrfRes.text() }
+                    const r = await fetch('/api/email/resend', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+                      body: JSON.stringify({ email: formData.email }),
+                    })
+                    await r.json().catch(() => ({}))
+                  } catch {}
+                }}
+              >
+                重新发送验证邮件
+              </Button>
+              <Button variant="outline" onClick={() => router.push('/login')}>前往登录</Button>
             </div>
           </Card>
         </motion.div>

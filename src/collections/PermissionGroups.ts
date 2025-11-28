@@ -124,4 +124,21 @@ export const PermissionGroups: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, req, operation }) => {
+        if (operation === 'update') {
+          await req.payload.create({
+            collection: 'permission-change-logs',
+            data: {
+              action: 'permission_group_updated',
+              group: doc.id,
+              details: { before: previousDoc, after: doc },
+              timestamp: new Date().toISOString(),
+            },
+          })
+        }
+      },
+    ],
+  },
 }

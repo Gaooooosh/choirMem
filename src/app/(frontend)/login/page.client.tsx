@@ -4,7 +4,14 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
 import { useRouter } from 'next/navigation'
@@ -18,7 +25,7 @@ export function LoginClient() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  
+
   const { setUser } = useAuth()
   const router = useRouter()
 
@@ -28,28 +35,42 @@ export function LoginClient() {
     setError('')
 
     try {
-      const response = await fetch(`${getClientSideURL()}/api/users/login`, {
+      const csrfRes = await fetch('/api/csrf', { credentials: 'include', cache: 'no-store' })
+      if (!csrfRes.ok) {
+        throw new Error(`获取CSRF失败: ${csrfRes.status}`)
+      }
+      const csrfCT = csrfRes.headers.get('content-type') || ''
+      const { token: csrfToken } = csrfCT.includes('application/json')
+        ? await csrfRes.json()
+        : { token: await csrfRes.text() }
+      const response = await fetch('/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
         },
         credentials: 'include',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, mfaCode: '' }),
       })
-
-      const data = await response.json()
+      const ct = response.headers.get('content-type') || ''
+      const data = ct.includes('application/json')
+        ? await response.json()
+        : { message: await response.text() }
 
       if (response.ok) {
         setUser(data.user)
-        
-        // 检查是否需要强制更新个人信息
-        if (data.user.email && data.user.email.includes('@example.com')) {
-          router.push('/force-update-profile')
+
+        if (data.user?.needs_password_reset === true) {
+          router.push('/migration-help')
         } else {
           router.push('/')
         }
       } else {
-        setError(data.message || '登录失败，请检查邮箱和密码')
+        if (String(data.message || '').includes('邮箱未验证')) {
+          setError('邮箱未验证，请先完成邮箱验证或重新发送验证邮件')
+        } else {
+          setError(data.message || '登录失败，请检查邮箱和密码')
+        }
       }
     } catch (error) {
       console.error('Login error:', error)
@@ -102,6 +123,40 @@ export function LoginClient() {
                   className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm"
                 >
                   {error}
+                  {String(error).includes('邮箱未验证') && (
+                    <div className="mt-2">
+                      <button
+                        className="text-blue-600 dark:text-blue-400 hover:underline"
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const csrfRes = await fetch('/api/csrf', {
+                              credentials: 'include',
+                              cache: 'no-store',
+                            })
+                            const cct = csrfRes.headers.get('content-type') || ''
+                            const { token: csrfToken } = cct.includes('application/json')
+                              ? await csrfRes.json()
+                              : { token: await csrfRes.text() }
+                            const r = await fetch('/api/email/resend', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'x-csrf-token': csrfToken,
+                              },
+                              body: JSON.stringify({ email }),
+                            })
+                            const msg = await r.json().catch(() => ({ message: '已尝试重新发送' }))
+                            setError(String(msg.message || '验证邮件已发送，请查收'))
+                          } catch {
+                            setError('网络错误，请稍后重试或检查邮箱设置')
+                          }
+                        }}
+                      >
+                        重新发送验证邮件
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               )}
 

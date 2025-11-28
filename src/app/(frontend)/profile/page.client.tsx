@@ -4,7 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '../../../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card'
 import { Input } from '../../../components/ui/input'
 import { Label } from '../../../components/ui/label'
 import { Textarea } from '../../../components/ui/textarea'
@@ -36,10 +42,12 @@ export function ProfileClient({ user }: ProfileClientProps) {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  
+  const [emailMessage, setEmailMessage] = useState<string | null>(null)
+
   // 检查用户是否需要重置密码
   const needsPasswordReset = user.needs_password_reset === true
-  
+  const needEmailVerify = user.email_verified === false
+
   const [formData, setFormData] = useState<FormData>({
     name: user.name || '',
     bio: typeof user.bio === 'string' ? user.bio : '',
@@ -50,7 +58,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
@@ -66,10 +74,17 @@ export function ProfileClient({ user }: ProfileClientProps) {
     }
 
     try {
+      const csrfRes = await fetch('/api/csrf', { credentials: 'include', cache: 'no-store' })
+      if (!csrfRes.ok) throw new Error(`获取CSRF失败: ${csrfRes.status}`)
+      const cct = csrfRes.headers.get('content-type') || ''
+      const { token: csrfToken } = cct.includes('application/json')
+        ? await csrfRes.json()
+        : { token: await csrfRes.text() }
       const response = await fetch('/api/update-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
         },
         body: JSON.stringify({
           name: formData.name,
@@ -129,16 +144,23 @@ export function ProfileClient({ user }: ProfileClientProps) {
       const requestBody: any = {
         newPassword: formData.newPassword,
       }
-      
+
       // 只有非临时密码用户才需要提供当前密码
       if (!needsPasswordReset) {
         requestBody.currentPassword = formData.currentPassword
       }
 
+      const csrfRes = await fetch('/api/csrf', { credentials: 'include', cache: 'no-store' })
+      if (!csrfRes.ok) throw new Error(`获取CSRF失败: ${csrfRes.status}`)
+      const cct2 = csrfRes.headers.get('content-type') || ''
+      const { token: csrfToken } = cct2.includes('application/json')
+        ? await csrfRes.json()
+        : { token: await csrfRes.text() }
       const response = await fetch('/api/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
         },
         body: JSON.stringify(requestBody),
       })
@@ -147,7 +169,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
 
       if (response.ok) {
         setMessage({ type: 'success', text: '密码修改成功！' })
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           currentPassword: '',
           newPassword: '',
@@ -176,6 +198,40 @@ export function ProfileClient({ user }: ProfileClientProps) {
         <p className="text-muted-foreground mt-2">管理您的个人信息和账户设置</p>
       </div>
 
+      {needEmailVerify && (
+        <Alert className="mb-6 border-yellow-200 bg-yellow-50">
+          <AlertDescription className="text-yellow-800">
+            您的邮箱尚未验证，请前往邮箱点击验证链接完成验证。
+            <button
+              className="ml-3 underline text-blue-600"
+              type="button"
+              onClick={async () => {
+                try {
+                  setEmailMessage(null)
+                  const csrfRes = await fetch('/api/csrf', { credentials: 'include', cache: 'no-store' })
+                  const cct = csrfRes.headers.get('content-type') || ''
+                  const { token: csrfToken } = cct.includes('application/json')
+                    ? await csrfRes.json()
+                    : { token: await csrfRes.text() }
+                  const r = await fetch('/api/email/resend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+                    body: JSON.stringify({ uid: String(user.id) }),
+                  })
+                  const msg = await r.json().catch(() => ({ message: '已尝试重新发送' }))
+                  setEmailMessage(String(msg.message || '验证邮件已发送，请查收'))
+                } catch {
+                  setEmailMessage('网络错误，请稍后再试')
+                }
+              }}
+            >
+              重新发送验证邮件
+            </button>
+            {emailMessage && <span className="ml-2">{emailMessage}</span>}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {message && (
         <Alert
           className={`mb-6 ${
@@ -203,7 +259,9 @@ export function ProfileClient({ user }: ProfileClientProps) {
           <CardContent>
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">真实姓名 <span className="text-red-500">*</span></Label>
+                <Label htmlFor="name">
+                  真实姓名 <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="name"
                   name="name"
@@ -231,13 +289,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="email">邮箱</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={user.email}
-                  disabled
-                  className="bg-muted"
-                />
+                <Input id="email" type="email" value={user.email} disabled className="bg-muted" />
                 <p className="text-sm text-muted-foreground">邮箱无法修改</p>
               </div>
 
@@ -269,10 +321,9 @@ export function ProfileClient({ user }: ProfileClientProps) {
               {needsPasswordReset ? '设置密码' : '修改密码'}
             </CardTitle>
             <CardDescription>
-              {needsPasswordReset 
-                ? '请设置一个新密码来完善您的账户信息，无需输入当前密码' 
-                : '为了您的账户安全，请定期更换密码'
-              }
+              {needsPasswordReset
+                ? '请设置一个新密码来完善您的账户信息，无需输入当前密码'
+                : '为了您的账户安全，请定期更换密码'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -330,11 +381,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     disabled={isLoading}
                   >
-                    {showNewPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
@@ -370,7 +417,13 @@ export function ProfileClient({ user }: ProfileClientProps) {
               </div>
 
               <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? (needsPasswordReset ? '设置中...' : '修改中...') : (needsPasswordReset ? '设置密码' : '修改密码')}
+                {isLoading
+                  ? needsPasswordReset
+                    ? '设置中...'
+                    : '修改中...'
+                  : needsPasswordReset
+                    ? '设置密码'
+                    : '修改密码'}
               </Button>
             </form>
           </CardContent>

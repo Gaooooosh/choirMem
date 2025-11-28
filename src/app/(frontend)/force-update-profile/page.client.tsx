@@ -27,7 +27,7 @@ export function ForceUpdateProfileClient({ user }: ForceUpdateProfileClientProps
   })
 
   // 检查用户是否需要重置密码
-  const needsPasswordReset = user.email?.includes('@example.com') || false
+  const needsPasswordReset = user.needs_password_reset === true
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -99,12 +99,18 @@ export function ForceUpdateProfileClient({ user }: ForceUpdateProfileClientProps
     setError('')
 
     try {
-      // 对于不需要重置密码的用户，验证当前密码
+      // 对于不需要重置密码的用户，验证当前密码（CSRF保护）
       if (!needsPasswordReset) {
-        const loginResponse = await fetch(`${getClientSideURL()}/api/users/login`, {
+        const csrfRes = await fetch('/api/csrf', { credentials: 'include', cache: 'no-store' })
+        if (!csrfRes.ok) throw new Error(`获取CSRF失败: ${csrfRes.status}`)
+        const cct = csrfRes.headers.get('content-type') || ''
+        const { token: csrfToken } = cct.includes('application/json') ? await csrfRes.json() : { token: await csrfRes.text() }
+
+        const loginResponse = await fetch('/api/users/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-csrf-token': csrfToken,
           },
           credentials: 'include',
           body: JSON.stringify({
@@ -121,10 +127,15 @@ export function ForceUpdateProfileClient({ user }: ForceUpdateProfileClientProps
       }
 
       // 更新用户信息
-      const updateResponse = await fetch(`${getClientSideURL()}/api/users/${user.id}`, {
+      const csrfRes = await fetch('/api/csrf', { credentials: 'include', cache: 'no-store' })
+      if (!csrfRes.ok) throw new Error(`获取CSRF失败: ${csrfRes.status}`)
+      const cctu = csrfRes.headers.get('content-type') || ''
+      const { token: csrfToken } = cctu.includes('application/json') ? await csrfRes.json() : { token: await csrfRes.text() }
+      const updateResponse = await fetch(`/api/users/${user.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
         },
         credentials: 'include',
         body: JSON.stringify({

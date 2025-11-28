@@ -17,7 +17,11 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Music, Users, Heart, Loader2 } from 'lucide-react'
 import { getClientSideURL } from '@/utilities/getURL'
-import { AnnouncementBanner } from '@/components/Announcements'
+import dynamic from 'next/dynamic'
+const AnnouncementBanner = dynamic(
+  () => import('@/components/Announcements').then((m) => m.AnnouncementBanner),
+  { ssr: false },
+)
 
 interface Track {
   id: string

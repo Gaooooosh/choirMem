@@ -55,7 +55,25 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
             whileHover={{ scale: 1.05 }}
             transition={{ type: 'spring', stiffness: 400, damping: 10 }}
           >
-            <Link href="/" className="flex items-center space-x-3 group">
+            <button
+              type="button"
+              className="flex items-center space-x-3 group"
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/users/me', { credentials: 'include' })
+                  if (res.ok) {
+                    const data = await res.json()
+                    const u = data?.user
+                    const needsMigration = Boolean(u?.needs_password_reset) || Boolean(u?.email && String(u.email).includes('@example.com'))
+                    if (needsMigration) {
+                      window.location.assign('/migration-help')
+                      return
+                    }
+                  }
+                } catch {}
+                window.location.assign('/')
+              }}
+            >
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
                 <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl">
@@ -68,7 +86,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
                 </h1>
                 <p className="text-xs text-white/70 -mt-1">Back to Home</p>
               </div>
-            </Link>
+            </button>
           </motion.div>
 
           {/* 导航区域 */}
